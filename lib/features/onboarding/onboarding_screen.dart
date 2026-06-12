@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:photo_manager/photo_manager.dart';
 
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
@@ -19,24 +20,34 @@ class OnboardingScreen extends StatefulWidget {
 class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _controller = PageController();
   int _index = 0;
+  bool _requesting = false;
+
+  Future<void> _requestAndContinue() async {
+    setState(() => _requesting = true);
+    await PhotoManager.requestPermissionExtend();
+    if (mounted) {
+      setState(() => _requesting = false);
+      widget.onDone();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final pages = [
-      _OnboardingPage(
+      const _OnboardingPage(
         icon: CupertinoIcons.rectangle_stack_fill,
         title: 'Your Videos. Finally Watchable.',
-        body: 'Swipe through your camera roll like reels. No uploads, no account, no cloud.',
+        body: 'Swipe through your camera roll like reels.\nNo uploads, no account, no cloud.',
       ),
-      _OnboardingPage(
+      const _OnboardingPage(
         icon: CupertinoIcons.lock_fill,
         title: '100% Private. 100% Yours.',
-        body: 'Everything stays on your iPhone. RollReel reads local videos and never sends them away.',
+        body: 'Everything stays on your iPhone.\nRollReel never uploads or shares your videos.',
       ),
-      _OnboardingPage(
+      const _OnboardingPage(
         icon: CupertinoIcons.photo_on_rectangle,
-        title: 'Let\'s Find Your Videos',
-        body: 'Grant photo library access to load local videos into your swipe feed.',
+        title: "Let's Find Your Videos",
+        body: 'Grant photo library access to load your local videos into the swipe feed.',
       ),
     ];
 
@@ -90,7 +101,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               else
                 Column(
                   children: [
-                    PrimaryButton(label: 'Allow Access to Videos', onPressed: widget.onDone),
+                    PrimaryButton(
+                      label: _requesting ? 'Requesting…' : 'Allow Access to Videos',
+                      onPressed: _requesting ? null : _requestAndContinue,
+                    ),
                     const SizedBox(height: RRSpace.sp12),
                     SecondaryButton(label: 'Not Now', onPressed: widget.onDone),
                   ],

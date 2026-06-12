@@ -1,18 +1,20 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
+import '../../shared/widgets/logo_variant_picker.dart';
 import '../../shared/widgets/pro_badge.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({super.key, required this.onBack, required this.onOpenPaywall});
 
   final VoidCallback onBack;
   final VoidCallback onOpenPaywall;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
@@ -24,6 +26,10 @@ class SettingsScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(RRSpace.sp20),
         children: [
+          _sectionLabel('APPEARANCE'),
+          const SizedBox(height: RRSpace.sp4),
+          const LogoVariantPicker(),
+          const SizedBox(height: RRSpace.sp20),
           _sectionLabel('PLAYBACK'),
           const _ToggleRow(label: 'Loop Short Videos', initialValue: true),
           const _ToggleRow(label: 'Auto-play on Launch', initialValue: true),
