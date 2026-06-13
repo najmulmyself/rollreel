@@ -23,12 +23,17 @@ class _AppRouterState extends State<AppRouter> {
   void _go(RRRoute route) => setState(() => _route = route);
 
   Future<void> _afterSplash() async {
-    final prefs = await SharedPreferences.getInstance();
-    final seen = prefs.getBool('has_seen_onboarding') ?? false;
-    if (!seen) {
-      _go(RRRoute.onboarding);
-    } else {
-      _go(RRRoute.feed);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final seen = prefs.getBool('has_seen_onboarding') ?? false;
+      if (!seen) {
+        _go(RRRoute.onboarding);
+      } else {
+        _go(RRRoute.feed);
+      }
+    } catch (e) {
+      debugPrint('Router error: $e');
+      _go(RRRoute.onboarding); // Fallback to onboarding
     }
   }
 

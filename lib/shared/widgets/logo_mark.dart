@@ -34,38 +34,31 @@ class LogoMark extends StatelessWidget {
   }
 
   Widget _icon(double size) {
-    switch (variant) {
-      case LogoVariant.classic:
-        return Container(
-          width: size,
-          height: size,
-          decoration: const BoxDecoration(
-            gradient: RRColors.gradBrand,
-            shape: BoxShape.circle,
-          ),
-          child: Icon(Icons.play_arrow_rounded, size: size * 0.59, color: Colors.white),
-        );
-
-      case LogoVariant.iconic:
-        return SizedBox(
-          width: size,
-          height: size,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(size * 0.22),
-            child: Image.asset(
-              'assets/icons/icon.png',
-              fit: BoxFit.cover,
-            ),
-          ),
-        );
-    }
+    final asset = switch (variant) {
+      LogoVariant.classic => 'assets/icons/icon_sec.png',
+      LogoVariant.iconic  => 'assets/icons/icon.png',
+    };
+    return SizedBox(
+      width: size,
+      height: size,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(size * 0.22),
+        child: Image.asset(asset, fit: BoxFit.cover),
+      ),
+    );
   }
+
+  static const _gradClassic = LinearGradient(
+    colors: [RRColors.accentCyan, RRColors.accentViolet],
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+  );
 
   Widget _wordmark() {
     switch (variant) {
       case LogoVariant.classic:
         return ShaderMask(
-          shaderCallback: (bounds) => RRColors.gradBrand.createShader(bounds),
+          shaderCallback: (bounds) => _gradClassic.createShader(bounds),
           child: const Text(
             'RollReel',
             style: TextStyle(

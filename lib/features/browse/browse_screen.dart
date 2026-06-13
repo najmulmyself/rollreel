@@ -9,6 +9,7 @@ import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
 import '../../core/theme/typography.dart';
 import '../../core/video/video_library_provider.dart';
+// import '../../shared/widgets/banner_ad_widget.dart';
 import '../../shared/widgets/local_badge.dart';
 import '../../shared/widgets/video_thumbnail.dart';
 import '../states/empty_state.dart';
@@ -45,6 +46,8 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // const Center(child: BannerAdWidget()),
+          const Divider(height: 1),
           videosAsync.when(
             loading: () => const Padding(
               padding: EdgeInsets.fromLTRB(RRSpace.sp20, RRSpace.sp16, RRSpace.sp20, RRSpace.sp12),

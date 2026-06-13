@@ -53,6 +53,10 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   Widget build(BuildContext context) {
     final variant = ref.watch(logoVariantProvider);
 
+    final glowColor = variant == LogoVariant.iconic
+        ? RRColors.accentCoral.withValues(alpha: 0.30)
+        : RRColors.accentCyan.withValues(alpha: 0.22);
+
     return Scaffold(
       body: Container(
         color: RRColors.bgDeep,
@@ -63,7 +67,22 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
               opacity: _fade,
               child: ScaleTransition(
                 scale: _scale,
-                child: LogoMark(variant: variant),
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Container(
+                      width: 260,
+                      height: 260,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: RadialGradient(
+                          colors: [glowColor, Colors.transparent],
+                        ),
+                      ),
+                    ),
+                    LogoMark(variant: variant),
+                  ],
+                ),
               ),
             ),
           ),

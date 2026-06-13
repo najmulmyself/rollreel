@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -A 50 \"executing.*simctl launch\" /tmp/flutter_verbose.log | head -60)",
+      "Read(//private/tmp/**)",
+      "Bash(flutter analyze *)"
+    ]
+  }
+}

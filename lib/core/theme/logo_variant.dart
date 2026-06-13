@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -19,19 +20,28 @@ class LogoVariantNotifier extends StateNotifier<LogoVariant> {
   }
 
   Future<void> _load() async {
-    final prefs = await SharedPreferences.getInstance();
-    final saved = prefs.getString(_kPrefsKey);
-    if (saved != null) {
-      state = LogoVariant.values.firstWhere(
-        (v) => v.name == saved,
-        orElse: () => LogoVariant.classic,
-      );
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final saved = prefs.getString(_kPrefsKey);
+      if (saved != null) {
+        state = LogoVariant.values.firstWhere(
+          (v) => v.name == saved,
+          orElse: () => LogoVariant.classic,
+        );
+      }
+    } catch (e) {
+      debugPrint('Logo variant load error: $e');
+      // Keep default state
     }
   }
 
   Future<void> select(LogoVariant variant) async {
     state = variant;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_kPrefsKey, variant.name);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_kPrefsKey, variant.name);
+    } catch (e) {
+      debugPrint('Logo variant save error: $e');
+    }
   }
 }

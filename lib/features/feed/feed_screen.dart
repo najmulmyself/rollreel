@@ -5,8 +5,8 @@ import 'package:photo_manager/photo_manager.dart';
 
 import '../../core/theme/spacing.dart';
 import '../../core/video/video_library_provider.dart';
-import '../states/empty_state.dart';
 import '../states/loading_state.dart';
+import '../states/no_videos_state.dart';
 import '../../shared/widgets/date_label.dart';
 import 'video_feed_item.dart';
 
@@ -29,6 +29,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   int _currentIndex = 0;
   bool _showDateLabel = false;
   String _dateLabelText = '';
+  bool _dismissed = false;
 
   void _onPageChanged(int index, List<AssetEntity> videos) {
     final prev = videos[_currentIndex];
@@ -78,13 +79,10 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           child: Text('Could not load videos: $e', style: const TextStyle(color: Colors.white)),
         ),
         data: (videos) {
-          if (videos.isEmpty) {
-            return EmptyState(
-              icon: CupertinoIcons.film,
-              title: 'No Videos Yet',
-              body: 'Your camera roll videos will appear here.\nGrant access in Settings → Privacy → Photos.',
-              buttonLabel: 'Open Settings',
-              onPressed: () => PhotoManager.openSetting(),
+          if (videos.isEmpty && !_dismissed) {
+            return NoVideosState(
+              onOpenSettings: () => PhotoManager.openSetting(),
+              onContinue: () => setState(() => _dismissed = true),
             );
           }
 

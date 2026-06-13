@@ -40,11 +40,11 @@ dependencies:
   palette_generator: ^0.3.3+6
   flutter_riverpod: ^2.5.1
   in_app_purchase: ^3.1.13
-  google_mobile_ads: ^5.1.0
+  # google_mobile_ads: ^5.1.0
   shared_preferences: ^2.3.2
   local_auth: ^2.3.0
   in_app_review: ^2.0.10
-  flutter_haptic_feedback: ^1.0.1
+  # flutter_haptic_feedback: ^1.0.1
   flutter_animate: ^4.5.2
 
 dev_dependencies:
