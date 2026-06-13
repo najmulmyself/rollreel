@@ -7,8 +7,9 @@ import '../features/onboarding/onboarding_screen.dart';
 import '../features/paywall/paywall_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/splash/splash_screen.dart';
+import '../features/vault/vault_screen.dart';
 
-enum RRRoute { splash, onboarding, feed, browse, settings, paywall }
+enum RRRoute { splash, onboarding, feed, browse, settings, paywall, vault }
 
 class AppRouter extends StatefulWidget {
   const AppRouter({super.key});
@@ -61,9 +62,12 @@ class _AppRouterState extends State<AppRouter> {
         return SettingsScreen(
           onBack: () => _go(RRRoute.feed),
           onOpenPaywall: () => _go(RRRoute.paywall),
+          onOpenVault: () => _go(RRRoute.vault),
         );
       case RRRoute.paywall:
         return PaywallScreen(onClose: () => _go(RRRoute.settings));
+      case RRRoute.vault:
+        return VaultScreen(onBack: () => _go(RRRoute.settings));
     }
   }
 }

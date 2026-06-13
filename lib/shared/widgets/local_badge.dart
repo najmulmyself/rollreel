@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
@@ -20,7 +20,14 @@ class LocalBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(CupertinoIcons.cloud_fill, color: RRColors.accentGreen, size: 12),
+          Container(
+            width: 7,
+            height: 7,
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: RRColors.accentGreen,
+            ),
+          ),
           const SizedBox(width: RRSpace.sp4),
           Text(
             label,

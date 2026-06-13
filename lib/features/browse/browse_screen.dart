@@ -7,13 +7,15 @@ import 'package:photo_manager/photo_manager.dart';
 
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
-import '../../core/theme/typography.dart';
 import '../../core/video/video_library_provider.dart';
-// import '../../shared/widgets/banner_ad_widget.dart';
 import '../../shared/widgets/local_badge.dart';
-import '../../shared/widgets/video_thumbnail.dart';
 import '../states/empty_state.dart';
 import '../states/loading_state.dart';
+import 'filter_sheet.dart';
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BrowseScreen
+// ─────────────────────────────────────────────────────────────────────────────
 
 class BrowseScreen extends ConsumerStatefulWidget {
   const BrowseScreen({super.key, required this.onBack, this.onPlayAt});
@@ -26,105 +28,431 @@ class BrowseScreen extends ConsumerStatefulWidget {
 }
 
 class _BrowseScreenState extends ConsumerState<BrowseScreen> {
-  @override
-  Widget build(BuildContext context) {
-    final videosAsync = ref.watch(videoLibraryProvider);
-    final activeFilter = ref.watch(videoFilterProvider);
+  // ── Quick chip definitions ────────────────────────────────────────────────
 
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: RRColors.bgDeep,
-        leading: IconButton(
-          onPressed: widget.onBack,
-          icon: const Icon(CupertinoIcons.xmark),
-        ),
-        title: const Text('Your Library'),
-        actions: [
-          IconButton(onPressed: () {}, icon: const Icon(CupertinoIcons.search)),
-        ],
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // const Center(child: BannerAdWidget()),
-          const Divider(height: 1),
-          videosAsync.when(
-            loading: () => const Padding(
-              padding: EdgeInsets.fromLTRB(RRSpace.sp20, RRSpace.sp16, RRSpace.sp20, RRSpace.sp12),
-              child: Text('Loading...', style: RRTypography.title1),
-            ),
-            error: (_, __) => const SizedBox.shrink(),
-            data: (videos) => Padding(
-              padding: const EdgeInsets.fromLTRB(RRSpace.sp20, RRSpace.sp16, RRSpace.sp20, RRSpace.sp12),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text('${videos.length} Videos', style: RRTypography.title1),
-                  ),
-                  const LocalBadge(label: '100% Local'),
-                ],
-              ),
-            ),
-          ),
-          SizedBox(
-            height: 44,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: RRSpace.sp20),
-              children: VideoFilter.values.map((f) {
-                final (icon, label) = _filterMeta(f);
-                return _FilterPill(
-                  icon: icon,
-                  label: label,
-                  active: f == activeFilter,
-                  onTap: () => ref.read(videoFilterProvider.notifier).state = f,
-                );
-              }).toList(),
-            ),
-          ),
-          const Divider(height: 1),
-          Expanded(
-            child: videosAsync.when(
-              loading: () => const LoadingState(),
-              error: (e, _) => Center(child: Text('Error: $e')),
-              data: (videos) {
-                if (videos.isEmpty) {
-                  return EmptyState(
-                    icon: CupertinoIcons.search,
-                    title: 'No Videos Found',
-                    body: 'Try a different filter.',
-                    buttonLabel: 'Clear Filters',
-                    onPressed: () =>
-                        ref.read(videoFilterProvider.notifier).state = VideoFilter.all,
-                  );
-                }
-                return ListView.separated(
-                  itemCount: videos.length,
-                  separatorBuilder: (_, __) => const Divider(indent: 68, height: 1),
-                  itemBuilder: (context, index) => _VideoRow(
-                    asset: videos[index],
-                    onTap: () {
-                      widget.onPlayAt?.call(index);
-                      widget.onBack();
-                    },
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
+  static const List<_QuickChip> _quickChips = [
+    _QuickChip(
+      label: 'All',
+      icon: CupertinoIcons.rectangle_stack_fill,
+    ),
+    _QuickChip(
+      label: 'Today',
+      icon: CupertinoIcons.calendar,
+    ),
+    _QuickChip(
+      label: 'Shorts',
+      icon: CupertinoIcons.bolt_fill,
+    ),
+    _QuickChip(
+      label: 'Long',
+      icon: CupertinoIcons.video_camera_solid,
+    ),
+    _QuickChip(
+      label: 'Recent',
+      icon: CupertinoIcons.clock_fill,
+    ),
+  ];
+
+  bool _isQuickChipActive(String label, BrowseFilter filter) {
+    switch (label) {
+      case 'All':
+        return filter.period == VideoTimePeriod.all &&
+            filter.duration == VideoDurationFilter.any;
+      case 'Today':
+        return filter.period == VideoTimePeriod.today;
+      case 'Shorts':
+        return filter.duration == VideoDurationFilter.short;
+      case 'Long':
+        return filter.duration == VideoDurationFilter.long;
+      case 'Recent':
+        return filter.period == VideoTimePeriod.thisWeek;
+      default:
+        return false;
+    }
+  }
+
+  void _onQuickChipTap(String label) {
+    final notifier = ref.read(browseFilterProvider.notifier);
+    switch (label) {
+      case 'All':
+        notifier.state = const BrowseFilter();
+      case 'Today':
+        notifier.state = const BrowseFilter(period: VideoTimePeriod.today);
+      case 'Shorts':
+        notifier.state = const BrowseFilter(duration: VideoDurationFilter.short);
+      case 'Long':
+        notifier.state = const BrowseFilter(duration: VideoDurationFilter.long);
+      case 'Recent':
+        notifier.state = const BrowseFilter(period: VideoTimePeriod.thisWeek);
+    }
+  }
+
+  void _openFilterSheet() {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const FilterSheet(),
     );
   }
 
-  (IconData, String) _filterMeta(VideoFilter f) => switch (f) {
-        VideoFilter.all => (CupertinoIcons.rectangle_stack_fill, 'All'),
-        VideoFilter.today => (CupertinoIcons.calendar, 'Today'),
-        VideoFilter.shorts => (CupertinoIcons.bolt_fill, 'Shorts'),
-        VideoFilter.long => (CupertinoIcons.video_camera_solid, 'Long'),
-        VideoFilter.recent => (CupertinoIcons.clock_fill, 'Recent'),
-      };
+  // ── Date grouping helpers ─────────────────────────────────────────────────
+
+  String _groupLabel(DateTime dt, DateTime now) {
+    final today = DateTime(now.year, now.month, now.day);
+    final itemDay = DateTime(dt.year, dt.month, dt.day);
+
+    if (itemDay == today) return 'TODAY';
+    if (itemDay == today.subtract(const Duration(days: 1))) return 'YESTERDAY';
+
+    const months = [
+      'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
+      'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC',
+    ];
+
+    if (dt.year == now.year) {
+      return '${months[dt.month - 1]} ${dt.day}';
+    }
+    return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
+  }
+
+  List<Object> _buildFlatList(List<AssetEntity> videos) {
+    final now = DateTime.now();
+    final List<Object> flat = [];
+    String? lastLabel;
+
+    for (final v in videos) {
+      final label = _groupLabel(v.createDateTime, now);
+      if (label != lastLabel) {
+        flat.add(label);
+        lastLabel = label;
+      }
+      flat.add(v);
+    }
+    return flat;
+  }
+
+  // ── Build ─────────────────────────────────────────────────────────────────
+
+  @override
+  Widget build(BuildContext context) {
+    final filter = ref.watch(browseFilterProvider);
+    final videosAsync = ref.watch(browseVideosProvider);
+    final allAsync = ref.watch(videoLibraryProvider);
+
+    return Scaffold(
+      backgroundColor: RRColors.bgDeep,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Top navigation row ─────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: RRSpace.sp4, vertical: RRSpace.sp4),
+              child: Row(
+                children: [
+                  TextButton.icon(
+                    onPressed: widget.onBack,
+                    icon: const Icon(
+                      CupertinoIcons.chevron_left,
+                      size: 16,
+                      color: RRColors.accentCyan,
+                    ),
+                    label: const Text(
+                      'Feed',
+                      style: TextStyle(
+                        color: RRColors.accentCyan,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: RRSpace.sp8, vertical: RRSpace.sp4),
+                    ),
+                  ),
+                  const Spacer(),
+                  Padding(
+                    padding: const EdgeInsets.only(right: RRSpace.sp12),
+                    child: const Icon(
+                      CupertinoIcons.search,
+                      color: RRColors.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // ── Header section ─────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                  RRSpace.sp16, RRSpace.sp8, RRSpace.sp16, RRSpace.sp8),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        allAsync.when(
+                          loading: () => const Text(
+                            'Videos',
+                            style: TextStyle(
+                              fontSize: 34,
+                              fontWeight: FontWeight.w800,
+                              color: RRColors.textPrimary,
+                              letterSpacing: -0.5,
+                            ),
+                          ),
+                          error: (_, __) => const Text(
+                            'Videos',
+                            style: TextStyle(
+                              fontSize: 34,
+                              fontWeight: FontWeight.w800,
+                              color: RRColors.textPrimary,
+                              letterSpacing: -0.5,
+                            ),
+                          ),
+                          data: (all) => Text(
+                            '${all.length} Videos',
+                            style: const TextStyle(
+                              fontSize: 34,
+                              fontWeight: FontWeight.w800,
+                              color: RRColors.textPrimary,
+                              letterSpacing: -0.5,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        const Text(
+                          'Your Library',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: RRColors.textSecond,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      const LocalBadge(label: 'Local'),
+                      const SizedBox(height: RRSpace.sp8),
+                      _FilterBtn(onTap: _openFilterSheet),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            // ── Quick filter chips ─────────────────────────────────────────
+            SizedBox(
+              height: 44,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: RRSpace.sp16),
+                itemCount: _quickChips.length,
+                itemBuilder: (context, i) {
+                  final chip = _quickChips[i];
+                  final active = _isQuickChipActive(chip.label, filter);
+                  return _QuickChipTile(
+                    chip: chip,
+                    active: active,
+                    onTap: () => _onQuickChipTap(chip.label),
+                  );
+                },
+              ),
+            ),
+
+            // ── Divider ────────────────────────────────────────────────────
+            const Divider(height: 1, color: RRColors.divider),
+
+            // ── Main list ──────────────────────────────────────────────────
+            Expanded(
+              child: videosAsync.when(
+                loading: () => const LoadingState(),
+                error: (e, _) => Center(
+                  child: Text(
+                    'Error: $e',
+                    style: const TextStyle(color: RRColors.textSecond),
+                  ),
+                ),
+                data: (videos) {
+                  if (videos.isEmpty) {
+                    return EmptyState(
+                      icon: CupertinoIcons.search,
+                      title: 'No Videos Found',
+                      body: 'Try a different filter.',
+                      buttonLabel: 'Clear Filters',
+                      onPressed: () =>
+                          ref.read(browseFilterProvider.notifier).state =
+                              const BrowseFilter(),
+                    );
+                  }
+
+                  final flat = _buildFlatList(videos);
+
+                  return ListView.builder(
+                    itemCount: flat.length,
+                    itemBuilder: (context, index) {
+                      final item = flat[index];
+                      if (item is String) {
+                        return _SectionHeader(label: item);
+                      }
+                      final asset = item as AssetEntity;
+                      final assetIndex = videos.indexOf(asset);
+                      return _VideoRow(
+                        asset: asset,
+                        onTap: () {
+                          widget.onPlayAt?.call(assetIndex);
+                          widget.onBack();
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// _FilterBtn
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _FilterBtn extends StatelessWidget {
+  const _FilterBtn({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: RRSpace.sp12, vertical: RRSpace.sp8),
+        decoration: BoxDecoration(
+          color: RRColors.bgElevated,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              CupertinoIcons.line_horizontal_3_decrease,
+              size: 14,
+              color: RRColors.textSecond,
+            ),
+            SizedBox(width: 6),
+            Text(
+              'Filter',
+              style: TextStyle(
+                fontSize: 13,
+                color: RRColors.textSecond,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Quick chip data + tile
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _QuickChip {
+  const _QuickChip({required this.label, required this.icon});
+
+  final String label;
+  final IconData icon;
+}
+
+class _QuickChipTile extends StatelessWidget {
+  const _QuickChipTile({
+    required this.chip,
+    required this.active,
+    required this.onTap,
+  });
+
+  final _QuickChip chip;
+  final bool active;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final fg = active ? RRColors.textPrimary : RRColors.textSecond;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(right: RRSpace.sp8),
+        padding: const EdgeInsets.symmetric(
+            horizontal: RRSpace.sp16, vertical: RRSpace.sp8),
+        decoration: BoxDecoration(
+          gradient: active ? RRColors.gradBrand : null,
+          color: active ? null : RRColors.bgElevated,
+          borderRadius: BorderRadius.circular(RRSpace.radiusFull),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(chip.icon, size: 14, color: fg),
+            const SizedBox(width: RRSpace.sp8),
+            Text(
+              chip.label,
+              style: TextStyle(
+                color: fg,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// _SectionHeader
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _SectionHeader extends StatelessWidget {
+  const _SectionHeader({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+          RRSpace.sp16, 20, RRSpace.sp16, RRSpace.sp8),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: RRColors.textDisabled,
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.8,
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// _VideoRow
+// ─────────────────────────────────────────────────────────────────────────────
 
 class _VideoRow extends StatefulWidget {
   const _VideoRow({required this.asset, required this.onTap});
@@ -146,70 +474,160 @@ class _VideoRowState extends State<_VideoRow> {
   }
 
   Future<void> _loadThumb() async {
-    final bytes = await widget.asset.thumbnailDataWithSize(const ThumbnailSize(150, 150));
+    final bytes = await widget.asset
+        .thumbnailDataWithSize(const ThumbnailSize(160, 160));
     if (mounted) setState(() => _thumb = bytes);
   }
 
-  String _date(DateTime dt) {
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  String _relativeDate(DateTime dt) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final itemDay = DateTime(dt.year, dt.month, dt.day);
+
+    if (itemDay == today) return 'Today';
+    if (itemDay == today.subtract(const Duration(days: 1))) return 'Yesterday';
+
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+
+    if (dt.year == now.year) {
+      return '${months[dt.month - 1]} ${dt.day}';
+    }
     return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
+  }
+
+  String _formatDuration(int seconds) {
+    final m = seconds ~/ 60;
+    final s = (seconds % 60).toString().padLeft(2, '0');
+    return '$m:$s';
   }
 
   @override
   Widget build(BuildContext context) {
-    final title = widget.asset.title ?? _date(widget.asset.createDateTime);
-    final subtitle = '${widget.asset.duration ~/ 60}:${(widget.asset.duration % 60).toString().padLeft(2, '0')}'
-        ' · ${_date(widget.asset.createDateTime)}';
+    final title =
+        widget.asset.title ?? _relativeDate(widget.asset.createDateTime);
+    final durationStr = _formatDuration(widget.asset.duration);
+    final dateStr = _relativeDate(widget.asset.createDateTime);
+    final subtitle = '$durationStr · $dateStr';
 
-    return ListTile(
-      contentPadding: const EdgeInsets.symmetric(horizontal: RRSpace.sp20),
-      leading: VideoThumbnail(
-        bytes: _thumb,
-        durationSeconds: widget.asset.duration,
-        size: 48,
-      ),
-      title: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis, style: RRTypography.headline),
-      subtitle: Text(subtitle, style: RRTypography.caption),
-      trailing: const Icon(CupertinoIcons.ellipsis_circle, color: RRColors.textSecond),
+    return InkWell(
       onTap: widget.onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+            horizontal: RRSpace.sp16, vertical: RRSpace.sp12),
+        child: Row(
+          children: [
+            _BrowseThumbnail(
+              bytes: _thumb,
+              durationSeconds: widget.asset.duration,
+            ),
+            const SizedBox(width: RRSpace.sp12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: RRColors.textPrimary,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      color: RRColors.textSecond,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: RRSpace.sp8),
+            const Icon(
+              CupertinoIcons.chevron_right,
+              color: RRColors.textDisabled,
+              size: 16,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
 
-class _FilterPill extends StatelessWidget {
-  const _FilterPill({
-    required this.icon,
-    required this.label,
-    required this.active,
-    required this.onTap,
+// ─────────────────────────────────────────────────────────────────────────────
+// _BrowseThumbnail
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _BrowseThumbnail extends StatelessWidget {
+  const _BrowseThumbnail({
+    required this.bytes,
+    required this.durationSeconds,
   });
 
-  final IconData icon;
-  final String label;
-  final bool active;
-  final VoidCallback onTap;
+  final Uint8List? bytes;
+  final int durationSeconds;
+
+  String _formatDuration(int seconds) {
+    final m = seconds ~/ 60;
+    final s = (seconds % 60).toString().padLeft(2, '0');
+    return '$m:$s';
+  }
 
   @override
   Widget build(BuildContext context) {
-    final fg = active ? RRColors.textPrimary : RRColors.textSecond;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(right: RRSpace.sp8),
-        padding: const EdgeInsets.symmetric(horizontal: RRSpace.sp16, vertical: RRSpace.sp8),
-        decoration: BoxDecoration(
-          gradient: active ? RRColors.gradBrand : null,
-          color: active ? null : RRColors.bgElevated,
-          borderRadius: BorderRadius.circular(RRSpace.radiusFull),
-          border: active ? null : Border.all(color: RRColors.divider),
-        ),
-        child: Row(
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(14),
+      child: SizedBox(
+        width: 80,
+        height: 80,
+        child: Stack(
+          fit: StackFit.expand,
           children: [
-            Icon(icon, size: 14, color: fg),
-            const SizedBox(width: RRSpace.sp8),
-            Text(label, style: TextStyle(color: fg, fontSize: 12, fontWeight: FontWeight.w700)),
+            // Thumbnail image or placeholder
+            if (bytes != null)
+              Image.memory(bytes!, fit: BoxFit.cover)
+            else
+              Container(color: RRColors.bgElevated),
+
+            // Duration badge — bottom left
+            Positioned(
+              bottom: 6,
+              left: 6,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.65),
+                  borderRadius: BorderRadius.circular(RRSpace.radiusSm),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.play_arrow_rounded,
+                      color: Colors.white,
+                      size: 12,
+                    ),
+                    const SizedBox(width: 2),
+                    Text(
+                      _formatDuration(durationSeconds),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),
