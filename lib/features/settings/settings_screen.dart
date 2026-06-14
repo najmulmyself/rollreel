@@ -10,12 +10,12 @@ import '../../core/theme/spacing.dart';
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({
     super.key,
-    required this.onBack,
+    this.onBack,
     required this.onOpenPaywall,
     required this.onOpenVault,
   });
 
-  final VoidCallback onBack;
+  final VoidCallback? onBack;
   final VoidCallback onOpenPaywall;
   final VoidCallback onOpenVault;
 
@@ -193,6 +193,7 @@ class SettingsScreen extends ConsumerWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
+          if (onBack != null)
           Align(
             alignment: Alignment.centerLeft,
             child: CupertinoButton(

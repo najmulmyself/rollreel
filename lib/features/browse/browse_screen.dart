@@ -20,13 +20,13 @@ import 'filter_sheet.dart';
 class BrowseScreen extends ConsumerStatefulWidget {
   const BrowseScreen({
     super.key,
-    required this.onBack,
+    this.onBack,
     this.onPlayAt,
     this.initialScrollOffset = 0.0,
     this.onScrollChanged,
   });
 
-  final VoidCallback onBack;
+  final VoidCallback? onBack;
   final void Function(String assetId)? onPlayAt;
   final double initialScrollOffset;
   final void Function(double offset)? onScrollChanged;
@@ -110,6 +110,46 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
     }
   }
 
+  Future<void> _showDeleteSheet(AssetEntity asset) async {
+    // Capture messenger before any async gap
+    final messenger = ScaffoldMessenger.of(context);
+    final confirmed = await showCupertinoModalPopup<bool>(
+      context: context,
+      builder: (_) => CupertinoActionSheet(
+        title: Text(asset.title ?? 'This video'),
+        message: const Text(
+            'This will permanently delete the video from your library.'),
+        actions: [
+          CupertinoActionSheetAction(
+            isDestructiveAction: true,
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Delete Video'),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          isDefaultAction: true,
+          onPressed: () => Navigator.pop(context, false),
+          child: const Text('Cancel'),
+        ),
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    final deleted = await PhotoManager.editor.deleteWithIds([asset.id]);
+    if (!mounted) return;
+    if (deleted.contains(asset.id)) {
+      ref.invalidate(videoLibraryProvider);
+      messenger.showSnackBar(
+        SnackBar(
+          content: const Text('Video deleted'),
+          behavior: SnackBarBehavior.floating,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
   void _openFilterSheet() {
     showModalBottomSheet<void>(
       context: context,
@@ -175,6 +215,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                   horizontal: RRSpace.sp4, vertical: RRSpace.sp4),
               child: Row(
                 children: [
+                  if (widget.onBack != null)
                   TextButton.icon(
                     onPressed: widget.onBack,
                     icon: const Icon(
@@ -332,8 +373,9 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                         onTap: () {
                           widget.onScrollChanged?.call(_scrollController.offset);
                           widget.onPlayAt?.call(asset.id);
-                          widget.onBack();
+                          widget.onBack?.call();
                         },
+                        onLongPress: () => _showDeleteSheet(asset),
                       );
                     },
                   );
@@ -479,10 +521,15 @@ class _SectionHeader extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _VideoRow extends StatefulWidget {
-  const _VideoRow({required this.asset, required this.onTap});
+  const _VideoRow({
+    required this.asset,
+    required this.onTap,
+    this.onLongPress,
+  });
 
   final AssetEntity asset;
   final VoidCallback onTap;
+  final VoidCallback? onLongPress;
 
   @override
   State<_VideoRow> createState() => _VideoRowState();
@@ -538,6 +585,7 @@ class _VideoRowState extends State<_VideoRow> {
 
     return InkWell(
       onTap: widget.onTap,
+      onLongPress: widget.onLongPress,
       child: Padding(
         padding: const EdgeInsets.symmetric(
             horizontal: RRSpace.sp16, vertical: RRSpace.sp12),

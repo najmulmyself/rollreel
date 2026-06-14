@@ -2,21 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../features/browse/browse_screen.dart';
-import '../features/feed/feed_screen.dart';
 import '../features/onboarding/onboarding_screen.dart';
 import '../features/paywall/paywall_screen.dart';
 import '../features/permission/permission_denied_screen.dart';
-import '../features/settings/settings_screen.dart';
 import '../features/splash/splash_screen.dart';
 import '../features/vault/vault_screen.dart';
+import 'main_shell.dart';
 
 enum RRRoute {
   splash,
   onboarding,
-  feed,
-  browse,
-  settings,
+  main,
   paywall,
   vault,
   permissionDenied,
@@ -31,8 +27,6 @@ class AppRouter extends StatefulWidget {
 
 class _AppRouterState extends State<AppRouter> with WidgetsBindingObserver {
   RRRoute _route = RRRoute.splash;
-  String? _activeAssetId;
-  double _browseScrollOffset = 0.0;
 
   @override
   void initState() {
@@ -58,7 +52,7 @@ class _AppRouterState extends State<AppRouter> with WidgetsBindingObserver {
   Future<void> _recheckPermission() async {
     final perm = await PhotoManager.requestPermissionExtend();
     if (perm.isAuth || perm == PermissionState.limited) {
-      _go(RRRoute.feed);
+      _go(RRRoute.main);
     }
   }
 
@@ -75,7 +69,7 @@ class _AppRouterState extends State<AppRouter> with WidgetsBindingObserver {
       // Silent check — no dialog shown when permission already determined
       final perm = await PhotoManager.requestPermissionExtend();
       if (perm.isAuth || perm == PermissionState.limited) {
-        _go(RRRoute.feed);
+        _go(RRRoute.main);
       } else {
         _go(RRRoute.permissionDenied);
       }
@@ -88,7 +82,7 @@ class _AppRouterState extends State<AppRouter> with WidgetsBindingObserver {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('has_seen_onboarding', true);
     if (perm.isAuth || perm == PermissionState.limited) {
-      _go(RRRoute.feed);
+      _go(RRRoute.main);
     } else {
       _go(RRRoute.permissionDenied);
     }
@@ -101,37 +95,19 @@ class _AppRouterState extends State<AppRouter> with WidgetsBindingObserver {
         return SplashScreen(onComplete: _afterSplash);
       case RRRoute.onboarding:
         return OnboardingScreen(onDone: _finishOnboarding);
-      case RRRoute.feed:
-        return FeedScreen(
-          onOpenBrowse: () => _go(RRRoute.browse),
-          onOpenSettings: () => _go(RRRoute.settings),
-          initialAssetId: _activeAssetId,
-          onVideoChanged: (id) => _activeAssetId = id,
-        );
-      case RRRoute.browse:
-        return BrowseScreen(
-          onBack: () => _go(RRRoute.feed),
-          initialScrollOffset: _browseScrollOffset,
-          onScrollChanged: (offset) => _browseScrollOffset = offset,
-          onPlayAt: (assetId) {
-            setState(() => _activeAssetId = assetId);
-            _go(RRRoute.feed);
-          },
-        );
-      case RRRoute.settings:
-        return SettingsScreen(
-          onBack: () => _go(RRRoute.feed),
+      case RRRoute.main:
+        return MainShell(
           onOpenPaywall: () => _go(RRRoute.paywall),
           onOpenVault: () => _go(RRRoute.vault),
         );
       case RRRoute.paywall:
-        return PaywallScreen(onClose: () => _go(RRRoute.settings));
+        return PaywallScreen(onClose: () => _go(RRRoute.main));
       case RRRoute.vault:
-        return VaultScreen(onBack: () => _go(RRRoute.settings));
+        return VaultScreen(onBack: () => _go(RRRoute.main));
       case RRRoute.permissionDenied:
         return PermissionDeniedScreen(
           onTryAgain: () => PhotoManager.openSetting(),
-          onContinue: () => _go(RRRoute.feed),
+          onContinue: () => _go(RRRoute.main),
         );
     }
   }

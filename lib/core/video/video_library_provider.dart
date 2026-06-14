@@ -62,6 +62,9 @@ final videoLibraryProvider = FutureProvider<List<AssetEntity>>((ref) async {
   }
 });
 
+/// Drives cross-tab Browse → Feed navigation. Set to an asset ID to jump there.
+final feedJumpToAssetProvider = StateProvider<String?>((ref) => null);
+
 /// Returns all videos excluding those in the vault — used by the feed.
 final feedVideosProvider = FutureProvider<List<AssetEntity>>((ref) async {
   final all = await ref.watch(videoLibraryProvider.future);
