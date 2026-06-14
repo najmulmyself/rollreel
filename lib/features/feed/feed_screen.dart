@@ -1,9 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../core/settings/settings_provider.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
 import '../../core/video/video_library_provider.dart';
@@ -18,18 +21,27 @@ class FeedScreen extends ConsumerStatefulWidget {
     super.key,
     required this.onOpenBrowse,
     required this.onOpenSettings,
+    this.initialIndex = 0,
   });
 
   final VoidCallback onOpenBrowse;
   final VoidCallback onOpenSettings;
+  final int initialIndex;
 
   @override
   ConsumerState<FeedScreen> createState() => _FeedScreenState();
 }
 
 class _FeedScreenState extends ConsumerState<FeedScreen> {
-  final _pageController = PageController();
-  int _currentIndex = 0;
+  late final PageController _pageController;
+  late int _currentIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+    _pageController = PageController(initialPage: widget.initialIndex);
+  }
   bool _showDateLabel = false;
   String _dateLabelText = '';
   VideoPlayerController? _activeController;
@@ -39,6 +51,8 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   }
 
   void _onPageChanged(int index, List<AssetEntity> videos) {
+    HapticFeedback.mediumImpact();
+
     final prev = videos[_currentIndex];
     final next = videos[index];
     final prevDay = prev.createDateTime;
@@ -83,8 +97,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final videosAsync = ref.watch(videoLibraryProvider);
+    final videosAsync = ref.watch(feedVideosProvider);
     final variant = ref.watch(logoVariantProvider);
+    final settings = ref.watch(settingsProvider);
     final safeTop = MediaQuery.paddingOf(context).top;
     final safeBottom = MediaQuery.paddingOf(context).bottom;
 
@@ -147,7 +162,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                       ),
 
                     // Date label
-                    if (_showDateLabel)
+                    if (_showDateLabel && settings.showDateLabels)
                       Positioned(
                         top: safeTop + 64,
                         left: 0,
@@ -410,7 +425,12 @@ class _BottomPlayer extends StatelessWidget {
                 ),
               ),
               IconButton(
-                onPressed: () {},
+                onPressed: () async {
+                  final file = await asset.file;
+                  if (file != null) {
+                    await Share.shareXFiles([XFile(file.path)]);
+                  }
+                },
                 padding: EdgeInsets.zero,
                 constraints:
                     const BoxConstraints.tightFor(width: 40, height: 40),

@@ -10,7 +10,7 @@ import '../../shared/widgets/primary_button.dart';
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key, required this.onDone});
 
-  final VoidCallback onDone;
+  final void Function(PermissionState) onDone;
 
   @override
   State<OnboardingScreen> createState() => _OnboardingScreenState();
@@ -23,10 +23,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Future<void> _requestAccess() async {
     setState(() => _requesting = true);
-    await PhotoManager.requestPermissionExtend();
+    final result = await PhotoManager.requestPermissionExtend();
     if (mounted) {
       setState(() => _requesting = false);
-      widget.onDone();
+      widget.onDone(result);
     }
   }
 
@@ -59,7 +59,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   child: Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
-                      onPressed: widget.onDone,
+                      onPressed: () => widget.onDone(PermissionState.notDetermined),
                       style: TextButton.styleFrom(
                         foregroundColor: RRColors.textSecond,
                         padding: const EdgeInsets.symmetric(

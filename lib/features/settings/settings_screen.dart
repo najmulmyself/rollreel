@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_review/in_app_review.dart';
 
+import '../../core/settings/settings_provider.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
 
-class SettingsScreen extends ConsumerStatefulWidget {
+class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({
     super.key,
     required this.onBack,
@@ -17,16 +18,6 @@ class SettingsScreen extends ConsumerStatefulWidget {
   final VoidCallback onBack;
   final VoidCallback onOpenPaywall;
   final VoidCallback onOpenVault;
-
-  @override
-  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
-}
-
-class _SettingsScreenState extends ConsumerState<SettingsScreen> {
-  bool _loopShortVideos = true;
-  bool _autoPlay = true;
-  bool _showDateLabels = true;
-  bool _showDurationBadges = true;
 
   static const String _version = '1.0.0';
   static const String _build = '1';
@@ -40,7 +31,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
-  void _shareApp() {
+  void _shareApp(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Text('Share link copied!'),
@@ -55,13 +46,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final s = ref.watch(settingsProvider);
+    final notifier = ref.read(settingsProvider.notifier);
+
     return Scaffold(
       backgroundColor: RRColors.bgDeep,
       body: SafeArea(
         child: Column(
           children: [
-            _buildTopNav(),
+            _buildTopNav(context),
             const Divider(height: 1, color: RRColors.divider),
             Expanded(
               child: ListView(
@@ -69,7 +63,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     RRSpace.sp16, RRSpace.sp20, RRSpace.sp16, 48),
                 children: [
                   // ── RollReel Pro banner ──────────────────────────────────
-                  _buildProBanner(),
+                  _buildProBanner(context),
                   const SizedBox(height: RRSpace.sp24),
 
                   // ── PLAYBACK ─────────────────────────────────────────────
@@ -81,16 +75,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           color: Color(0xFF7D5A2A),
                           icon: CupertinoIcons.arrow_2_circlepath),
                       label: 'Loop Short Videos',
-                      value: _loopShortVideos,
-                      onChanged: (v) => setState(() => _loopShortVideos = v),
+                      value: s.loopShortVideos,
+                      onChanged: notifier.setLoopShortVideos,
                     ),
                     _ToggleRow(
                       icon: const _SettingIcon(
                           color: Color(0xFF1B6F6F),
                           icon: CupertinoIcons.play_fill),
                       label: 'Auto-play on Launch',
-                      value: _autoPlay,
-                      onChanged: (v) => setState(() => _autoPlay = v),
+                      value: s.autoPlay,
+                      onChanged: notifier.setAutoPlay,
                     ),
                     const _NavRow(
                       icon: _SettingIcon(
@@ -111,17 +105,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           color: Color(0xFF3D3FB8),
                           icon: CupertinoIcons.calendar),
                       label: 'Show Date Labels',
-                      value: _showDateLabels,
-                      onChanged: (v) => setState(() => _showDateLabels = v),
+                      value: s.showDateLabels,
+                      onChanged: notifier.setShowDateLabels,
                     ),
                     _ToggleRow(
                       icon: const _SettingIcon(
                           color: Color(0xFF237A4A),
                           icon: CupertinoIcons.clock_fill),
                       label: 'Show Duration Badges',
-                      value: _showDurationBadges,
-                      onChanged: (v) =>
-                          setState(() => _showDurationBadges = v),
+                      value: s.showDurationBadges,
+                      onChanged: notifier.setShowDurationBadges,
                     ),
                   ]),
                   const SizedBox(height: RRSpace.sp24),
@@ -136,7 +129,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           icon: CupertinoIcons.lock_fill),
                       label: 'Privacy Vault',
                       trailingText: 'Set Up',
-                      onTap: widget.onOpenVault,
+                      onTap: onOpenVault,
                     ),
                     _NavRow(
                       icon: const _SettingIcon(
@@ -144,7 +137,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           icon: Icons.face_retouching_natural),
                       label: 'App Lock (Face ID)',
                       trailingText: 'Pro',
-                      onTap: widget.onOpenPaywall,
+                      onTap: onOpenPaywall,
                     ),
                   ]),
                   const SizedBox(height: RRSpace.sp24),
@@ -171,7 +164,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           color: Color(0xFF1A4A8B),
                           icon: CupertinoIcons.share),
                       label: 'Share RollReel',
-                      onTap: _shareApp,
+                      onTap: () => _shareApp(context),
                     ),
                     _NavRow(
                       icon: const _SettingIcon(
@@ -191,9 +184,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  // ── Top nav ─────────────────────────────────────────────────────────────────
+  // ── Top nav ──────────────────────────────────────────────────────────────────
 
-  Widget _buildTopNav() {
+  Widget _buildTopNav(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(
           horizontal: RRSpace.sp4, vertical: RRSpace.sp4),
@@ -205,7 +198,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             child: CupertinoButton(
               padding: const EdgeInsets.symmetric(
                   horizontal: RRSpace.sp12, vertical: RRSpace.sp8),
-              onPressed: widget.onBack,
+              onPressed: onBack,
               child: const Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -239,9 +232,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   // ── Pro banner ───────────────────────────────────────────────────────────────
 
-  Widget _buildProBanner() {
+  Widget _buildProBanner(BuildContext context) {
     return GestureDetector(
-      onTap: widget.onOpenPaywall,
+      onTap: onOpenPaywall,
       child: Container(
         padding: const EdgeInsets.symmetric(
             horizontal: RRSpace.sp16, vertical: RRSpace.sp16),
@@ -256,8 +249,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.2),
-                borderRadius:
-                    BorderRadius.circular(RRSpace.radiusFull),
+                borderRadius: BorderRadius.circular(RRSpace.radiusFull),
               ),
               child: const Text(
                 'PRO',
@@ -330,7 +322,7 @@ class _SectionLabel extends StatelessWidget {
   }
 }
 
-// ─── Settings group (dark rounded container with dividers) ────────────────────
+// ─── Settings group ───────────────────────────────────────────────────────────
 
 class _SettingsGroup extends StatelessWidget {
   const _SettingsGroup({required this.rows});
@@ -351,12 +343,7 @@ class _SettingsGroup extends StatelessWidget {
             for (int i = 0; i < rows.length; i++) ...[
               rows[i],
               if (i < rows.length - 1)
-                const Divider(
-                  height: 1,
-                  color: RRColors.divider,
-                  // icon(34) + sp16 padding + sp12 gap = 62
-                  indent: 62,
-                ),
+                const Divider(height: 1, color: RRColors.divider, indent: 62),
             ],
           ],
         ),
@@ -415,10 +402,7 @@ class _ToggleRow extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: const TextStyle(
-                color: RRColors.textPrimary,
-                fontSize: 16,
-              ),
+              style: const TextStyle(color: RRColors.textPrimary, fontSize: 16),
             ),
           ),
           CupertinoSwitch(
@@ -432,7 +416,7 @@ class _ToggleRow extends StatelessWidget {
   }
 }
 
-// ─── Nav row (optional trailing text + optional chevron) ─────────────────────
+// ─── Nav row ──────────────────────────────────────────────────────────────────
 
 class _NavRow extends StatelessWidget {
   const _NavRow({
@@ -464,27 +448,20 @@ class _NavRow extends StatelessWidget {
               child: Text(
                 label,
                 style: const TextStyle(
-                  color: RRColors.textPrimary,
-                  fontSize: 16,
-                ),
+                    color: RRColors.textPrimary, fontSize: 16),
               ),
             ),
             if (trailingText != null) ...[
               Text(
                 trailingText!,
                 style: const TextStyle(
-                  color: RRColors.textSecond,
-                  fontSize: 15,
-                ),
+                    color: RRColors.textSecond, fontSize: 15),
               ),
               if (showChevron) const SizedBox(width: RRSpace.sp4),
             ],
             if (showChevron)
-              const Icon(
-                CupertinoIcons.chevron_right,
-                color: RRColors.textDisabled,
-                size: 16,
-              ),
+              const Icon(CupertinoIcons.chevron_right,
+                  color: RRColors.textDisabled, size: 16),
           ],
         ),
       ),

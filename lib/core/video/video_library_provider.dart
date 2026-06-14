@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_manager/photo_manager.dart';
 
+import '../vault/vault_provider.dart';
+
 // ─── Filter enums & model ────────────────────────────────────────────────────
 
 enum VideoTimePeriod { all, today, thisWeek, thisMonth, y2026, y2025, y2024 }
@@ -60,17 +62,29 @@ final videoLibraryProvider = FutureProvider<List<AssetEntity>>((ref) async {
   }
 });
 
-/// Returns the filtered + sorted subset of [videoLibraryProvider].
+/// Returns all videos excluding those in the vault — used by the feed.
+final feedVideosProvider = FutureProvider<List<AssetEntity>>((ref) async {
+  final all = await ref.watch(videoLibraryProvider.future);
+  final vaultIds = ref.watch(vaultIdsProvider);
+  if (vaultIds.isEmpty) return all;
+  return all.where((a) => !vaultIds.contains(a.id)).toList();
+});
+
+/// Returns the filtered + sorted subset of [videoLibraryProvider] excluding vault.
 final browseVideosProvider = FutureProvider<List<AssetEntity>>((ref) async {
   try {
     final all = await ref.watch(videoLibraryProvider.future);
     final filter = ref.watch(browseFilterProvider);
+    final vaultIds = ref.watch(vaultIdsProvider);
 
     final now = DateTime.now();
     final todayStart = DateTime(now.year, now.month, now.day);
 
+    // ── Vault filter ─────────────────────────────────────────────────────────
+    Iterable<AssetEntity> result =
+        vaultIds.isEmpty ? all : all.where((a) => !vaultIds.contains(a.id));
+
     // ── Period filter ────────────────────────────────────────────────────────
-    Iterable<AssetEntity> result = all;
 
     switch (filter.period) {
       case VideoTimePeriod.all:

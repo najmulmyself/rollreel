@@ -1,15 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:photo_manager/photo_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../features/browse/browse_screen.dart';
 import '../features/feed/feed_screen.dart';
 import '../features/onboarding/onboarding_screen.dart';
 import '../features/paywall/paywall_screen.dart';
+import '../features/permission/permission_denied_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/splash/splash_screen.dart';
 import '../features/vault/vault_screen.dart';
 
-enum RRRoute { splash, onboarding, feed, browse, settings, paywall, vault }
+enum RRRoute {
+  splash,
+  onboarding,
+  feed,
+  browse,
+  settings,
+  paywall,
+  vault,
+  permissionDenied,
+}
 
 class AppRouter extends StatefulWidget {
   const AppRouter({super.key});
@@ -18,8 +29,37 @@ class AppRouter extends StatefulWidget {
   State<AppRouter> createState() => _AppRouterState();
 }
 
-class _AppRouterState extends State<AppRouter> {
+class _AppRouterState extends State<AppRouter> with WidgetsBindingObserver {
   RRRoute _route = RRRoute.splash;
+  int _feedInitialIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  // Re-check permission when user returns from iOS Settings
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed &&
+        _route == RRRoute.permissionDenied) {
+      _recheckPermission();
+    }
+  }
+
+  Future<void> _recheckPermission() async {
+    final perm = await PhotoManager.requestPermissionExtend();
+    if (perm.isAuth || perm == PermissionState.limited) {
+      _go(RRRoute.feed);
+    }
+  }
 
   void _go(RRRoute route) => setState(() => _route = route);
 
@@ -29,19 +69,28 @@ class _AppRouterState extends State<AppRouter> {
       final seen = prefs.getBool('has_seen_onboarding') ?? false;
       if (!seen) {
         _go(RRRoute.onboarding);
-      } else {
-        _go(RRRoute.feed);
+        return;
       }
-    } catch (e) {
-      debugPrint('Router error: $e');
-      _go(RRRoute.onboarding); // Fallback to onboarding
+      // Silent check — no dialog shown when permission already determined
+      final perm = await PhotoManager.requestPermissionExtend();
+      if (perm.isAuth || perm == PermissionState.limited) {
+        _go(RRRoute.feed);
+      } else {
+        _go(RRRoute.permissionDenied);
+      }
+    } catch (_) {
+      _go(RRRoute.onboarding);
     }
   }
 
-  Future<void> _finishOnboarding() async {
+  Future<void> _finishOnboarding(PermissionState perm) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('has_seen_onboarding', true);
-    _go(RRRoute.feed);
+    if (perm.isAuth || perm == PermissionState.limited) {
+      _go(RRRoute.feed);
+    } else {
+      _go(RRRoute.permissionDenied);
+    }
   }
 
   @override
@@ -55,9 +104,16 @@ class _AppRouterState extends State<AppRouter> {
         return FeedScreen(
           onOpenBrowse: () => _go(RRRoute.browse),
           onOpenSettings: () => _go(RRRoute.settings),
+          initialIndex: _feedInitialIndex,
         );
       case RRRoute.browse:
-        return BrowseScreen(onBack: () => _go(RRRoute.feed));
+        return BrowseScreen(
+          onBack: () => _go(RRRoute.feed),
+          onPlayAt: (index) {
+            setState(() => _feedInitialIndex = index);
+            _go(RRRoute.feed);
+          },
+        );
       case RRRoute.settings:
         return SettingsScreen(
           onBack: () => _go(RRRoute.feed),
@@ -68,6 +124,11 @@ class _AppRouterState extends State<AppRouter> {
         return PaywallScreen(onClose: () => _go(RRRoute.settings));
       case RRRoute.vault:
         return VaultScreen(onBack: () => _go(RRRoute.settings));
+      case RRRoute.permissionDenied:
+        return PermissionDeniedScreen(
+          onTryAgain: () => PhotoManager.openSetting(),
+          onContinue: () => _go(RRRoute.feed),
+        );
     }
   }
 }

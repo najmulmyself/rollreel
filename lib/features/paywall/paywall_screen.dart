@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/iap/iap_provider.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
 
@@ -57,27 +59,56 @@ const List<_FeatureData> _kFeatures = [
 
 enum _Plan { lifetime, annual }
 
+extension _PlanX on _Plan {
+  String get productId =>
+      this == _Plan.lifetime ? kProductLifetime : kProductAnnual;
+}
+
 // ─── Screen ───────────────────────────────────────────────────────────────────
 
-class PaywallScreen extends StatefulWidget {
+class PaywallScreen extends ConsumerStatefulWidget {
   const PaywallScreen({super.key, required this.onClose});
 
   final VoidCallback onClose;
 
   @override
-  State<PaywallScreen> createState() => _PaywallScreenState();
+  ConsumerState<PaywallScreen> createState() => _PaywallScreenState();
 }
 
-class _PaywallScreenState extends State<PaywallScreen> {
+class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   _Plan _selected = _Plan.lifetime;
+
+  void _purchase() {
+    final iap = ref.read(iapProvider.notifier);
+    iap.purchase(_selected.productId);
+  }
+
+  void _restore() {
+    ref.read(iapProvider.notifier).restore();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final iap = ref.watch(iapProvider);
+    final isPro = ref.watch(isProProvider);
+
+    // Show error once via SnackBar
+    ref.listen<IAPState>(iapProvider, (prev, next) {
+      if (next.error != null && next.error != prev?.error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(next.error!),
+            backgroundColor: RRColors.accentCoral,
+          ),
+        );
+      }
+    });
+
     return Scaffold(
       backgroundColor: RRColors.bgDeep,
       body: Column(
         children: [
-          _buildHeader(context),
+          _buildHeader(context, isPro),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(
@@ -85,17 +116,18 @@ class _PaywallScreenState extends State<PaywallScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // ── Feature list ───────────────────────────────────────────
+                  // ── Feature list ─────────────────────────────────────────
                   ..._kFeatures.map((f) => _FeatureRow(data: f)),
                   const SizedBox(height: RRSpace.sp20),
 
-                  // ── Pricing cards ──────────────────────────────────────────
+                  // ── Pricing cards ────────────────────────────────────────
                   Row(
                     children: [
                       Expanded(
                         child: _PricingCard(
                           plan: _Plan.lifetime,
                           selected: _selected == _Plan.lifetime,
+                          price: iap.products[kProductLifetime]?.price,
                           onTap: () =>
                               setState(() => _selected = _Plan.lifetime),
                         ),
@@ -105,6 +137,7 @@ class _PaywallScreenState extends State<PaywallScreen> {
                         child: _PricingCard(
                           plan: _Plan.annual,
                           selected: _selected == _Plan.annual,
+                          price: iap.products[kProductAnnual]?.price,
                           onTap: () =>
                               setState(() => _selected = _Plan.annual),
                         ),
@@ -113,9 +146,9 @@ class _PaywallScreenState extends State<PaywallScreen> {
                   ),
                   const SizedBox(height: RRSpace.sp20),
 
-                  // ── CTA button ─────────────────────────────────────────────
+                  // ── CTA button ───────────────────────────────────────────
                   GestureDetector(
-                    onTap: () {},
+                    onTap: (iap.loading || isPro) ? null : _purchase,
                     child: Container(
                       height: RRSpace.buttonHeight,
                       decoration: BoxDecoration(
@@ -124,30 +157,37 @@ class _PaywallScreenState extends State<PaywallScreen> {
                             BorderRadius.circular(RRSpace.radiusFull),
                       ),
                       alignment: Alignment.center,
-                      child: const Text(
-                        'Unlock RollReel Pro',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 17,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
+                      child: iap.loading
+                          ? const CupertinoActivityIndicator(
+                              color: Colors.white)
+                          : Text(
+                              isPro
+                                  ? 'You\'re Pro!'
+                                  : 'Unlock RollReel Pro',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 17,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
                     ),
                   ),
                   const SizedBox(height: RRSpace.sp12),
 
-                  // ── Footer ─────────────────────────────────────────────────
-                  const Text(
-                    'One-time purchase · No subscription',
+                  // ── Footer ───────────────────────────────────────────────
+                  Text(
+                    _selected == _Plan.lifetime
+                        ? 'One-time purchase · No subscription'
+                        : 'Auto-renews annually · Cancel anytime',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: RRColors.textDisabled,
                       fontSize: 13,
                     ),
                   ),
                   const SizedBox(height: RRSpace.sp16),
                   GestureDetector(
-                    onTap: () {},
+                    onTap: iap.loading ? null : _restore,
                     child: const Text(
                       'Restore Purchases',
                       textAlign: TextAlign.center,
@@ -177,13 +217,14 @@ class _PaywallScreenState extends State<PaywallScreen> {
     );
   }
 
-  // ── Header (gradient, extends behind status bar) ──────────────────────────
+  // ── Header (gradient, extends behind status bar) ────────────────────────────
 
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildHeader(BuildContext context, bool isPro) {
     final topPad = MediaQuery.of(context).padding.top;
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.fromLTRB(RRSpace.sp16, topPad + 12, RRSpace.sp16, 28),
+      padding:
+          EdgeInsets.fromLTRB(RRSpace.sp16, topPad + 12, RRSpace.sp16, 28),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [Color(0xFF8B5CF6), Color(0xFF00D4FF)],
@@ -202,12 +243,11 @@ class _PaywallScreenState extends State<PaywallScreen> {
                     horizontal: RRSpace.sp16, vertical: RRSpace.sp4),
                 decoration: BoxDecoration(
                   color: Colors.black.withValues(alpha: 0.22),
-                  borderRadius:
-                      BorderRadius.circular(RRSpace.radiusFull),
+                  borderRadius: BorderRadius.circular(RRSpace.radiusFull),
                 ),
-                child: const Text(
-                  'PRO',
-                  style: TextStyle(
+                child: Text(
+                  isPro ? 'ACTIVE' : 'PRO',
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 13,
                     fontWeight: FontWeight.w800,
@@ -327,13 +367,26 @@ class _PricingCard extends StatelessWidget {
     required this.plan,
     required this.selected,
     required this.onTap,
+    this.price,
   });
 
   final _Plan plan;
   final bool selected;
   final VoidCallback onTap;
+  final String? price;
 
   bool get _isLifetime => plan == _Plan.lifetime;
+
+  String get _displayPrice {
+    if (price != null) return price!;
+    return _isLifetime ? '\$4.99' : '\$14.99/yr';
+  }
+
+  String get _subLabel {
+    if (_isLifetime) return 'Lifetime Access';
+    // For annual, show per-month breakdown if possible
+    return '\$1.25/month';
+  }
 
   Widget _inner() {
     return Container(
@@ -354,8 +407,7 @@ class _PricingCard extends StatelessWidget {
               color: _isLifetime
                   ? RRColors.accentAmber.withValues(alpha: 0.2)
                   : RRColors.accentCyan.withValues(alpha: 0.15),
-              borderRadius:
-                  BorderRadius.circular(RRSpace.radiusFull),
+              borderRadius: BorderRadius.circular(RRSpace.radiusFull),
             ),
             child: Text(
               _isLifetime ? 'Best Value' : 'Includes On This Day',
@@ -370,7 +422,7 @@ class _PricingCard extends StatelessWidget {
           ),
           const SizedBox(height: RRSpace.sp12),
           Text(
-            _isLifetime ? '\$4.99' : '\$14.99/yr',
+            _displayPrice,
             style: const TextStyle(
               color: RRColors.textPrimary,
               fontSize: 26,
@@ -379,7 +431,7 @@ class _PricingCard extends StatelessWidget {
           ),
           const SizedBox(height: 2),
           Text(
-            _isLifetime ? 'Lifetime Access' : '\$1.25/month',
+            _subLabel,
             style: const TextStyle(
               color: RRColors.textSecond,
               fontSize: 13,

@@ -97,19 +97,21 @@ class _LoadingStateState extends State<LoadingState>
                             width: 72,
                             radius: RRSpace.radiusMd),
                         const SizedBox(width: RRSpace.sp12),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _bone(
-                                height: 13,
-                                width: _titleWidths[i],
-                                radius: RRSpace.radiusSm),
-                            const SizedBox(height: RRSpace.sp8),
-                            _bone(
-                                height: 11,
-                                width: _subtitleWidths[i],
-                                radius: RRSpace.radiusSm),
-                          ],
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _bone(
+                                  height: 13,
+                                  width: _titleWidths[i],
+                                  radius: RRSpace.radiusSm),
+                              const SizedBox(height: RRSpace.sp8),
+                              _bone(
+                                  height: 11,
+                                  width: _subtitleWidths[i],
+                                  radius: RRSpace.radiusSm),
+                            ],
+                          ),
                         ),
                       ],
                     ),
