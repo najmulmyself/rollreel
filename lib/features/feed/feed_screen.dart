@@ -21,12 +21,14 @@ class FeedScreen extends ConsumerStatefulWidget {
     super.key,
     required this.onOpenBrowse,
     required this.onOpenSettings,
-    this.initialIndex = 0,
+    this.initialAssetId,
+    this.onVideoChanged,
   });
 
   final VoidCallback onOpenBrowse;
   final VoidCallback onOpenSettings;
-  final int initialIndex;
+  final String? initialAssetId;
+  final void Function(String assetId)? onVideoChanged;
 
   @override
   ConsumerState<FeedScreen> createState() => _FeedScreenState();
@@ -39,8 +41,17 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   @override
   void initState() {
     super.initState();
-    _currentIndex = widget.initialIndex;
-    _pageController = PageController(initialPage: widget.initialIndex);
+    // Resolve initial page from asset ID using cached provider data
+    int startPage = 0;
+    if (widget.initialAssetId != null) {
+      final cached = ref.read(feedVideosProvider).valueOrNull;
+      if (cached != null) {
+        final idx = cached.indexWhere((v) => v.id == widget.initialAssetId);
+        if (idx >= 0) startPage = idx;
+      }
+    }
+    _currentIndex = startPage;
+    _pageController = PageController(initialPage: startPage);
   }
   bool _showDateLabel = false;
   String _dateLabelText = '';
@@ -69,6 +80,8 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
         _dateLabelText = _fmtDateLabel(nextDay);
       }
     });
+
+    widget.onVideoChanged?.call(videos[index].id);
 
     if (!sameDay) {
       Future.delayed(const Duration(milliseconds: 1700), () {

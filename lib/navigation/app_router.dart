@@ -31,7 +31,8 @@ class AppRouter extends StatefulWidget {
 
 class _AppRouterState extends State<AppRouter> with WidgetsBindingObserver {
   RRRoute _route = RRRoute.splash;
-  int _feedInitialIndex = 0;
+  String? _activeAssetId;
+  double _browseScrollOffset = 0.0;
 
   @override
   void initState() {
@@ -104,13 +105,16 @@ class _AppRouterState extends State<AppRouter> with WidgetsBindingObserver {
         return FeedScreen(
           onOpenBrowse: () => _go(RRRoute.browse),
           onOpenSettings: () => _go(RRRoute.settings),
-          initialIndex: _feedInitialIndex,
+          initialAssetId: _activeAssetId,
+          onVideoChanged: (id) => _activeAssetId = id,
         );
       case RRRoute.browse:
         return BrowseScreen(
           onBack: () => _go(RRRoute.feed),
-          onPlayAt: (index) {
-            setState(() => _feedInitialIndex = index);
+          initialScrollOffset: _browseScrollOffset,
+          onScrollChanged: (offset) => _browseScrollOffset = offset,
+          onPlayAt: (assetId) {
+            setState(() => _activeAssetId = assetId);
             _go(RRRoute.feed);
           },
         );

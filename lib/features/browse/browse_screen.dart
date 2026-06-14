@@ -18,16 +18,39 @@ import 'filter_sheet.dart';
 // ─────────────────────────────────────────────────────────────────────────────
 
 class BrowseScreen extends ConsumerStatefulWidget {
-  const BrowseScreen({super.key, required this.onBack, this.onPlayAt});
+  const BrowseScreen({
+    super.key,
+    required this.onBack,
+    this.onPlayAt,
+    this.initialScrollOffset = 0.0,
+    this.onScrollChanged,
+  });
 
   final VoidCallback onBack;
-  final void Function(int index)? onPlayAt;
+  final void Function(String assetId)? onPlayAt;
+  final double initialScrollOffset;
+  final void Function(double offset)? onScrollChanged;
 
   @override
   ConsumerState<BrowseScreen> createState() => _BrowseScreenState();
 }
 
 class _BrowseScreenState extends ConsumerState<BrowseScreen> {
+  late final ScrollController _scrollController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController(
+        initialScrollOffset: widget.initialScrollOffset);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
   // ── Quick chip definitions ────────────────────────────────────────────────
 
   static const List<_QuickChip> _quickChips = [
@@ -296,6 +319,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                   final flat = _buildFlatList(videos);
 
                   return ListView.builder(
+                    controller: _scrollController,
                     itemCount: flat.length,
                     itemBuilder: (context, index) {
                       final item = flat[index];
@@ -303,11 +327,11 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                         return _SectionHeader(label: item);
                       }
                       final asset = item as AssetEntity;
-                      final assetIndex = videos.indexOf(asset);
                       return _VideoRow(
                         asset: asset,
                         onTap: () {
-                          widget.onPlayAt?.call(assetIndex);
+                          widget.onScrollChanged?.call(_scrollController.offset);
+                          widget.onPlayAt?.call(asset.id);
                           widget.onBack();
                         },
                       );
