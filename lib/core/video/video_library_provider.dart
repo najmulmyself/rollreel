@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_manager/photo_manager.dart';
 
+import '../settings/settings_provider.dart';
 import '../vault/vault_provider.dart';
 
 // ─── Filter enums & model ────────────────────────────────────────────────────
@@ -65,12 +66,37 @@ final videoLibraryProvider = FutureProvider<List<AssetEntity>>((ref) async {
 /// Drives cross-tab Browse → Feed navigation. Set to an asset ID to jump there.
 final feedJumpToAssetProvider = StateProvider<String?>((ref) => null);
 
-/// Returns all videos excluding those in the vault — used by the feed.
+/// Active quick-filter for the feed screen.
+final feedFilterProvider = StateProvider<FeedFilter>((ref) => FeedFilter.all);
+
+/// Returns all videos excluding those in the vault, filtered by [feedFilterProvider].
 final feedVideosProvider = FutureProvider<List<AssetEntity>>((ref) async {
   final all = await ref.watch(videoLibraryProvider.future);
   final vaultIds = ref.watch(vaultIdsProvider);
-  if (vaultIds.isEmpty) return all;
-  return all.where((a) => !vaultIds.contains(a.id)).toList();
+  final feedFilter = ref.watch(feedFilterProvider);
+
+  Iterable<AssetEntity> result =
+      vaultIds.isEmpty ? all : all.where((a) => !vaultIds.contains(a.id));
+
+  final now = DateTime.now();
+  final todayStart = DateTime(now.year, now.month, now.day);
+
+  switch (feedFilter) {
+    case FeedFilter.all:
+      break;
+    case FeedFilter.today:
+      result = result.where((a) {
+        final d = DateTime(
+            a.createDateTime.year, a.createDateTime.month, a.createDateTime.day);
+        return d == todayStart;
+      });
+    case FeedFilter.shorts:
+      result = result.where((a) => a.duration < 60);
+    case FeedFilter.long:
+      result = result.where((a) => a.duration >= 60);
+  }
+
+  return result.toList();
 });
 
 /// Returns the filtered + sorted subset of [videoLibraryProvider] excluding vault.

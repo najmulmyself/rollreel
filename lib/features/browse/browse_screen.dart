@@ -37,18 +37,43 @@ class BrowseScreen extends ConsumerStatefulWidget {
 
 class _BrowseScreenState extends ConsumerState<BrowseScreen> {
   late final ScrollController _scrollController;
+  final TextEditingController _searchCtrl = TextEditingController();
+  bool _searchActive = false;
+  String _searchQuery = '';
 
   @override
   void initState() {
     super.initState();
     _scrollController = ScrollController(
         initialScrollOffset: widget.initialScrollOffset);
+    _searchCtrl.addListener(() {
+      setState(() => _searchQuery = _searchCtrl.text.trim().toLowerCase());
+    });
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchCtrl.dispose();
     super.dispose();
+  }
+
+  void _toggleSearch() {
+    setState(() {
+      _searchActive = !_searchActive;
+      if (!_searchActive) {
+        _searchCtrl.clear();
+        _searchQuery = '';
+      }
+    });
+  }
+
+  List<AssetEntity> _applySearch(List<AssetEntity> videos) {
+    if (_searchQuery.isEmpty) return videos;
+    return videos
+        .where((v) =>
+            (v.title ?? '').toLowerCase().contains(_searchQuery))
+        .toList();
   }
 
   // ── Quick chip definitions ────────────────────────────────────────────────
@@ -237,16 +262,51 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                     ),
                   ),
                   const Spacer(),
-                  Padding(
-                    padding: const EdgeInsets.only(right: RRSpace.sp12),
-                    child: const Icon(
-                      CupertinoIcons.search,
-                      color: RRColors.textPrimary,
+                  GestureDetector(
+                    onTap: _toggleSearch,
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: RRSpace.sp12),
+                      child: Icon(
+                        _searchActive
+                            ? CupertinoIcons.xmark_circle_fill
+                            : CupertinoIcons.search,
+                        color: _searchActive
+                            ? RRColors.accentCoral
+                            : RRColors.textPrimary,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
+
+            // ── Search field ───────────────────────────────────────────────
+            if (_searchActive)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                    RRSpace.sp16, 0, RRSpace.sp16, RRSpace.sp8),
+                child: CupertinoTextField(
+                  controller: _searchCtrl,
+                  autofocus: true,
+                  placeholder: 'Search videos…',
+                  placeholderStyle:
+                      const TextStyle(color: RRColors.textDisabled),
+                  style: const TextStyle(color: RRColors.textPrimary),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: RRSpace.sp12, vertical: RRSpace.sp8),
+                  decoration: BoxDecoration(
+                    color: RRColors.bgElevated,
+                    borderRadius:
+                        BorderRadius.circular(RRSpace.radiusMd),
+                  ),
+                  clearButtonMode: OverlayVisibilityMode.editing,
+                  prefix: const Padding(
+                    padding: EdgeInsets.only(left: 8),
+                    child: Icon(CupertinoIcons.search,
+                        color: RRColors.textDisabled, size: 16),
+                  ),
+                ),
+              ),
 
             // ── Header section ─────────────────────────────────────────────
             Padding(
@@ -344,16 +404,28 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                     style: const TextStyle(color: RRColors.textSecond),
                   ),
                 ),
-                data: (videos) {
+                data: (rawVideos) {
+                  final videos = _applySearch(rawVideos);
                   if (videos.isEmpty) {
                     return EmptyState(
                       icon: CupertinoIcons.search,
-                      title: 'No Videos Found',
-                      body: 'Try a different filter.',
-                      buttonLabel: 'Clear Filters',
-                      onPressed: () =>
+                      title: _searchQuery.isNotEmpty
+                          ? 'No Results'
+                          : 'No Videos Found',
+                      body: _searchQuery.isNotEmpty
+                          ? 'No videos match "$_searchQuery".'
+                          : 'Try a different filter.',
+                      buttonLabel: _searchQuery.isNotEmpty
+                          ? 'Clear Search'
+                          : 'Clear Filters',
+                      onPressed: () {
+                        if (_searchQuery.isNotEmpty) {
+                          _searchCtrl.clear();
+                        } else {
                           ref.read(browseFilterProvider.notifier).state =
-                              const BrowseFilter(),
+                              const BrowseFilter();
+                        }
+                      },
                     );
                   }
 

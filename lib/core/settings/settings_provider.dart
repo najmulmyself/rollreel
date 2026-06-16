@@ -7,6 +7,26 @@ const _kLoop = 'settings_loop_short_videos';
 const _kAutoPlay = 'settings_auto_play';
 const _kDateLabels = 'settings_show_date_labels';
 const _kDurationBadges = 'settings_show_duration_badges';
+const _kDefaultFilter = 'settings_default_filter';
+
+// ─── Feed filter enum ─────────────────────────────────────────────────────────
+
+enum FeedFilter { all, today, shorts, long }
+
+extension FeedFilterLabel on FeedFilter {
+  String get label {
+    switch (this) {
+      case FeedFilter.all:
+        return 'All';
+      case FeedFilter.today:
+        return 'Today';
+      case FeedFilter.shorts:
+        return 'Shorts';
+      case FeedFilter.long:
+        return 'Long';
+    }
+  }
+}
 
 // ─── Model ───────────────────────────────────────────────────────────────────
 
@@ -15,12 +35,14 @@ class AppSettings {
   final bool autoPlay;
   final bool showDateLabels;
   final bool showDurationBadges;
+  final FeedFilter defaultFilter;
 
   const AppSettings({
     this.loopShortVideos = true,
     this.autoPlay = true,
     this.showDateLabels = true,
     this.showDurationBadges = true,
+    this.defaultFilter = FeedFilter.all,
   });
 
   AppSettings copyWith({
@@ -28,12 +50,14 @@ class AppSettings {
     bool? autoPlay,
     bool? showDateLabels,
     bool? showDurationBadges,
+    FeedFilter? defaultFilter,
   }) =>
       AppSettings(
         loopShortVideos: loopShortVideos ?? this.loopShortVideos,
         autoPlay: autoPlay ?? this.autoPlay,
         showDateLabels: showDateLabels ?? this.showDateLabels,
         showDurationBadges: showDurationBadges ?? this.showDurationBadges,
+        defaultFilter: defaultFilter ?? this.defaultFilter,
       );
 }
 
@@ -47,11 +71,13 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
   Future<void> _load() async {
     try {
       final prefs = await SharedPreferences.getInstance();
+      final filterIndex = prefs.getInt(_kDefaultFilter) ?? 0;
       state = AppSettings(
         loopShortVideos: prefs.getBool(_kLoop) ?? true,
         autoPlay: prefs.getBool(_kAutoPlay) ?? true,
         showDateLabels: prefs.getBool(_kDateLabels) ?? true,
         showDurationBadges: prefs.getBool(_kDurationBadges) ?? true,
+        defaultFilter: FeedFilter.values[filterIndex.clamp(0, FeedFilter.values.length - 1)],
       );
     } catch (_) {}
   }
@@ -78,6 +104,12 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     state = state.copyWith(showDurationBadges: value);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_kDurationBadges, value);
+  }
+
+  Future<void> setDefaultFilter(FeedFilter value) async {
+    state = state.copyWith(defaultFilter: value);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(_kDefaultFilter, value.index);
   }
 }
 
