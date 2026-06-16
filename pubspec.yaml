@@ -45,6 +45,9 @@ dependencies:
   local_auth: ^2.3.0
   in_app_review: ^2.0.10
   share_plus: ^10.1.2
+  url_launcher: ^6.3.0
+  flutter_volume_controller: ^1.0.6
+  screen_brightness: ^0.2.2+1
   # flutter_haptic_feedback: ^1.0.1
   flutter_animate: ^4.5.2
 

@@ -2,6 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_review/in_app_review.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/settings/settings_provider.dart';
 import '../../core/theme/colors.dart';
@@ -32,15 +34,69 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   void _shareApp(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Share link copied!'),
-        behavior: SnackBarBehavior.floating,
-        backgroundColor: RRColors.bgElevated,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(RRSpace.radiusMd),
+    Share.share(
+      'Check out RollReel – swipe your camera roll like TikTok!\n'
+      'https://apps.apple.com/app/rollreel',
+    );
+  }
+
+  Future<void> _openPrivacyPolicy(BuildContext context) async {
+    final uri = Uri.parse('https://rollreel.app/privacy');
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      if (!context.mounted) return;
+      showCupertinoDialog<void>(
+        context: context,
+        builder: (_) => CupertinoAlertDialog(
+          title: const Text('Privacy Policy'),
+          content: const Text(
+            'RollReel does not upload, transmit, or store any of your '
+            'videos outside your device. No account is required. '
+            'No personal data is shared with third parties.',
+          ),
+          actions: [
+            CupertinoDialogAction(
+              isDefaultDestructiveAction: false,
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
         ),
-        duration: const Duration(seconds: 2),
+      );
+    }
+  }
+
+  Future<void> _showDefaultFilterPicker(
+      BuildContext context, AppSettings s, SettingsNotifier notifier) async {
+    await showCupertinoModalPopup<void>(
+      context: context,
+      builder: (_) => CupertinoActionSheet(
+        title: const Text('Default Filter'),
+        actions: FeedFilter.values.map((f) {
+          return CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(context);
+              notifier.setDefaultFilter(f);
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(f.label),
+                if (s.defaultFilter == f) ...[
+                  const SizedBox(width: 8),
+                  const Icon(CupertinoIcons.checkmark,
+                      size: 16, color: CupertinoColors.activeBlue),
+                ],
+              ],
+            ),
+          );
+        }).toList(),
+        cancelButton: CupertinoActionSheetAction(
+          isDefaultAction: true,
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
       ),
     );
   }
@@ -86,12 +142,14 @@ class SettingsScreen extends ConsumerWidget {
                       value: s.autoPlay,
                       onChanged: notifier.setAutoPlay,
                     ),
-                    const _NavRow(
-                      icon: _SettingIcon(
+                    _NavRow(
+                      icon: const _SettingIcon(
                           color: Color(0xFF7D2E2E),
                           icon: CupertinoIcons.line_horizontal_3_decrease),
                       label: 'Default Filter',
-                      trailingText: 'All',
+                      trailingText: s.defaultFilter.label,
+                      onTap: () =>
+                          _showDefaultFilterPicker(context, s, notifier),
                     ),
                   ]),
                   const SizedBox(height: RRSpace.sp24),
@@ -146,11 +204,12 @@ class SettingsScreen extends ConsumerWidget {
                   const _SectionLabel('ABOUT'),
                   const SizedBox(height: RRSpace.sp8),
                   _SettingsGroup(rows: [
-                    const _NavRow(
-                      icon: _SettingIcon(
+                    _NavRow(
+                      icon: const _SettingIcon(
                           color: Color(0xFF2A6B3A),
                           icon: CupertinoIcons.shield_fill),
                       label: 'Privacy Policy',
+                      onTap: () => _openPrivacyPolicy(context),
                     ),
                     _NavRow(
                       icon: const _SettingIcon(

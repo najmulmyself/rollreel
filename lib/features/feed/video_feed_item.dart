@@ -2,14 +2,22 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_volume_controller/flutter_volume_controller.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:screen_brightness/screen_brightness.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../core/favorites/favorites_provider.dart';
 import '../../core/settings/settings_provider.dart';
+import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
 import '../../core/vault/vault_provider.dart';
 import 'dynamic_bg.dart';
+
+// ─── Gesture drag type ────────────────────────────────────────────────────────
+
+enum _DragType { none, volume, brightness }
 
 class VideoFeedItem extends ConsumerStatefulWidget {
   const VideoFeedItem({
@@ -35,6 +43,16 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
   Uint8List? _thumbnail;
   bool _showPlayIcon = false;
   bool _iconIsPlay = false;
+
+  // Slow-motion state
+  bool _slowMotion = false;
+
+  // Volume / brightness gesture state
+  _DragType _dragType = _DragType.none;
+  double _dragValue = 0.0; // 0.0 – 1.0
+  bool _showDragOverlay = false;
+  double? _dragStartY;
+  double? _dragStartValue;
 
   @override
   void initState() {
@@ -100,6 +118,8 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
   void dispose() {
     _controller?.removeListener(_onTick);
     _controller?.dispose();
+    // Restore screen brightness when leaving
+    ScreenBrightness().resetApplicationScreenBrightness();
     super.dispose();
   }
 
@@ -118,6 +138,79 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
     Future.delayed(const Duration(milliseconds: 750), () {
       if (mounted) setState(() => _showPlayIcon = false);
     });
+  }
+
+  // ── Slow motion ─────────────────────────────────────────────────────────────
+
+  void _startSlowMotion() {
+    if (!_initialized || _controller == null) return;
+    HapticFeedback.heavyImpact();
+    _controller!.setPlaybackSpeed(0.5);
+    setState(() => _slowMotion = true);
+  }
+
+  void _endSlowMotion() {
+    if (!_initialized || _controller == null) return;
+    _controller!.setPlaybackSpeed(1.0);
+    setState(() => _slowMotion = false);
+  }
+
+  // ── Volume / brightness gestures ─────────────────────────────────────────────
+
+  Future<void> _onDragStart(DragStartDetails d, BuildContext context) async {
+    final width = MediaQuery.sizeOf(context).width;
+    final x = d.localPosition.dx;
+    if (x < width * 0.25) {
+      // Left 25% = brightness
+      final current = await ScreenBrightness().application;
+      _dragStartValue = current;
+      _dragType = _DragType.brightness;
+      _dragValue = current;
+    } else if (x > width * 0.75) {
+      // Right 25% = volume
+      double? vol;
+      try {
+        vol = await FlutterVolumeController.getVolume();
+      } catch (_) {}
+      _dragStartValue = vol ?? 0.5;
+      _dragType = _DragType.volume;
+      _dragValue = _dragStartValue!;
+    } else {
+      _dragType = _DragType.none;
+      return;
+    }
+    _dragStartY = d.localPosition.dy;
+    if (mounted) setState(() => _showDragOverlay = true);
+  }
+
+  Future<void> _onDragUpdate(DragUpdateDetails d) async {
+    if (_dragType == _DragType.none || _dragStartY == null) return;
+    final height = MediaQuery.sizeOf(context).height;
+    final dy = _dragStartY! - d.localPosition.dy; // positive = up = increase
+    final delta = dy / (height * 0.6); // 60% of screen = full range
+    final newValue = (_dragStartValue! + delta).clamp(0.0, 1.0);
+
+    setState(() => _dragValue = newValue);
+
+    if (_dragType == _DragType.volume) {
+      try {
+        await FlutterVolumeController.setVolume(newValue);
+      } catch (_) {}
+    } else {
+      try {
+        await ScreenBrightness().setApplicationScreenBrightness(newValue);
+      } catch (_) {}
+    }
+  }
+
+  void _onDragEnd(DragEndDetails d) {
+    if (_dragType == _DragType.none) return;
+    _dragType = _DragType.none;
+    _dragStartY = null;
+    _dragStartValue = null;
+    if (mounted) {
+      setState(() => _showDragOverlay = false);
+    }
   }
 
   Future<void> _openLandscape(BuildContext context) async {
@@ -147,6 +240,18 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
           CupertinoActionSheetAction(
             onPressed: () {
               Navigator.pop(context);
+              showModalBottomSheet<void>(
+                context: context,
+                backgroundColor: Colors.transparent,
+                isScrollControlled: true,
+                builder: (_) => _VideoInfoSheet(asset: widget.asset),
+              );
+            },
+            child: const Text('Get Info'),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(context);
               ref.read(vaultIdsProvider.notifier).toggle(widget.asset.id);
             },
             child: Text(inVault ? 'Remove from Vault' : 'Add to Vault'),
@@ -169,44 +274,30 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
     );
   }
 
-  Future<void> _showLongPressSheet(BuildContext context) async {
-    HapticFeedback.mediumImpact();
-    await showCupertinoModalPopup<void>(
-      context: context,
-      builder: (_) => CupertinoActionSheet(
-        actions: [
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(context);
-              showModalBottomSheet<void>(
-                context: context,
-                backgroundColor: Colors.transparent,
-                isScrollControlled: true,
-                builder: (_) => _VideoInfoSheet(asset: widget.asset),
-              );
-            },
-            child: const Text('Get Info'),
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          isDefaultAction: true,
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-      ),
-    );
+  String _fmtDateShort(DateTime dt) {
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+    final now = DateTime.now();
+    if (dt.year == now.year) {
+      return '${months[dt.month - 1]} ${dt.day}';
+    }
+    return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
   }
 
   @override
   Widget build(BuildContext context) {
     final safeBottom = MediaQuery.paddingOf(context).bottom;
+    final isFavorited = ref.watch(favoritesIdsProvider).contains(widget.asset.id);
 
     return DynamicBackground(
       thumbnailBytes: _thumbnail,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: _togglePlay,
-        onLongPress: () => _showLongPressSheet(context),
+        onLongPressStart: (_) => _startSlowMotion(),
+        onLongPressEnd: (_) => _endSlowMotion(),
         onDoubleTapDown: (d) {
           HapticFeedback.lightImpact();
           final half = MediaQuery.sizeOf(context).width / 2;
@@ -217,10 +308,13 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
               (_controller?.value.position ?? Duration.zero) + offset;
           _controller?.seekTo(next.isNegative ? Duration.zero : next);
         },
+        onVerticalDragStart: (d) => _onDragStart(d, context),
+        onVerticalDragUpdate: _onDragUpdate,
+        onVerticalDragEnd: _onDragEnd,
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // ── Video at native aspect ratio ───────────────────────────────
+            // ── Video at native aspect ratio ───────────────────────────────────
             if (_initialized && _controller != null)
               Center(
                 child: AspectRatio(
@@ -235,18 +329,18 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
             else
               const ColoredBox(color: Colors.black),
 
-            // ── Loading indicator ──────────────────────────────────────────
+            // ── Loading indicator ────────────────────────────────────────────
             if (!_initialized)
               const Center(
                 child: CupertinoActivityIndicator(color: Colors.white),
               ),
 
-            // ── Top vignette ───────────────────────────────────────────────
+            // ── Top vignette ─────────────────────────────────────────────────
             Positioned(
               top: 0,
               left: 0,
               right: 0,
-              height: 100,
+              height: 120,
               child: IgnorePointer(
                 child: DecoratedBox(
                   decoration: BoxDecoration(
@@ -263,7 +357,7 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
               ),
             ),
 
-            // ── Bottom vignette ────────────────────────────────────────────
+            // ── Bottom vignette ──────────────────────────────────────────────
             const Positioned.fill(
               child: IgnorePointer(
                 child: DecoratedBox(
@@ -279,7 +373,7 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
               ),
             ),
 
-            // ── Tap flash: play/pause icon ─────────────────────────────────
+            // ── Tap flash: play/pause icon ────────────────────────────────────
             IgnorePointer(
               child: AnimatedOpacity(
                 opacity: _showPlayIcon ? 1.0 : 0.0,
@@ -304,7 +398,44 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
               ),
             ),
 
-            // ── Right sidebar — vertically centered ────────────────────────
+            // ── Slow-motion badge ────────────────────────────────────────────
+            if (_slowMotion)
+              IgnorePointer(
+                child: Positioned(
+                  top: 72,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.6),
+                        borderRadius: BorderRadius.circular(100),
+                      ),
+                      child: const Text(
+                        '0.5×',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+            // ── Volume / brightness overlay ──────────────────────────────────
+            if (_showDragOverlay)
+              IgnorePointer(
+                child: _DragOverlay(
+                  type: _dragType,
+                  value: _dragValue,
+                ),
+              ),
+
+            // ── Right sidebar — vertically centered ──────────────────────────
             Align(
               alignment: Alignment.centerRight,
               child: Padding(
@@ -312,13 +443,61 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
                     right: RRSpace.sp16, bottom: safeBottom + 56),
                 child: _Sidebar(
                   asset: widget.asset,
+                  isFavorited: isFavorited,
+                  onFavorite: () {
+                    HapticFeedback.lightImpact();
+                    ref
+                        .read(favoritesIdsProvider.notifier)
+                        .toggle(widget.asset.id);
+                  },
                   onLandscape: () => _openLandscape(context),
                   onOptions: () => _showOptions(context),
                 ),
               ),
             ),
 
-            // ── Seek bar + time ────────────────────────────────────────────
+            // ── Video info overlay ────────────────────────────────────────────
+            if (_initialized)
+              Positioned(
+                left: RRSpace.sp20,
+                right: 72,
+                bottom: safeBottom + 56,
+                child: IgnorePointer(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (widget.asset.title != null &&
+                          widget.asset.title!.isNotEmpty)
+                        Text(
+                          widget.asset.title!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            shadows: [
+                              Shadow(blurRadius: 8, color: Colors.black54)
+                            ],
+                          ),
+                        ),
+                      Text(
+                        _fmtDateShort(widget.asset.createDateTime),
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
+                          shadows: [
+                            Shadow(blurRadius: 6, color: Colors.black54)
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+            // ── Seek bar + time ───────────────────────────────────────────────
             Positioned(
               left: RRSpace.sp20,
               right: RRSpace.sp20,
@@ -334,15 +513,85 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
   }
 }
 
+// ─── Drag overlay (volume / brightness) ──────────────────────────────────────
+
+class _DragOverlay extends StatelessWidget {
+  const _DragOverlay({required this.type, required this.value});
+
+  final _DragType type;
+  final double value;
+
+  @override
+  Widget build(BuildContext context) {
+    final icon = type == _DragType.volume
+        ? (value == 0 ? Icons.volume_off_rounded : Icons.volume_up_rounded)
+        : (value == 0
+            ? Icons.brightness_low_rounded
+            : Icons.brightness_high_rounded);
+
+    return Align(
+      alignment: type == _DragType.volume
+          ? Alignment.centerRight
+          : Alignment.centerLeft,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        child: Container(
+          width: 42,
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 10),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.6),
+            borderRadius: BorderRadius.circular(21),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: Colors.white, size: 18),
+              const SizedBox(height: 8),
+              SizedBox(
+                height: 80,
+                child: RotatedBox(
+                  quarterTurns: 3,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: LinearProgressIndicator(
+                      value: value,
+                      backgroundColor: Colors.white24,
+                      valueColor:
+                          const AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                '${(value * 100).round()}%',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 // ─── Right sidebar ────────────────────────────────────────────────────────────
 
 class _Sidebar extends StatelessWidget {
   const _Sidebar({
     required this.asset,
+    required this.isFavorited,
+    required this.onFavorite,
     required this.onLandscape,
     required this.onOptions,
   });
   final AssetEntity asset;
+  final bool isFavorited;
+  final VoidCallback onFavorite;
   final VoidCallback onLandscape;
   final VoidCallback onOptions;
 
@@ -356,7 +605,13 @@ class _Sidebar extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _SideBtn(icon: CupertinoIcons.heart, onTap: () {}),
+        _SideBtn(
+          icon: isFavorited
+              ? CupertinoIcons.heart_fill
+              : CupertinoIcons.heart,
+          color: isFavorited ? RRColors.accentCoral : Colors.white,
+          onTap: onFavorite,
+        ),
         const SizedBox(height: 28),
         _SideBtn(icon: CupertinoIcons.share, onTap: _share),
         const SizedBox(height: 28),
@@ -369,9 +624,14 @@ class _Sidebar extends StatelessWidget {
 }
 
 class _SideBtn extends StatelessWidget {
-  const _SideBtn({required this.icon, required this.onTap});
+  const _SideBtn({
+    required this.icon,
+    required this.onTap,
+    this.color = Colors.white,
+  });
   final IconData icon;
   final VoidCallback onTap;
+  final Color color;
 
   @override
   Widget build(BuildContext context) {
@@ -382,7 +642,7 @@ class _SideBtn extends StatelessWidget {
         padding: const EdgeInsets.all(6),
         child: Icon(
           icon,
-          color: Colors.white,
+          color: color,
           size: 27,
           shadows: const [Shadow(blurRadius: 10, color: Colors.black54)],
         ),
@@ -564,7 +824,7 @@ class _LandscapeVideoPageState extends State<_LandscapeVideoPage> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // ── Video at native ratio ──────────────────────────────────────
+            // ── Video at native ratio ────────────────────────────────────────
             if (_initialized && _controller != null)
               Center(
                 child: AspectRatio(
@@ -577,7 +837,7 @@ class _LandscapeVideoPageState extends State<_LandscapeVideoPage> {
                 child: CupertinoActivityIndicator(color: Colors.white),
               ),
 
-            // ── Bottom vignette ────────────────────────────────────────────
+            // ── Bottom vignette ──────────────────────────────────────────────
             const Positioned.fill(
               child: IgnorePointer(
                 child: DecoratedBox(
@@ -593,7 +853,7 @@ class _LandscapeVideoPageState extends State<_LandscapeVideoPage> {
               ),
             ),
 
-            // ── Play/pause flash ───────────────────────────────────────────
+            // ── Play/pause flash ─────────────────────────────────────────────
             IgnorePointer(
               child: AnimatedOpacity(
                 opacity: _showPlayIcon ? 1.0 : 0.0,
@@ -618,7 +878,7 @@ class _LandscapeVideoPageState extends State<_LandscapeVideoPage> {
               ),
             ),
 
-            // ── Close button (top-left) ────────────────────────────────────
+            // ── Close button (top-left) ──────────────────────────────────────
             Positioned(
               top: safe.top + 12,
               left: safe.left + 12,
@@ -641,7 +901,7 @@ class _LandscapeVideoPageState extends State<_LandscapeVideoPage> {
               ),
             ),
 
-            // ── Seek bar (bottom) ──────────────────────────────────────────
+            // ── Seek bar (bottom) ────────────────────────────────────────────
             if (_controller != null)
               Positioned(
                 left: safe.left + RRSpace.sp20,
@@ -794,3 +1054,4 @@ class _InfoRow extends StatelessWidget {
     );
   }
 }
+

@@ -39,6 +39,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   bool _showDateLabel = false;
   String _dateLabelText = '';
   VideoPlayerController? _activeController;
+  bool _filterInitialized = false;
 
   @override
   void initState() {
@@ -53,6 +54,15 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     }
     _currentIndex = startPage;
     _pageController = PageController(initialPage: startPage);
+  }
+
+  void _initializeDefaultFilter() {
+    if (_filterInitialized) return;
+    _filterInitialized = true;
+    final defaultFilter = ref.read(settingsProvider).defaultFilter;
+    if (defaultFilter != FeedFilter.all) {
+      ref.read(feedFilterProvider.notifier).state = defaultFilter;
+    }
   }
 
   Future<void> _deleteCurrentVideo(List<AssetEntity> videos) async {
@@ -108,6 +118,19 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     }
   }
 
+  void _showInitialDateLabel(List<AssetEntity> videos) {
+    if (videos.isEmpty) return;
+    final idx = _currentIndex.clamp(0, videos.length - 1);
+    final label = _fmtDateLabel(videos[idx].createDateTime);
+    setState(() {
+      _showDateLabel = true;
+      _dateLabelText = label;
+    });
+    Future.delayed(const Duration(milliseconds: 1700), () {
+      if (mounted) setState(() => _showDateLabel = false);
+    });
+  }
+
   @override
   void didUpdateWidget(FeedScreen old) {
     super.didUpdateWidget(old);
@@ -143,6 +166,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   Widget build(BuildContext context) {
     final videosAsync = ref.watch(feedVideosProvider);
     final settings = ref.watch(settingsProvider);
+    final activeFilter = ref.watch(feedFilterProvider);
     final safeTop = MediaQuery.paddingOf(context).top;
 
     ref.listen<AsyncValue<List<AssetEntity>>>(feedVideosProvider, (_, next) {
@@ -195,14 +219,48 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       );
     }
 
+    // Initialize default filter once videos are loaded
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeDefaultFilter();
+    });
+
     if (videos.isEmpty) {
       return Scaffold(
         backgroundColor: RRColors.bgDeep,
-        body: NoVideosState(onOpenPhotos: () => PhotoManager.openSetting()),
+        body: Stack(
+          children: [
+            NoVideosState(onOpenPhotos: () => PhotoManager.openSetting()),
+            Positioned(
+              top: safeTop + 8,
+              left: 0,
+              right: 0,
+              child: _FilterTabs(
+                activeFilter: activeFilter,
+                onFilterChanged: (f) {
+                  ref.read(feedFilterProvider.notifier).state = f;
+                  setState(() {
+                    _currentIndex = 0;
+                    _activeController = null;
+                  });
+                  if (_pageController.hasClients) {
+                    _pageController.jumpToPage(0);
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
       );
     }
 
     final safeIndex = _currentIndex.clamp(0, videos.length - 1);
+
+    // Show initial date label once when videos first become available
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_showDateLabel && settings.showDateLabels && videos.isNotEmpty) {
+        // Only on first render — we rely on a flag set in _onPageChanged for subsequent
+      }
+    });
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -221,14 +279,91 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
               onDelete: () => _deleteCurrentVideo(videos),
             ),
           ),
+          // ── Filter tabs ────────────────────────────────────────────────────
+          Positioned(
+            top: safeTop + 8,
+            left: 0,
+            right: 0,
+            child: _FilterTabs(
+              activeFilter: activeFilter,
+              onFilterChanged: (f) {
+                ref.read(feedFilterProvider.notifier).state = f;
+                setState(() {
+                  _currentIndex = 0;
+                  _activeController = null;
+                });
+                if (_pageController.hasClients) {
+                  _pageController.jumpToPage(0);
+                }
+                // Show date label for first video after filter change
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  final updated = ref.read(feedVideosProvider).valueOrNull;
+                  if (updated != null && updated.isNotEmpty && settings.showDateLabels) {
+                    _showInitialDateLabel(updated);
+                  }
+                });
+              },
+            ),
+          ),
+          // ── Date label ─────────────────────────────────────────────────────
           if (_showDateLabel && settings.showDateLabels)
             Positioned(
-              top: safeTop + 16,
+              top: safeTop + 56,
               left: 0,
               right: 0,
               child: Center(child: DateLabel(label: _dateLabelText)),
             ),
         ],
+      ),
+    );
+  }
+}
+
+// ─── Filter tabs ──────────────────────────────────────────────────────────────
+
+class _FilterTabs extends StatelessWidget {
+  const _FilterTabs({
+    required this.activeFilter,
+    required this.onFilterChanged,
+  });
+
+  final FeedFilter activeFilter;
+  final void Function(FeedFilter) onFilterChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 36,
+      child: ListView(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        children: FeedFilter.values.map((f) {
+          final isActive = f == activeFilter;
+          return GestureDetector(
+            onTap: () => onFilterChanged(f),
+            child: Container(
+              margin: const EdgeInsets.only(right: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+              decoration: BoxDecoration(
+                color: isActive
+                    ? Colors.white.withValues(alpha: 0.2)
+                    : Colors.black.withValues(alpha: 0.35),
+                borderRadius: BorderRadius.circular(100),
+                border: isActive
+                    ? Border.all(color: Colors.white.withValues(alpha: 0.6), width: 1)
+                    : null,
+              ),
+              child: Text(
+                f.label,
+                style: TextStyle(
+                  color: isActive ? Colors.white : Colors.white60,
+                  fontSize: 13,
+                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                ),
+              ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }
