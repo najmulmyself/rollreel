@@ -299,6 +299,8 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
               onControllerReady: _handleControllerReady,
               onDelete: () => _deleteCurrentVideo(videos),
               onPlayStateChanged: _handlePlayStateChanged,
+              onOpenLibrary: widget.onOpenBrowse,
+              onOpenSettings: widget.onOpenSettings,
             ),
           ),
           // ── Filter tabs ────────────────────────────────────────────────────
@@ -313,6 +315,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                 duration: const Duration(milliseconds: 250),
                 child: _FilterTabs(
                   activeFilter: activeFilter,
+                  onSearchTap: widget.onOpenBrowse,
                   onFilterChanged: (f) {
                     ref.read(feedFilterProvider.notifier).state = f;
                     setState(() {
@@ -354,45 +357,73 @@ class _FilterTabs extends StatelessWidget {
   const _FilterTabs({
     required this.activeFilter,
     required this.onFilterChanged,
+    this.onSearchTap,
   });
 
   final FeedFilter activeFilter;
   final void Function(FeedFilter) onFilterChanged;
+  final VoidCallback? onSearchTap;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 36,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        children: FeedFilter.values.map((f) {
-          final isActive = f == activeFilter;
-          return GestureDetector(
-            onTap: () => onFilterChanged(f),
-            child: Container(
-              margin: const EdgeInsets.only(right: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-              decoration: BoxDecoration(
-                color: isActive
-                    ? Colors.white.withValues(alpha: 0.2)
-                    : Colors.black.withValues(alpha: 0.35),
-                borderRadius: BorderRadius.circular(100),
-                border: isActive
-                    ? Border.all(color: Colors.white.withValues(alpha: 0.6), width: 1)
-                    : null,
-              ),
-              child: Text(
-                f.label,
-                style: TextStyle(
-                  color: isActive ? Colors.white : Colors.white60,
-                  fontSize: 13,
-                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: [
+          Expanded(
+            child: SizedBox(
+              height: 36,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: FeedFilter.values.map((f) {
+                  final isActive = f == activeFilter;
+                  return GestureDetector(
+                    onTap: () => onFilterChanged(f),
+                    child: Container(
+                      margin: const EdgeInsets.only(right: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: isActive
+                            ? Colors.white.withValues(alpha: 0.2)
+                            : Colors.black.withValues(alpha: 0.35),
+                        borderRadius: BorderRadius.circular(100),
+                        border: isActive
+                            ? Border.all(
+                                color: Colors.white.withValues(alpha: 0.6),
+                                width: 1)
+                            : null,
+                      ),
+                      child: Text(
+                        f.label,
+                        style: TextStyle(
+                          color: isActive ? Colors.white : Colors.white60,
+                          fontSize: 13,
+                          fontWeight:
+                              isActive ? FontWeight.w700 : FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
               ),
             ),
-          );
-        }).toList(),
+          ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: onSearchTap,
+            behavior: HitTestBehavior.opaque,
+            child: Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.35),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.search, color: Colors.white, size: 18),
+            ),
+          ),
+        ],
       ),
     );
   }

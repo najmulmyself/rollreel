@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -27,6 +29,8 @@ class VideoFeedItem extends ConsumerStatefulWidget {
     required this.onControllerReady,
     this.onDelete,
     this.onPlayStateChanged,
+    this.onOpenLibrary,
+    this.onOpenSettings,
   });
 
   final AssetEntity asset;
@@ -34,6 +38,8 @@ class VideoFeedItem extends ConsumerStatefulWidget {
   final void Function(VideoPlayerController?) onControllerReady;
   final VoidCallback? onDelete;
   final ValueChanged<bool>? onPlayStateChanged;
+  final VoidCallback? onOpenLibrary;
+  final VoidCallback? onOpenSettings;
 
   @override
   ConsumerState<VideoFeedItem> createState() => _VideoFeedItemState();
@@ -55,6 +61,22 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
   bool _showDragOverlay = false;
   double? _dragStartY;
   double? _dragStartValue;
+
+  // Info card / controls visibility
+  bool _controlsVisible = true;
+  Timer? _controlsHideTimer;
+
+  void _scheduleControlsAutoHide() {
+    _controlsHideTimer?.cancel();
+    _controlsHideTimer = Timer(const Duration(milliseconds: 1000), () {
+      if (mounted) setState(() => _controlsVisible = false);
+    });
+  }
+
+  void _showControls() {
+    _controlsHideTimer?.cancel();
+    if (mounted) setState(() => _controlsVisible = true);
+  }
 
   @override
   void initState() {
@@ -93,6 +115,7 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
       if (settings.autoPlay) {
         await ctrl.play();
         widget.onPlayStateChanged?.call(true);
+        _scheduleControlsAutoHide();
       }
       widget.onControllerReady(ctrl);
     }
@@ -111,17 +134,20 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
       if (widget.isActive) {
         _controller?.play();
         widget.onPlayStateChanged?.call(true);
+        _scheduleControlsAutoHide();
         if (_initialized && _controller != null) {
           widget.onControllerReady(_controller);
         }
       } else {
         _controller?.pause();
+        _showControls();
       }
     });
   }
 
   @override
   void dispose() {
+    _controlsHideTimer?.cancel();
     _controller?.removeListener(_onTick);
     _controller?.dispose();
     // Restore screen brightness when leaving
@@ -132,16 +158,22 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
   void _togglePlay() {
     if (!_initialized || _controller == null) return;
     final wasPlaying = _controller!.value.isPlaying;
+    final nowPlaying = !wasPlaying;
     setState(() {
       _showPlayIcon = true;
-      _iconIsPlay = !wasPlaying;
+      _iconIsPlay = nowPlaying;
     });
     if (wasPlaying) {
       _controller!.pause();
     } else {
       _controller!.play();
     }
-    widget.onPlayStateChanged?.call(!wasPlaying);
+    widget.onPlayStateChanged?.call(nowPlaying);
+    if (nowPlaying) {
+      _scheduleControlsAutoHide();
+    } else {
+      _showControls();
+    }
     Future.delayed(const Duration(milliseconds: 750), () {
       if (mounted) setState(() => _showPlayIcon = false);
     });
@@ -239,6 +271,13 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
           CupertinoActionSheetAction(
             onPressed: () {
               Navigator.pop(context);
+              _openLandscape(context);
+            },
+            child: const Text('Open Fullscreen'),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(context);
               showModalBottomSheet<void>(
                 context: context,
                 backgroundColor: Colors.transparent,
@@ -273,22 +312,11 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
     );
   }
 
-  String _fmtDateShort(DateTime dt) {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
-    final now = DateTime.now();
-    if (dt.year == now.year) {
-      return '${months[dt.month - 1]} ${dt.day}';
-    }
-    return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
-  }
-
   @override
   Widget build(BuildContext context) {
     final safeBottom = MediaQuery.paddingOf(context).bottom;
     final isFavorited = ref.watch(favoritesIdsProvider).contains(widget.asset.id);
+    final isSaved = ref.watch(vaultIdsProvider).contains(widget.asset.id);
 
     return DynamicBackground(
       thumbnailBytes: _thumbnail,
@@ -431,77 +459,58 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
                 ),
               ),
 
-            // ── Right sidebar — vertically centered ──────────────────────────
+            // ── Right sidebar — sits above the info card ───────────────────────
             Align(
-              alignment: Alignment.centerRight,
+              alignment: const Alignment(1, -0.05),
               child: Padding(
-                padding: EdgeInsets.only(
-                    right: RRSpace.sp16, bottom: safeBottom + 20),
+                padding: const EdgeInsets.only(right: RRSpace.sp16),
                 child: _Sidebar(
                   asset: widget.asset,
                   isFavorited: isFavorited,
+                  isSaved: isSaved,
                   onFavorite: () {
                     HapticFeedback.lightImpact();
                     ref
                         .read(favoritesIdsProvider.notifier)
                         .toggle(widget.asset.id);
                   },
-                  onLandscape: () => _openLandscape(context),
+                  onSave: () {
+                    HapticFeedback.lightImpact();
+                    ref.read(vaultIdsProvider.notifier).toggle(widget.asset.id);
+                  },
                   onOptions: () => _showOptions(context),
                 ),
               ),
             ),
 
-            // ── Video info overlay ────────────────────────────────────────────
+            // ── Info card: title/tag, date, seek bar, controls ─────────────────
             if (_initialized)
               Positioned(
-                left: RRSpace.sp20,
-                right: 72,
-                bottom: safeBottom + 20,
+                left: RRSpace.sp16,
+                right: RRSpace.sp16,
+                bottom: safeBottom + 16,
                 child: IgnorePointer(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (widget.asset.title != null &&
-                          widget.asset.title!.isNotEmpty)
-                        Text(
-                          widget.asset.title!,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
-                            shadows: [
-                              Shadow(blurRadius: 8, color: Colors.black54)
-                            ],
-                          ),
-                        ),
-                      Text(
-                        _fmtDateShort(widget.asset.createDateTime),
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 12,
-                          shadows: [
-                            Shadow(blurRadius: 6, color: Colors.black54)
-                          ],
-                        ),
+                  ignoring: !_controlsVisible,
+                  child: AnimatedSlide(
+                    duration: const Duration(milliseconds: 220),
+                    curve: Curves.easeOutCubic,
+                    offset:
+                        _controlsVisible ? Offset.zero : const Offset(0, 0.3),
+                    child: AnimatedOpacity(
+                      duration: const Duration(milliseconds: 220),
+                      opacity: _controlsVisible ? 1.0 : 0.0,
+                      child: _InfoCard(
+                        asset: widget.asset,
+                        controller: _controller,
+                        isPlaying: _controller?.value.isPlaying ?? false,
+                        onTogglePlay: _togglePlay,
+                        onOpenLibrary: widget.onOpenLibrary,
+                        onOpenSettings: widget.onOpenSettings,
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
-
-            // ── Seek bar + time ───────────────────────────────────────────────
-            Positioned(
-              left: RRSpace.sp20,
-              right: RRSpace.sp20,
-              bottom: safeBottom + 20,
-              child: _controller != null
-                  ? _VideoSeekBar(controller: _controller!)
-                  : const SizedBox.shrink(),
-            ),
 
             // ── Edge gesture zones: left = brightness, right = volume ─────────
             // Narrow strips only, so vertical swipes in the rest of the screen
@@ -610,14 +619,16 @@ class _Sidebar extends StatelessWidget {
   const _Sidebar({
     required this.asset,
     required this.isFavorited,
+    required this.isSaved,
     required this.onFavorite,
-    required this.onLandscape,
+    required this.onSave,
     required this.onOptions,
   });
   final AssetEntity asset;
   final bool isFavorited;
+  final bool isSaved;
   final VoidCallback onFavorite;
-  final VoidCallback onLandscape;
+  final VoidCallback onSave;
   final VoidCallback onOptions;
 
   Future<void> _share() async {
@@ -637,11 +648,22 @@ class _Sidebar extends StatelessWidget {
           color: isFavorited ? RRColors.accentCoral : Colors.white,
           onTap: onFavorite,
         ),
-        const SizedBox(height: 28),
-        _SideBtn(icon: CupertinoIcons.share, onTap: _share),
-        const SizedBox(height: 28),
-        _SideBtn(icon: Icons.fullscreen_rounded, onTap: onLandscape),
-        const SizedBox(height: 28),
+        const SizedBox(height: 22),
+        _SideBtn(
+          icon: CupertinoIcons.share,
+          label: 'Share',
+          onTap: _share,
+        ),
+        const SizedBox(height: 22),
+        _SideBtn(
+          icon: isSaved
+              ? CupertinoIcons.bookmark_fill
+              : CupertinoIcons.bookmark,
+          color: isSaved ? RRColors.accentAmber : Colors.white,
+          label: 'Save',
+          onTap: onSave,
+        ),
+        const SizedBox(height: 22),
         _SideBtn(icon: CupertinoIcons.ellipsis, onTap: onOptions),
       ],
     );
@@ -653,24 +675,208 @@ class _SideBtn extends StatelessWidget {
     required this.icon,
     required this.onTap,
     this.color = Colors.white,
+    this.label,
   });
   final IconData icon;
   final VoidCallback onTap;
   final Color color;
+  final String? label;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
-      child: Padding(
-        padding: const EdgeInsets.all(6),
-        child: Icon(
-          icon,
-          color: color,
-          size: 27,
-          shadows: const [Shadow(blurRadius: 10, color: Colors.black54)],
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.32),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: color, size: 22),
+          ),
+          if (label != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              label!,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                shadows: [Shadow(blurRadius: 6, color: Colors.black54)],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Bottom info card ─────────────────────────────────────────────────────────
+
+class _InfoCard extends StatelessWidget {
+  const _InfoCard({
+    required this.asset,
+    required this.controller,
+    required this.isPlaying,
+    required this.onTogglePlay,
+    this.onOpenLibrary,
+    this.onOpenSettings,
+  });
+
+  final AssetEntity asset;
+  final VideoPlayerController? controller;
+  final bool isPlaying;
+  final VoidCallback onTogglePlay;
+  final VoidCallback? onOpenLibrary;
+  final VoidCallback? onOpenSettings;
+
+  String _fmtDuration(Duration d) {
+    final m = d.inMinutes.remainder(60);
+    final s = d.inSeconds.remainder(60).toString().padLeft(2, '0');
+    return '$m:$s';
+  }
+
+  String _fmtDay(DateTime dt) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final d = DateTime(dt.year, dt.month, dt.day);
+    if (d == today) return 'Today';
+    if (d == today.subtract(const Duration(days: 1))) return 'Yesterday';
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ];
+    if (dt.year == now.year) return '${months[dt.month - 1]} ${dt.day}';
+    return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final tag = asset.duration < 60 ? 'Shorts' : 'Long';
+    final title = (asset.title != null && asset.title!.isNotEmpty)
+        ? asset.title!
+        : 'Video';
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.45),
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: RRColors.accentAmber.withValues(alpha: 0.18),
+                  borderRadius: BorderRadius.circular(100),
+                ),
+                child: Text(
+                  tag,
+                  style: const TextStyle(
+                    color: RRColors.accentAmber,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '${_fmtDay(asset.createDateTime)} · ${_fmtDuration(asset.duration > 0 ? Duration(seconds: asset.duration) : Duration.zero)}',
+            style: const TextStyle(color: Colors.white60, fontSize: 13),
+          ),
+          const SizedBox(height: 14),
+          if (controller != null)
+            _VideoSeekBar(
+              controller: controller!,
+              accentColor: RRColors.accentAmber,
+              showThumb: true,
+            )
+          else
+            const SizedBox(height: 20),
+          const SizedBox(height: 14),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _CardIconBtn(
+                icon: CupertinoIcons.square_grid_2x2,
+                onTap: onOpenLibrary,
+              ),
+              GestureDetector(
+                onTap: onTogglePlay,
+                behavior: HitTestBehavior.opaque,
+                child: Container(
+                  width: 56,
+                  height: 56,
+                  decoration: const BoxDecoration(
+                    color: RRColors.accentAmber,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    isPlaying
+                        ? CupertinoIcons.pause_fill
+                        : CupertinoIcons.play_fill,
+                    color: Colors.black,
+                    size: 24,
+                  ),
+                ),
+              ),
+              _CardIconBtn(
+                icon: CupertinoIcons.gear_alt,
+                onTap: onOpenSettings,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CardIconBtn extends StatelessWidget {
+  const _CardIconBtn({required this.icon, this.onTap});
+  final IconData icon;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        width: 44,
+        height: 44,
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.08),
+          shape: BoxShape.circle,
         ),
+        child: Icon(icon, color: Colors.white, size: 20),
       ),
     );
   }
@@ -679,8 +885,14 @@ class _SideBtn extends StatelessWidget {
 // ─── Shared seek bar ──────────────────────────────────────────────────────────
 
 class _VideoSeekBar extends StatelessWidget {
-  const _VideoSeekBar({required this.controller});
+  const _VideoSeekBar({
+    required this.controller,
+    this.accentColor = Colors.white,
+    this.showThumb = false,
+  });
   final VideoPlayerController controller;
+  final Color accentColor;
+  final bool showThumb;
 
   String _fmt(Duration d) {
     final m = d.inMinutes.remainder(60);
@@ -719,29 +931,48 @@ class _VideoSeekBar extends StatelessWidget {
             children: [
               SizedBox(
                 height: 20,
-                child: Center(
-                  child: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      Container(
-                        height: 2.5,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.25),
-                          borderRadius: BorderRadius.circular(99),
-                        ),
-                      ),
-                      FractionallySizedBox(
-                        widthFactor: progress,
-                        child: Container(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return Stack(
+                      clipBehavior: Clip.none,
+                      alignment: Alignment.centerLeft,
+                      children: [
+                        Container(
                           height: 2.5,
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: Colors.white.withValues(alpha: 0.25),
                             borderRadius: BorderRadius.circular(99),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
+                        FractionallySizedBox(
+                          widthFactor: progress,
+                          child: Container(
+                            height: 2.5,
+                            decoration: BoxDecoration(
+                              color: accentColor,
+                              borderRadius: BorderRadius.circular(99),
+                            ),
+                          ),
+                        ),
+                        if (showThumb)
+                          Positioned(
+                            left:
+                                (progress * constraints.maxWidth - 6).clamp(
+                                    0.0, constraints.maxWidth - 12),
+                            child: Container(
+                              width: 12,
+                              height: 12,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                                border:
+                                    Border.all(color: accentColor, width: 2),
+                              ),
+                            ),
+                          ),
+                      ],
+                    );
+                  },
                 ),
               ),
               const SizedBox(height: 2),

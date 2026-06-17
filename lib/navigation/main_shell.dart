@@ -69,6 +69,8 @@ class _MainShellState extends ConsumerState<MainShell> {
                 FeedScreen(
                   isTabActive: _tab == 0,
                   onPlayStateChanged: _handleFeedPlayState,
+                  onOpenBrowse: () => _setTab(1),
+                  onOpenSettings: () => _setTab(2),
                 ),
                 BrowseScreen(
                   onPlayAt: (assetId) {
