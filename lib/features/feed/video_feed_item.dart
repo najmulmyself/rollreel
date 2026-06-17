@@ -119,7 +119,7 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
     _controller?.removeListener(_onTick);
     _controller?.dispose();
     // Restore screen brightness when leaving
-    ScreenBrightness().resetApplicationScreenBrightness();
+    ScreenBrightness().resetScreenBrightness();
     super.dispose();
   }
 
@@ -162,7 +162,7 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
     final x = d.localPosition.dx;
     if (x < width * 0.25) {
       // Left 25% = brightness
-      final current = await ScreenBrightness().application;
+      final current = await ScreenBrightness().current;
       _dragStartValue = current;
       _dragType = _DragType.brightness;
       _dragValue = current;
@@ -198,7 +198,7 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
       } catch (_) {}
     } else {
       try {
-        await ScreenBrightness().setApplicationScreenBrightness(newValue);
+        await ScreenBrightness().setScreenBrightness(newValue);
       } catch (_) {}
     }
   }
