@@ -26,12 +26,14 @@ class VideoFeedItem extends ConsumerStatefulWidget {
     required this.isActive,
     required this.onControllerReady,
     this.onDelete,
+    this.onPlayStateChanged,
   });
 
   final AssetEntity asset;
   final bool isActive;
   final void Function(VideoPlayerController?) onControllerReady;
   final VoidCallback? onDelete;
+  final ValueChanged<bool>? onPlayStateChanged;
 
   @override
   ConsumerState<VideoFeedItem> createState() => _VideoFeedItemState();
@@ -88,7 +90,10 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
     });
 
     if (widget.isActive) {
-      if (settings.autoPlay) await ctrl.play();
+      if (settings.autoPlay) {
+        await ctrl.play();
+        widget.onPlayStateChanged?.call(true);
+      }
       widget.onControllerReady(ctrl);
     }
   }
@@ -105,6 +110,7 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
       if (!mounted) return;
       if (widget.isActive) {
         _controller?.play();
+        widget.onPlayStateChanged?.call(true);
         if (_initialized && _controller != null) {
           widget.onControllerReady(_controller);
         }
@@ -135,6 +141,7 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
     } else {
       _controller!.play();
     }
+    widget.onPlayStateChanged?.call(!wasPlaying);
     Future.delayed(const Duration(milliseconds: 750), () {
       if (mounted) setState(() => _showPlayIcon = false);
     });
@@ -429,7 +436,7 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
               alignment: Alignment.centerRight,
               child: Padding(
                 padding: EdgeInsets.only(
-                    right: RRSpace.sp16, bottom: safeBottom + 56),
+                    right: RRSpace.sp16, bottom: safeBottom + 20),
                 child: _Sidebar(
                   asset: widget.asset,
                   isFavorited: isFavorited,
@@ -450,7 +457,7 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
               Positioned(
                 left: RRSpace.sp20,
                 right: 72,
-                bottom: safeBottom + 56,
+                bottom: safeBottom + 20,
                 child: IgnorePointer(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,

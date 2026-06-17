@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,6 +42,8 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   String _dateLabelText = '';
   VideoPlayerController? _activeController;
   bool _filterInitialized = false;
+  bool _navVisible = true;
+  Timer? _navHideTimer;
 
   @override
   void initState() {
@@ -89,6 +93,17 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     if (mounted) setState(() => _activeController = ctrl);
   }
 
+  void _handlePlayStateChanged(bool playing) {
+    _navHideTimer?.cancel();
+    if (playing) {
+      _navHideTimer = Timer(const Duration(milliseconds: 1200), () {
+        if (mounted) setState(() => _navVisible = false);
+      });
+    } else if (mounted) {
+      setState(() => _navVisible = true);
+    }
+  }
+
   void _onPageChanged(int index, List<AssetEntity> videos) {
     HapticFeedback.mediumImpact();
 
@@ -100,9 +115,11 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
         prevDay.month == nextDay.month &&
         prevDay.day == nextDay.day;
 
+    _navHideTimer?.cancel();
     setState(() {
       _currentIndex = index;
       _activeController = null;
+      _navVisible = true;
       if (!sameDay) {
         _showDateLabel = true;
         _dateLabelText = _fmtDateLabel(nextDay);
@@ -158,6 +175,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
 
   @override
   void dispose() {
+    _navHideTimer?.cancel();
     _pageController.dispose();
     super.dispose();
   }
@@ -277,6 +295,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
               isActive: index == safeIndex,
               onControllerReady: _handleControllerReady,
               onDelete: () => _deleteCurrentVideo(videos),
+              onPlayStateChanged: _handlePlayStateChanged,
             ),
           ),
           // ── Filter tabs ────────────────────────────────────────────────────
@@ -284,25 +303,32 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
             top: safeTop + 8,
             left: 0,
             right: 0,
-            child: _FilterTabs(
-              activeFilter: activeFilter,
-              onFilterChanged: (f) {
-                ref.read(feedFilterProvider.notifier).state = f;
-                setState(() {
-                  _currentIndex = 0;
-                  _activeController = null;
-                });
-                if (_pageController.hasClients) {
-                  _pageController.jumpToPage(0);
-                }
-                // Show date label for first video after filter change
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  final updated = ref.read(feedVideosProvider).valueOrNull;
-                  if (updated != null && updated.isNotEmpty && settings.showDateLabels) {
-                    _showInitialDateLabel(updated);
-                  }
-                });
-              },
+            child: IgnorePointer(
+              ignoring: !_navVisible,
+              child: AnimatedOpacity(
+                opacity: _navVisible ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 250),
+                child: _FilterTabs(
+                  activeFilter: activeFilter,
+                  onFilterChanged: (f) {
+                    ref.read(feedFilterProvider.notifier).state = f;
+                    setState(() {
+                      _currentIndex = 0;
+                      _activeController = null;
+                    });
+                    if (_pageController.hasClients) {
+                      _pageController.jumpToPage(0);
+                    }
+                    // Show date label for first video after filter change
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      final updated = ref.read(feedVideosProvider).valueOrNull;
+                      if (updated != null && updated.isNotEmpty && settings.showDateLabels) {
+                        _showInitialDateLabel(updated);
+                      }
+                    });
+                  },
+                ),
+              ),
             ),
           ),
           // ── Date label ─────────────────────────────────────────────────────
