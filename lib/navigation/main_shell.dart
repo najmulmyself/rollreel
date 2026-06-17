@@ -29,6 +29,7 @@ class MainShell extends ConsumerStatefulWidget {
 
 class _MainShellState extends ConsumerState<MainShell> {
   int _tab = 0;
+  bool _videoPlaying = false;
 
   void _setTab(int index) {
     if (_tab == index) return;
@@ -36,10 +37,15 @@ class _MainShellState extends ConsumerState<MainShell> {
     setState(() => _tab = index);
   }
 
+  void _handleFeedPlayState(bool playing) {
+    if (mounted) setState(() => _videoPlaying = playing);
+  }
+
   @override
   Widget build(BuildContext context) {
     final safeBottom = MediaQuery.paddingOf(context).bottom;
     final tabBarFootprint = _kTabBarHeight + _kTabBarMargin + safeBottom;
+    final showTabBar = _tab != 0 || !_videoPlaying;
 
     // When Browse triggers a play, switch to the Watch tab
     ref.listen<String?>(feedJumpToAssetProvider, (_, assetId) {
@@ -60,7 +66,10 @@ class _MainShellState extends ConsumerState<MainShell> {
             child: IndexedStack(
               index: _tab,
               children: [
-                FeedScreen(isTabActive: _tab == 0),
+                FeedScreen(
+                  isTabActive: _tab == 0,
+                  onPlayStateChanged: _handleFeedPlayState,
+                ),
                 BrowseScreen(
                   onPlayAt: (assetId) {
                     ref.read(feedJumpToAssetProvider.notifier).state = assetId;
@@ -80,9 +89,21 @@ class _MainShellState extends ConsumerState<MainShell> {
             bottom: safeBottom + _kTabBarMargin,
             left: 20,
             right: 20,
-            child: _GlassTabBar(
-              currentTab: _tab,
-              onTabSelected: _setTab,
+            child: IgnorePointer(
+              ignoring: !showTabBar,
+              child: AnimatedOpacity(
+                opacity: showTabBar ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 250),
+                child: AnimatedSlide(
+                  offset: showTabBar ? Offset.zero : const Offset(0, 0.4),
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeOutCubic,
+                  child: _GlassTabBar(
+                    currentTab: _tab,
+                    onTabSelected: _setTab,
+                  ),
+                ),
+              ),
             ),
           ),
         ],

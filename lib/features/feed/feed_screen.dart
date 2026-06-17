@@ -22,6 +22,7 @@ class FeedScreen extends ConsumerStatefulWidget {
     this.initialAssetId,
     this.onVideoChanged,
     this.isTabActive = true,
+    this.onPlayStateChanged,
   });
 
   final VoidCallback? onOpenBrowse;
@@ -29,6 +30,7 @@ class FeedScreen extends ConsumerStatefulWidget {
   final String? initialAssetId;
   final void Function(String assetId)? onVideoChanged;
   final bool isTabActive;
+  final ValueChanged<bool>? onPlayStateChanged;
 
   @override
   ConsumerState<FeedScreen> createState() => _FeedScreenState();
@@ -94,6 +96,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   }
 
   void _handlePlayStateChanged(bool playing) {
+    widget.onPlayStateChanged?.call(playing);
     _navHideTimer?.cancel();
     if (playing) {
       _navHideTimer = Timer(const Duration(milliseconds: 1200), () {
