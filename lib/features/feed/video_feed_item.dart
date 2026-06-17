@@ -157,36 +157,28 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
 
   // ── Volume / brightness gestures ─────────────────────────────────────────────
 
-  Future<void> _onDragStart(DragStartDetails d, BuildContext context) async {
-    final width = MediaQuery.sizeOf(context).width;
-    final x = d.localPosition.dx;
-    if (x < width * 0.25) {
-      // Left 25% = brightness
+  Future<void> _onDragStart(DragStartDetails d, _DragType type) async {
+    if (type == _DragType.brightness) {
       final current = await ScreenBrightness().current;
       _dragStartValue = current;
-      _dragType = _DragType.brightness;
       _dragValue = current;
-    } else if (x > width * 0.75) {
-      // Right 25% = volume
+    } else {
       double? vol;
       try {
         vol = await FlutterVolumeController.getVolume();
       } catch (_) {}
       _dragStartValue = vol ?? 0.5;
-      _dragType = _DragType.volume;
       _dragValue = _dragStartValue!;
-    } else {
-      _dragType = _DragType.none;
-      return;
     }
-    _dragStartY = d.localPosition.dy;
+    _dragType = type;
+    _dragStartY = d.globalPosition.dy;
     if (mounted) setState(() => _showDragOverlay = true);
   }
 
   Future<void> _onDragUpdate(DragUpdateDetails d) async {
     if (_dragType == _DragType.none || _dragStartY == null) return;
     final height = MediaQuery.sizeOf(context).height;
-    final dy = _dragStartY! - d.localPosition.dy; // positive = up = increase
+    final dy = _dragStartY! - d.globalPosition.dy; // positive = up = increase
     final delta = dy / (height * 0.6); // 60% of screen = full range
     final newValue = (_dragStartValue! + delta).clamp(0.0, 1.0);
 
@@ -308,9 +300,6 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
               (_controller?.value.position ?? Duration.zero) + offset;
           _controller?.seekTo(next.isNegative ? Duration.zero : next);
         },
-        onVerticalDragStart: (d) => _onDragStart(d, context),
-        onVerticalDragUpdate: _onDragUpdate,
-        onVerticalDragEnd: _onDragEnd,
         child: Stack(
           fit: StackFit.expand,
           children: [
@@ -505,6 +494,35 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
               child: _controller != null
                   ? _VideoSeekBar(controller: _controller!)
                   : const SizedBox.shrink(),
+            ),
+
+            // ── Edge gesture zones: left = brightness, right = volume ─────────
+            // Narrow strips only, so vertical swipes in the rest of the screen
+            // are left free for the PageView to change videos.
+            Positioned(
+              top: 0,
+              bottom: 0,
+              left: 0,
+              width: MediaQuery.sizeOf(context).width * 0.25,
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onVerticalDragStart: (d) =>
+                    _onDragStart(d, _DragType.brightness),
+                onVerticalDragUpdate: _onDragUpdate,
+                onVerticalDragEnd: _onDragEnd,
+              ),
+            ),
+            Positioned(
+              top: 0,
+              bottom: 0,
+              right: 0,
+              width: MediaQuery.sizeOf(context).width * 0.25,
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onVerticalDragStart: (d) => _onDragStart(d, _DragType.volume),
+                onVerticalDragUpdate: _onDragUpdate,
+                onVerticalDragEnd: _onDragEnd,
+              ),
             ),
           ],
         ),
