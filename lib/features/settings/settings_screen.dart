@@ -57,7 +57,6 @@ class SettingsScreen extends ConsumerWidget {
           ),
           actions: [
             CupertinoDialogAction(
-              isDefaultDestructiveAction: false,
               onPressed: () => Navigator.pop(context),
               child: const Text('OK'),
             ),
