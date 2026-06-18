@@ -374,25 +374,39 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
             // ── Quick filter chips ─────────────────────────────────────────
             SizedBox(
               height: 44,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: RRSpace.sp16),
-                itemCount: _quickChips.length,
-                itemBuilder: (context, i) {
-                  final chip = _quickChips[i];
-                  final active = _isQuickChipActive(chip.label, filter);
-                  return _QuickChipTile(
-                    chip: chip,
-                    active: active,
-                    onTap: () => _onQuickChipTap(chip.label),
-                  );
-                },
+              child: ShaderMask(
+                shaderCallback: (rect) => LinearGradient(
+                  begin: Alignment.centerRight,
+                  end: const Alignment(0.82, 0),
+                  colors: const [Colors.transparent, Colors.white],
+                ).createShader(rect),
+                blendMode: BlendMode.dstIn,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.fromLTRB(
+                      RRSpace.sp16, 0, RRSpace.sp32, 0),
+                  itemCount: _quickChips.length,
+                  itemBuilder: (context, i) {
+                    final chip = _quickChips[i];
+                    final active = _isQuickChipActive(chip.label, filter);
+                    return _QuickChipTile(
+                      chip: chip,
+                      active: active,
+                      onTap: () => _onQuickChipTap(chip.label),
+                    );
+                  },
+                ),
               ),
             ),
 
+            const SizedBox(height: RRSpace.sp12),
+
             // ── Divider ────────────────────────────────────────────────────
-            const Divider(height: 1, color: RRColors.divider),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: RRSpace.sp16),
+              child: Divider(height: 1, thickness: 1, color: RRColors.divider),
+            ),
+            const SizedBox(height: RRSpace.sp4),
 
             // ── Main list ──────────────────────────────────────────────────
             Expanded(
