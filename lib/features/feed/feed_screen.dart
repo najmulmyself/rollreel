@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -20,6 +22,7 @@ class FeedScreen extends ConsumerStatefulWidget {
     this.initialAssetId,
     this.onVideoChanged,
     this.isTabActive = true,
+    this.onPlayStateChanged,
   });
 
   final VoidCallback? onOpenBrowse;
@@ -27,6 +30,7 @@ class FeedScreen extends ConsumerStatefulWidget {
   final String? initialAssetId;
   final void Function(String assetId)? onVideoChanged;
   final bool isTabActive;
+  final ValueChanged<bool>? onPlayStateChanged;
 
   @override
   ConsumerState<FeedScreen> createState() => _FeedScreenState();
@@ -40,6 +44,8 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   String _dateLabelText = '';
   VideoPlayerController? _activeController;
   bool _filterInitialized = false;
+  bool _navVisible = true;
+  Timer? _navHideTimer;
 
   @override
   void initState() {
@@ -89,6 +95,18 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     if (mounted) setState(() => _activeController = ctrl);
   }
 
+  void _handlePlayStateChanged(bool playing) {
+    widget.onPlayStateChanged?.call(playing);
+    _navHideTimer?.cancel();
+    if (playing) {
+      _navHideTimer = Timer(const Duration(milliseconds: 1200), () {
+        if (mounted) setState(() => _navVisible = false);
+      });
+    } else if (mounted) {
+      setState(() => _navVisible = true);
+    }
+  }
+
   void _onPageChanged(int index, List<AssetEntity> videos) {
     HapticFeedback.mediumImpact();
 
@@ -100,9 +118,11 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
         prevDay.month == nextDay.month &&
         prevDay.day == nextDay.day;
 
+    _navHideTimer?.cancel();
     setState(() {
       _currentIndex = index;
       _activeController = null;
+      _navVisible = true;
       if (!sameDay) {
         _showDateLabel = true;
         _dateLabelText = _fmtDateLabel(nextDay);
@@ -158,6 +178,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
 
   @override
   void dispose() {
+    _navHideTimer?.cancel();
     _pageController.dispose();
     super.dispose();
   }
@@ -277,6 +298,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
               isActive: index == safeIndex,
               onControllerReady: _handleControllerReady,
               onDelete: () => _deleteCurrentVideo(videos),
+              onPlayStateChanged: _handlePlayStateChanged,
+              onOpenLibrary: widget.onOpenBrowse,
+              onOpenSettings: widget.onOpenSettings,
             ),
           ),
           // ── Filter tabs ────────────────────────────────────────────────────
@@ -284,25 +308,33 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
             top: safeTop + 8,
             left: 0,
             right: 0,
-            child: _FilterTabs(
-              activeFilter: activeFilter,
-              onFilterChanged: (f) {
-                ref.read(feedFilterProvider.notifier).state = f;
-                setState(() {
-                  _currentIndex = 0;
-                  _activeController = null;
-                });
-                if (_pageController.hasClients) {
-                  _pageController.jumpToPage(0);
-                }
-                // Show date label for first video after filter change
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  final updated = ref.read(feedVideosProvider).valueOrNull;
-                  if (updated != null && updated.isNotEmpty && settings.showDateLabels) {
-                    _showInitialDateLabel(updated);
-                  }
-                });
-              },
+            child: IgnorePointer(
+              ignoring: !_navVisible,
+              child: AnimatedOpacity(
+                opacity: _navVisible ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 250),
+                child: _FilterTabs(
+                  activeFilter: activeFilter,
+                  onSearchTap: widget.onOpenBrowse,
+                  onFilterChanged: (f) {
+                    ref.read(feedFilterProvider.notifier).state = f;
+                    setState(() {
+                      _currentIndex = 0;
+                      _activeController = null;
+                    });
+                    if (_pageController.hasClients) {
+                      _pageController.jumpToPage(0);
+                    }
+                    // Show date label for first video after filter change
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      final updated = ref.read(feedVideosProvider).valueOrNull;
+                      if (updated != null && updated.isNotEmpty && settings.showDateLabels) {
+                        _showInitialDateLabel(updated);
+                      }
+                    });
+                  },
+                ),
+              ),
             ),
           ),
           // ── Date label ─────────────────────────────────────────────────────
@@ -325,45 +357,73 @@ class _FilterTabs extends StatelessWidget {
   const _FilterTabs({
     required this.activeFilter,
     required this.onFilterChanged,
+    this.onSearchTap,
   });
 
   final FeedFilter activeFilter;
   final void Function(FeedFilter) onFilterChanged;
+  final VoidCallback? onSearchTap;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 36,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        children: FeedFilter.values.map((f) {
-          final isActive = f == activeFilter;
-          return GestureDetector(
-            onTap: () => onFilterChanged(f),
-            child: Container(
-              margin: const EdgeInsets.only(right: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-              decoration: BoxDecoration(
-                color: isActive
-                    ? Colors.white.withValues(alpha: 0.2)
-                    : Colors.black.withValues(alpha: 0.35),
-                borderRadius: BorderRadius.circular(100),
-                border: isActive
-                    ? Border.all(color: Colors.white.withValues(alpha: 0.6), width: 1)
-                    : null,
-              ),
-              child: Text(
-                f.label,
-                style: TextStyle(
-                  color: isActive ? Colors.white : Colors.white60,
-                  fontSize: 13,
-                  fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: [
+          Expanded(
+            child: SizedBox(
+              height: 36,
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                children: FeedFilter.values.map((f) {
+                  final isActive = f == activeFilter;
+                  return GestureDetector(
+                    onTap: () => onFilterChanged(f),
+                    child: Container(
+                      margin: const EdgeInsets.only(right: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 14, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: isActive
+                            ? Colors.white.withValues(alpha: 0.2)
+                            : Colors.black.withValues(alpha: 0.35),
+                        borderRadius: BorderRadius.circular(100),
+                        border: isActive
+                            ? Border.all(
+                                color: Colors.white.withValues(alpha: 0.6),
+                                width: 1)
+                            : null,
+                      ),
+                      child: Text(
+                        f.label,
+                        style: TextStyle(
+                          color: isActive ? Colors.white : Colors.white60,
+                          fontSize: 13,
+                          fontWeight:
+                              isActive ? FontWeight.w700 : FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  );
+                }).toList(),
               ),
             ),
-          );
-        }).toList(),
+          ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: onSearchTap,
+            behavior: HitTestBehavior.opaque,
+            child: Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.35),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.search, color: Colors.white, size: 18),
+            ),
+          ),
+        ],
       ),
     );
   }
