@@ -124,28 +124,31 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                   const SizedBox(height: RRSpace.sp20),
 
                   // ── Pricing cards ────────────────────────────────────────
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _PricingCard(
-                          plan: _Plan.lifetime,
-                          selected: _selected == _Plan.lifetime,
-                          price: iap.products[kProductLifetime]?.price,
-                          onTap: () =>
-                              setState(() => _selected = _Plan.lifetime),
+                  IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(
+                          child: _PricingCard(
+                            plan: _Plan.lifetime,
+                            selected: _selected == _Plan.lifetime,
+                            price: iap.products[kProductLifetime]?.price,
+                            onTap: () =>
+                                setState(() => _selected = _Plan.lifetime),
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: RRSpace.sp12),
-                      Expanded(
-                        child: _PricingCard(
-                          plan: _Plan.monthly,
-                          selected: _selected == _Plan.monthly,
-                          price: iap.products[kProductMonthly]?.price,
-                          onTap: () =>
-                              setState(() => _selected = _Plan.monthly),
+                        const SizedBox(width: RRSpace.sp12),
+                        Expanded(
+                          child: _PricingCard(
+                            plan: _Plan.monthly,
+                            selected: _selected == _Plan.monthly,
+                            price: iap.products[kProductMonthly]?.price,
+                            onTap: () =>
+                                setState(() => _selected = _Plan.monthly),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                   const SizedBox(height: RRSpace.sp20),
 
@@ -421,11 +424,12 @@ class _PricingCard extends StatelessWidget {
 
   String get _subLabel {
     if (_isLifetime) return 'Lifetime Access';
-    return 'Founding-member pricing';
+    return 'Founding member';
   }
 
   Widget _inner() {
     return Container(
+      width: double.infinity,
       padding: const EdgeInsets.all(RRSpace.sp16),
       decoration: BoxDecoration(
         color: RRColors.bgElevated,
@@ -434,6 +438,7 @@ class _PricingCard extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           // Badge
           Container(
@@ -459,9 +464,10 @@ class _PricingCard extends StatelessWidget {
           const SizedBox(height: RRSpace.sp12),
           Text(
             _displayPrice,
+            maxLines: 1,
             style: TextStyle(
               color: RRColors.textPrimary,
-              fontSize: 26,
+              fontSize: 22,
               fontWeight: FontWeight.w800,
             ),
           ),
