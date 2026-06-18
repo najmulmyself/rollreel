@@ -20,10 +20,11 @@ Per `ROADMAP_GAPS.md` Phase 1. Everything below is now ✅ except where noted.
 - [x] Native share sheet
 - [x] 3-screen onboarding
 - [x] Settings: loop/autoplay/date-label toggles, default filter, dark mode, app icon variant, privacy policy link, manual rate-app, version
+- [x] "Rate RollReel" and "Share RollReel" buttons working (share text/link fixed, no trademark wording, real App Store ID `6781843410`)
 - [x] Auto-triggered App Store review prompt (3 swipe sessions + 24h post-install)
 - [x] Favorites (heart toggle, persisted)
 - [x] Privacy Vault with Face ID lock
-- [x] Pro (lifetime) + Plus (annual) IAP tiers wired to `in_app_purchase`
+- [x] Pro (lifetime, $4.99) + Plus (monthly, $0.99) IAP tiers wired to `in_app_purchase`
 - [x] Interstitial ads (AdMob), gated by Pro/Plus status
 - [ ] Controls auto-hide timing matches PRD spec (3s) — currently 1s; **non-blocking, cosmetic**
 - [ ] Long-press = 0.5× slow-motion preview — currently 2× fast-forward; **non-blocking, deviation**
@@ -89,14 +90,17 @@ Phase 1 for full detail and Phase 2+ for the post-launch roadmap.
 
 ## 6. In-App Purchases
 
-- [ ] `com.rollreel.pro.lifetime` (Non-Consumable, $4.99) created in App Store Connect
-- [ ] `com.rollreel.plus.monthly` (Auto-Renewing Subscription, $0.99–$1.99/mo) created
-      in App Store Connect
-- [ ] Both Product IDs match **byte-for-byte** what's hardcoded in
-      `lib/core/iap/iap_provider.dart` (`queryProductDetails` silently
-      returns nothing on any mismatch)
-- [ ] Subscription group, pricing, and localized display name/description set for the monthly plan
-- [ ] IAPs submitted for review alongside the app build (first-time IAPs require this)
+- [x] `com.rollreel.pro.lifetime` (Non-Consumable, $4.99) created in App Store Connect
+- [x] `com.rollreel.plus.monthly` (Auto-Renewing Subscription, $0.99/mo) created
+      in App Store Connect (Apple ID `6781861713`, group "RollReel Plus")
+- [x] Both Product IDs match **byte-for-byte** what's hardcoded in
+      `lib/core/iap/iap_provider.dart` (`kProductLifetime` / `kProductMonthly`)
+- [x] Subscription group localization + per-subscription localization/pricing
+      set ("RollReel Plus" group display name, "Ad-free, Privacy Vault,
+      founding member" description)
+- [ ] IAPs submitted for review alongside the app build (still pending —
+      Apple requires the first subscription to be attached to a build/version
+      before it can be submitted; do this in §9)
 - [ ] Paywall tested against the **Sandbox** Apple ID — prices and purchase flow confirmed working
 
 ## 7. Assets
