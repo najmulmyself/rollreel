@@ -8,7 +8,6 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/settings/settings_provider.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
-import '../../shared/widgets/logo_variant_picker.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({
@@ -101,20 +100,6 @@ class SettingsScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _showAppIconPicker(BuildContext context) async {
-    await showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: RRColors.bgSurface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(RRSpace.radiusXl)),
-      ),
-      builder: (_) => const Padding(
-        padding: EdgeInsets.symmetric(vertical: RRSpace.sp24),
-        child: LogoVariantPicker(),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final s = ref.watch(settingsProvider);
@@ -195,13 +180,6 @@ class SettingsScreen extends ConsumerWidget {
                       label: 'Show Duration Badges',
                       value: s.showDurationBadges,
                       onChanged: notifier.setShowDurationBadges,
-                    ),
-                    _NavRow(
-                      icon: const _SettingIcon(
-                          color: Color(0xFF8B2A6B),
-                          icon: Icons.apps_rounded),
-                      label: 'App Icon',
-                      onTap: () => _showAppIconPicker(context),
                     ),
                   ]),
                   const SizedBox(height: RRSpace.sp24),

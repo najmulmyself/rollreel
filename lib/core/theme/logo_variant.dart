@@ -2,8 +2,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'app_icon_channel.dart';
-
 enum LogoVariant {
   classic,  // Play-button circle, "Your Videos. Your Way."
   iconic,   // icon.png star/reel, "Watch. Feel. Remember."
@@ -39,7 +37,6 @@ class LogoVariantNotifier extends StateNotifier<LogoVariant> {
 
   Future<void> select(LogoVariant variant) async {
     state = variant;
-    await AppIconChannel.setIcon(variant);
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(_kPrefsKey, variant.name);
