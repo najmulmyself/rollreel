@@ -33,7 +33,7 @@ class VideoThumbnail extends StatelessWidget {
             else
               Container(
                 color: RRColors.bgElevated,
-                child: const Center(
+                child: Center(
                   child: Icon(CupertinoIcons.play_fill, size: 18, color: RRColors.textDisabled),
                 ),
               ),

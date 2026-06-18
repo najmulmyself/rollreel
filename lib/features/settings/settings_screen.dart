@@ -111,7 +111,7 @@ class SettingsScreen extends ConsumerWidget {
         child: Column(
           children: [
             _buildTopNav(context),
-            const Divider(height: 1, color: RRColors.divider),
+            Divider(height: 1, color: RRColors.divider),
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(
@@ -157,6 +157,14 @@ class SettingsScreen extends ConsumerWidget {
                   const _SectionLabel('APPEARANCE'),
                   const SizedBox(height: RRSpace.sp8),
                   _SettingsGroup(rows: [
+                    _ToggleRow(
+                      icon: const _SettingIcon(
+                          color: Color(0xFF5A3D1A),
+                          icon: CupertinoIcons.moon_fill),
+                      label: 'Dark Mode',
+                      value: s.darkMode,
+                      onChanged: notifier.setDarkMode,
+                    ),
                     _ToggleRow(
                       icon: const _SettingIcon(
                           color: Color(0xFF3D3FB8),
@@ -276,7 +284,7 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ),
           ),
-          const Text(
+          Text(
             'Settings',
             style: TextStyle(
               color: RRColors.textPrimary,
@@ -370,7 +378,7 @@ class _SectionLabel extends StatelessWidget {
       padding: const EdgeInsets.only(left: RRSpace.sp4),
       child: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           color: RRColors.textDisabled,
           fontSize: 12,
           fontWeight: FontWeight.w700,
@@ -402,7 +410,7 @@ class _SettingsGroup extends StatelessWidget {
             for (int i = 0; i < rows.length; i++) ...[
               rows[i],
               if (i < rows.length - 1)
-                const Divider(height: 1, color: RRColors.divider, indent: 62),
+                Divider(height: 1, color: RRColors.divider, indent: 62),
             ],
           ],
         ),
@@ -461,7 +469,7 @@ class _ToggleRow extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: const TextStyle(color: RRColors.textPrimary, fontSize: 16),
+              style: TextStyle(color: RRColors.textPrimary, fontSize: 16),
             ),
           ),
           CupertinoSwitch(
@@ -506,20 +514,20 @@ class _NavRow extends StatelessWidget {
             Expanded(
               child: Text(
                 label,
-                style: const TextStyle(
+                style: TextStyle(
                     color: RRColors.textPrimary, fontSize: 16),
               ),
             ),
             if (trailingText != null) ...[
               Text(
                 trailingText!,
-                style: const TextStyle(
+                style: TextStyle(
                     color: RRColors.textSecond, fontSize: 15),
               ),
               if (showChevron) const SizedBox(width: RRSpace.sp4),
             ],
             if (showChevron)
-              const Icon(CupertinoIcons.chevron_right,
+              Icon(CupertinoIcons.chevron_right,
                   color: RRColors.textDisabled, size: 16),
           ],
         ),

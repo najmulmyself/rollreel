@@ -15,7 +15,7 @@ final logoVariantProvider =
 });
 
 class LogoVariantNotifier extends StateNotifier<LogoVariant> {
-  LogoVariantNotifier() : super(LogoVariant.classic) {
+  LogoVariantNotifier() : super(LogoVariant.iconic) {
     _load();
   }
 
@@ -26,7 +26,7 @@ class LogoVariantNotifier extends StateNotifier<LogoVariant> {
       if (saved != null) {
         state = LogoVariant.values.firstWhere(
           (v) => v.name == saved,
-          orElse: () => LogoVariant.classic,
+          orElse: () => LogoVariant.iconic,
         );
       }
     } catch (e) {

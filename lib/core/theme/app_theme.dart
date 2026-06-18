@@ -8,7 +8,7 @@ class RRAppTheme {
   const RRAppTheme._();
 
   static ThemeData dark() {
-    final colorScheme = const ColorScheme.dark(
+    final colorScheme = ColorScheme.dark(
       primary: RRColors.accentCoral,
       secondary: RRColors.accentCyan,
       surface: RRColors.bgSurface,
@@ -23,7 +23,7 @@ class RRAppTheme {
       scaffoldBackgroundColor: RRColors.bgDeep,
       colorScheme: colorScheme,
       dividerColor: RRColors.divider,
-      textTheme: const TextTheme(
+      textTheme: TextTheme(
         headlineLarge: RRTypography.title1,
         headlineMedium: RRTypography.title2,
         headlineSmall: RRTypography.headline,
@@ -31,7 +31,7 @@ class RRAppTheme {
         bodyMedium: RRTypography.subheadline,
         bodySmall: RRTypography.caption,
       ),
-      cupertinoOverrideTheme: const CupertinoThemeData(
+      cupertinoOverrideTheme: CupertinoThemeData(
         brightness: Brightness.dark,
         scaffoldBackgroundColor: RRColors.bgDeep,
         primaryColor: RRColors.accentCoral,

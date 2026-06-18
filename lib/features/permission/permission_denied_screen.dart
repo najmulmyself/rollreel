@@ -23,7 +23,7 @@ class PermissionDeniedScreen extends StatelessWidget {
             children: [
               const Icon(CupertinoIcons.photo_fill_on_rectangle_fill, size: 64),
               const SizedBox(height: RRSpace.sp16),
-              const Text('No Videos Found', style: RRTypography.title1, textAlign: TextAlign.center),
+              Text('No Videos Found', style: RRTypography.title1, textAlign: TextAlign.center),
               const SizedBox(height: RRSpace.sp12),
               Text(
                 'RollReel needs photo library access to show your local videos. Your videos are never uploaded.',

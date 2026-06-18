@@ -21,7 +21,7 @@ class SecondaryButton extends StatelessWidget {
       child: OutlinedButton(
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
-          side: const BorderSide(color: RRColors.glassBorder, width: 1.4),
+          side: BorderSide(color: RRColors.glassBorder, width: 1.4),
           foregroundColor: RRColors.textSecond,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(RRSpace.radiusFull),
