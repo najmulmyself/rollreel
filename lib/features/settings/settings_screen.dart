@@ -24,6 +24,8 @@ class SettingsScreen extends ConsumerWidget {
   static const String _version = '1.0.0';
   static const String _build = '1';
 
+  static final _shareRowKey = GlobalKey();
+
   Future<void> _rateApp() async {
     final review = InAppReview.instance;
     if (await review.isAvailable()) {
@@ -33,16 +35,21 @@ class SettingsScreen extends ConsumerWidget {
     }
   }
 
+  // iPad shows the share sheet as a popover and requires an anchor rect —
+  // without one it renders at (0,0) and gets dismissed before it's visible.
+  static Rect get _sharePopoverOrigin {
+    final box = _shareRowKey.currentContext?.findRenderObject() as RenderBox?;
+    if (box == null) return Rect.zero;
+    final pos = box.localToGlobal(Offset.zero);
+    return pos & box.size;
+  }
+
   void _shareApp(BuildContext context) {
-    final box = context.findRenderObject() as RenderBox?;
-    final origin = box != null
-        ? box.localToGlobal(Offset.zero) & box.size
-        : null;
     Share.share(
       'Check out RollReel – swipe through your camera roll videos, '
       '100% offline!\n'
       'https://apps.apple.com/app/id6781843410',
-      sharePositionOrigin: origin,
+      sharePositionOrigin: _sharePopoverOrigin,
     );
   }
 
@@ -232,6 +239,7 @@ class SettingsScreen extends ConsumerWidget {
                       onTap: _rateApp,
                     ),
                     _NavRow(
+                      key: _shareRowKey,
                       icon: const _SettingIcon(
                           color: Color(0xFF1A4A8B),
                           icon: CupertinoIcons.share),
@@ -493,6 +501,7 @@ class _ToggleRow extends StatelessWidget {
 
 class _NavRow extends StatelessWidget {
   const _NavRow({
+    super.key,
     required this.icon,
     required this.label,
     this.trailingText,
