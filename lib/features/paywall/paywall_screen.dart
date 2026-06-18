@@ -26,8 +26,10 @@ class _FeatureData {
   final _Tier tier;
 }
 
-// Matches PRD §10 monetization ladder: Pro (one-time) vs Plus (annual,
-// includes everything in Pro plus these extras).
+// Phase 1: only features that actually ship today. Plus-exclusive perks
+// (On This Day, Memory Reel Auto-Gen, Siri Shortcuts, Early Access) and
+// unbuilt Pro perks (Smart Collections, Lock Screen Widget) return once
+// they're implemented in a later phase.
 const List<_FeatureData> _kFeatures = [
   _FeatureData(
     icon: Icons.visibility_off_rounded,
@@ -47,50 +49,8 @@ const List<_FeatureData> _kFeatures = [
     icon: CupertinoIcons.clock_fill,
     iconColor: Color(0xFF1A5A6B),
     title: 'Playback Speed Control',
-    subtitle: '0.5× to 2× speed',
+    subtitle: '2× fast-forward on long-press',
     tier: _Tier.pro,
-  ),
-  _FeatureData(
-    icon: CupertinoIcons.bookmark_fill,
-    iconColor: Color(0xFF7D5A2A),
-    title: 'Smart Collections',
-    subtitle: 'Auto-grouped by date and location',
-    tier: _Tier.pro,
-  ),
-  _FeatureData(
-    icon: CupertinoIcons.square_arrow_down_on_square_fill,
-    iconColor: Color(0xFF2A6B5A),
-    title: 'Lock Screen Widget',
-    subtitle: 'Today\'s video count at a glance',
-    tier: _Tier.pro,
-  ),
-  _FeatureData(
-    icon: CupertinoIcons.calendar_today,
-    iconColor: Color(0xFF1A5A8B),
-    title: '"On This Day" Memories',
-    subtitle: 'Resurfaced moments from years past',
-    tier: _Tier.plus,
-  ),
-  _FeatureData(
-    icon: CupertinoIcons.film_fill,
-    iconColor: Color(0xFF8B2A6B),
-    title: 'Memory Reel Auto-Generation',
-    subtitle: 'Auto-edited highlight reels',
-    tier: _Tier.plus,
-  ),
-  _FeatureData(
-    icon: CupertinoIcons.mic_fill,
-    iconColor: Color(0xFF6B5A1A),
-    title: 'Siri Shortcuts',
-    subtitle: 'Voice access to your memories',
-    tier: _Tier.plus,
-  ),
-  _FeatureData(
-    icon: CupertinoIcons.star_fill,
-    iconColor: Color(0xFF7D2E2E),
-    title: 'Early Access',
-    subtitle: 'First to get every new feature',
-    tier: _Tier.plus,
   ),
 ];
 
