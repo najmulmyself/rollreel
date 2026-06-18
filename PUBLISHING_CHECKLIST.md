@@ -77,13 +77,13 @@ Phase 1 for full detail and Phase 2+ for the post-launch roadmap.
 
 ## 5. Ads (AdMob)
 
-- [ ] Real AdMob app ID created in your own AdMob account
-- [ ] `GADApplicationIdentifier` in `ios/Runner/Info.plist` replaced with the
-      real ID (currently Google's public **test** ID
-      `ca-app-pub-3940256099942544~1458002511`)
+- [x] Real AdMob app ID created in your own AdMob account
+      (`ca-app-pub-3549493907002564~5038845892`)
+- [x] `GADApplicationIdentifier` in `ios/Runner/Info.plist` replaced with the
+      real ID above
 - [ ] `com.google.android.gms.ads.APPLICATION_ID` in
       `android/app/src/main/AndroidManifest.xml` replaced with the real ID
-      (if shipping Android too)
+      (only needed if shipping Android — still on Google's test ID)
 - [ ] Real ad unit IDs (not test units) wired into `lib/core/ads/ads_provider.dart`
 
 ## 6. In-App Purchases
