@@ -47,13 +47,13 @@ Phase 1 for full detail and Phase 2+ for the post-launch roadmap.
 ## 3. App Store Connect — app record
 
 - [x] App record created in App Store Connect with the final bundle ID
-- [ ] App Name set: `RollReel – Local Video Player` (see `APP_STORE_LISTING.md`)
-- [ ] Subtitle set: `Swipe Your Camera Roll Videos`
-- [ ] Promotional Text, Description, Keywords, "What's New" pasted from `APP_STORE_LISTING.md`
+- [x] App Name set: `RollReel – Local Video Player` (see `APP_STORE_LISTING.md`)
+- [x] Subtitle set: `Swipe Your Camera Roll Videos`
+- [x] Promotional Text, Description, Keywords, "What's New" pasted from `APP_STORE_LISTING.md`
       (no competitor trademarks — TikTok/Reels references removed)
-- [ ] Primary category: Photo & Video / Secondary: Utilities
+- [x] Primary category: Photo & Video / Secondary: Utilities
 - [x] Age rating questionnaire completed — calculated 4+ confirmed, no override applied
-- [ ] Pricing: Free (with in-app purchases)
+- [x] Pricing: Free (with in-app purchases)
 - [ ] Copyright string filled in with your real name/entity (currently a placeholder)
 - [x] Support URL set: `https://najmulmyself.github.io/rollreel/support.html`
 - [x] Marketing URL set: `https://najmulmyself.github.io/rollreel/`
