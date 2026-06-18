@@ -17,15 +17,15 @@ RollReel – Local Video Player
 ## Subtitle (30 char max)
 
 ```
-Swipe Camera Roll Like Reels
+Swipe Your Camera Roll Videos
 ```
-(28/30 chars)
+(29/30 chars)
 
 ## Promotional Text (170 char max — editable without a new build)
 
 ```
 100% offline video feed for your camera roll. No uploads, no account,
-no tracking. Just swipe and watch — like Reels, but it's all yours.
+no tracking. Just swipe and watch — it's all yours.
 ```
 
 ## Description
@@ -39,8 +39,8 @@ Open the app. Swipe up. Watch your life, one memory at a time.
 
 WHY ROLLREEL
 
-• Full-screen vertical swipe feed of your local videos — TikTok-style,
-  zero learning curve
+• Full-screen vertical swipe feed of your local videos, zero learning
+  curve
 • 100% on-device. No uploads, no cloud sync, no account, no sign-in
 • Auto-play, auto-loop short clips, instant preloading for smooth
   swiping
@@ -70,7 +70,7 @@ only permission it asks for — nothing else, ever.
 ## Keywords (100 char max — do not repeat words already in Name/Subtitle)
 
 ```
-offline,local,private,vault,gallery,reels,camera roll,memories,tiktok,rewind
+offline,local,private,vault,gallery,swipe feed,camera roll,memories,rewind,clips
 ```
 
 ## What's New in This Version (first release)
@@ -88,11 +88,11 @@ Welcome to RollReel — swipe through your camera roll videos like Reels,
 |---|---|
 | Category (Primary) | Photo & Video |
 | Category (Secondary) | Utilities |
-| Age Rating | 4+ (no objectionable content; confirm via questionnaire — depends on user-generated video content disclaimer) |
+| Age Rating | 4+ (Third-Party Advertising: Yes; everything else: None; no UGC) |
 | Price | Free (with in-app purchases) |
-| Privacy Policy URL | `https://rollreel.app/privacy` |
-| Support URL | `https://rollreel.app/support` (or a mailto: link) |
-| Marketing URL (optional) | `https://rollreel.app` |
+| Privacy Policy URL | `https://najmulmyself.github.io/rollreel/privacy.html` |
+| Support URL | `https://najmulmyself.github.io/rollreel/support.html` |
+| Marketing URL (optional) | `https://najmulmyself.github.io/rollreel/` |
 | Copyright | `© 2026 [Your Name / Entity]` |
 
 ## In-App Purchases to Create in App Store Connect
@@ -121,17 +121,18 @@ Welcome to RollReel — swipe through your camera roll videos like Reels,
 
 These are **not feature gaps**, they're submission blockers found in the current project that will get the build rejected or fail to build/notarize if untouched:
 
-| # | Blocker | Where | Why it blocks publishing |
+| # | Blocker | Where | Status |
 |---|---|---|---|
-| 1 | **Placeholder bundle ID** | `ios/Runner.xcodeproj` → `PRODUCT_BUNDLE_IDENTIFIER = com.example.rollreel` | Must be your real reverse-DNS ID (e.g. `com.yourname.rollreel`), registered under your Apple Developer account, before Xcode can archive/sign the build |
-| 2 | **Test AdMob IDs still in place** | `ios/Runner/Info.plist` (`GADApplicationIdentifier`), `android/app/src/main/AndroidManifest.xml` | Currently Google's public *test* app IDs — shipping with these means zero real ad revenue and Google may flag the account. Replace with your real AdMob app ID from your own AdMob account |
-| 3 | **Privacy Policy not actually hosted** | App links to `https://rollreel.app/privacy` | The domain/page needs to exist and be live before App Store Connect review — Apple checks this URL during review |
-| 4 | **No Apple Developer Program enrollment confirmed** | N/A | Required ($99/yr) to get signing certs, register the bundle ID, create the App Store Connect record, and create the IAP products above |
-| 5 | **In-App Purchase products not created** | App Store Connect | `com.rollreel.pro.lifetime` / `com.rollreel.pro.annual` must exist in ASC with matching IDs, or the paywall will show no prices and purchases will fail in review |
-| 6 | **No screenshots / app preview generated** | App Store Connect listing | Required for every supported device size before submission is allowed |
-| 7 | **No signing certificates / provisioning profile** | Xcode → Signing & Capabilities | Needs to be set up locally in Xcode with your Apple Developer team selected |
-| 8 | **App Privacy "Nutrition Label" not filled in App Store Connect** | ASC → App Privacy section | Must disclose AdMob's data collection (device identifiers for ads) — required questionnaire, separate from the in-app privacy policy text |
-| 9 | **No TestFlight pass yet** | N/A | Strongly recommended even for a same-day launch — catches crashes/signing issues before public review; can be skipped if you're confident, but raises rejection risk |
-| 10 | **Support contact missing** | ASC requires a working support URL or email | Needs to resolve to something real (a mailto: link is acceptable) |
+| 1 | Placeholder bundle ID | `ios/Runner.xcodeproj` | ✅ Resolved — set to `com.rollreel.player` |
+| 2 | Test AdMob IDs still in place | `ios/Runner/Info.plist`, `android/app/src/main/AndroidManifest.xml` | ⏳ Still pending — replace with your real AdMob app ID |
+| 3 | Privacy Policy / Support not hosted | N/A | ✅ Resolved — hosted via GitHub Pages: `https://najmulmyself.github.io/rollreel/privacy.html` and `/support.html` (see `docs/`). **Enable GitHub Pages in repo Settings → Pages if not already on.** |
+| 4 | Apple Developer Program enrollment | N/A | ✅ Resolved |
+| 5 | In-App Purchase products not created | App Store Connect | ⏳ Still pending — create `com.rollreel.pro.lifetime` / `com.rollreel.pro.annual` |
+| 6 | No screenshots / app preview generated | App Store Connect listing | ⏳ Still pending |
+| 7 | No signing certificates / provisioning profile | Xcode → Signing & Capabilities | ⏳ Still pending — needs your Mac |
+| 8 | App Privacy "Nutrition Label" not filled | ASC → App Privacy section | ⏳ Still pending — disclose AdMob's device identifier collection |
+| 9 | No TestFlight pass yet | N/A | ⏳ Still pending |
+| 10 | Support contact missing | N/A | ✅ Resolved — `support.html` + `mailto:najmul.myself@gmail.com` |
 
-None of these are code changes I can make for you (they're Apple Developer account / App Store Connect / Xcode signing steps), but they are the actual gating items between "code is ready" and "live on the App Store" — tackle them in roughly this order: #4 → #1 → #7 → #5 → #2 → #3 → #8 → #6 → #10 → #9 → submit.
+Remaining order: #7 (signing) → #5 (IAP products) → #2 (real AdMob IDs) →
+#8 (privacy nutrition label) → #6 (screenshots) → #9 (TestFlight) → submit.

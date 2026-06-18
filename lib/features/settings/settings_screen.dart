@@ -41,7 +41,7 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   Future<void> _openPrivacyPolicy(BuildContext context) async {
-    final uri = Uri.parse('https://rollreel.app/privacy');
+    final uri = Uri.parse('https://najmulmyself.github.io/rollreel/privacy.html');
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
