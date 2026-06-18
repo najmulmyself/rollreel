@@ -12,7 +12,6 @@ Everything not listed here as missing/partial is implemented and working.
 | Controls auto-hide timing | F3 | ⚠️ Deviation | Auto-hides after 1s, PRD specifies 3s |
 | Long-press gesture | F3 | ⚠️ Deviation | PRD specifies 0.5× slow-motion preview on long-press; current build uses long-press for 2× fast-forward instead |
 | Location tag on video info overlay | F6 | ❌ Missing | No EXIF/GPS read-back ("Dhaka, BD" style tag) — only filename/date/duration shown |
-| Automatic review prompt | F9 / §13 | ❌ Missing | `requestReview()` only fires from a manual Settings button; PRD wants it auto-triggered after 3 completed swipe sessions **and** 24h post-install |
 | Bottom banner ad | §12 | ❌ Missing | Only interstitial ads (every N swipes) are wired up; PRD's free-tier banner ad (320×50, list/grid screen only) isn't implemented |
 | Rewarded ad (optional unlock) | §12 | ❌ Missing | Not implemented (optional in PRD) |
 
@@ -64,6 +63,7 @@ Everything not listed here as missing/partial is implemented and working.
 - F7 Native share sheet
 - F8 3-screen onboarding
 - F9 Settings: loop/autoplay/date-label toggles, default filter, dark mode, app icon variant, privacy policy, manual rate-app, version
+- F9/§13 Automatic review prompt — auto-triggers `requestReview()` after 3 completed swipe sessions and 24h post-install, once only
 - Pro (lifetime IAP) + Plus (annual IAP) tiers wired to `in_app_purchase`
 - Interstitial ads (AdMob) every N swipes, gated by Pro/Plus status
 - Privacy Vault with Face ID lock

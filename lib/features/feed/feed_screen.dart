@@ -8,6 +8,7 @@ import 'package:video_player/video_player.dart';
 
 import '../../core/ads/ads_provider.dart';
 import '../../core/permissions/permission_provider.dart';
+import '../../core/review/review_prompt_provider.dart';
 import '../../core/settings/settings_provider.dart';
 import '../../core/theme/colors.dart';
 import '../../core/video/video_library_provider.dart';
@@ -112,6 +113,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   void _onPageChanged(int index, List<AssetEntity> videos) {
     HapticFeedback.mediumImpact();
     ref.read(adsProvider.notifier).registerSwipe();
+    ref.read(reviewPromptProvider).recordSwipe();
 
     final prev = videos[_currentIndex];
     final next = videos[index];

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../core/review/review_prompt_provider.dart';
 import '../features/onboarding/onboarding_screen.dart';
 import '../features/paywall/paywall_screen.dart';
 import '../features/permission/permission_denied_screen.dart';
@@ -18,14 +20,14 @@ enum RRRoute {
   permissionDenied,
 }
 
-class AppRouter extends StatefulWidget {
+class AppRouter extends ConsumerStatefulWidget {
   const AppRouter({super.key});
 
   @override
-  State<AppRouter> createState() => _AppRouterState();
+  ConsumerState<AppRouter> createState() => _AppRouterState();
 }
 
-class _AppRouterState extends State<AppRouter> with WidgetsBindingObserver {
+class _AppRouterState extends ConsumerState<AppRouter> with WidgetsBindingObserver {
   RRRoute _route = RRRoute.splash;
   int _mainTab = 0;
 
@@ -33,6 +35,7 @@ class _AppRouterState extends State<AppRouter> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    ref.read(reviewPromptProvider).ensureInstallDateRecorded();
   }
 
   @override
@@ -41,12 +44,18 @@ class _AppRouterState extends State<AppRouter> with WidgetsBindingObserver {
     super.dispose();
   }
 
-  // Re-check permission when user returns from iOS Settings
+  // Re-check permission when user returns from iOS Settings; also drives
+  // the auto review-prompt session tracking (PRD §13).
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed &&
-        _route == RRRoute.permissionDenied) {
-      _recheckPermission();
+    final review = ref.read(reviewPromptProvider);
+    if (state == AppLifecycleState.resumed) {
+      review.maybeRequestReview();
+      if (_route == RRRoute.permissionDenied) {
+        _recheckPermission();
+      }
+    } else if (state == AppLifecycleState.paused) {
+      review.endSession();
     }
   }
 
