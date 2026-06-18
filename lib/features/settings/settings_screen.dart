@@ -45,11 +45,16 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   void _shareApp(BuildContext context) {
+    debugPrint('[RollReel] _shareApp tapped, origin=$_sharePopoverOrigin');
     Share.share(
       'Check out RollReel – swipe through your camera roll videos, '
       '100% offline!\n'
       'https://apps.apple.com/app/id6781843410',
       sharePositionOrigin: _sharePopoverOrigin,
+    ).then(
+      (_) => debugPrint('[RollReel] Share.share completed'),
+      onError: (Object e, StackTrace st) =>
+          debugPrint('[RollReel] Share.share failed: $e'),
     );
   }
 
