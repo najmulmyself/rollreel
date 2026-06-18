@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:video_player/video_player.dart';
 
+import '../../core/ads/ads_provider.dart';
 import '../../core/settings/settings_provider.dart';
 import '../../core/theme/colors.dart';
 import '../../core/video/video_library_provider.dart';
@@ -109,6 +110,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
 
   void _onPageChanged(int index, List<AssetEntity> videos) {
     HapticFeedback.mediumImpact();
+    ref.read(adsProvider.notifier).registerSwipe();
 
     final prev = videos[_currentIndex];
     final next = videos[index];

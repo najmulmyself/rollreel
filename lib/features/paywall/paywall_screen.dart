@@ -8,50 +8,49 @@ import '../../core/theme/spacing.dart';
 
 // ─── Feature data ─────────────────────────────────────────────────────────────
 
+enum _Tier { pro, plus }
+
 class _FeatureData {
   const _FeatureData({
     required this.icon,
     required this.iconColor,
     required this.title,
     required this.subtitle,
+    required this.tier,
   });
 
   final IconData icon;
   final Color iconColor;
   final String title;
   final String subtitle;
+  final _Tier tier;
 }
 
+// Phase 1: only features that actually ship today. Plus-exclusive perks
+// (On This Day, Memory Reel Auto-Gen, Siri Shortcuts, Early Access) and
+// unbuilt Pro perks (Smart Collections, Lock Screen Widget) return once
+// they're implemented in a later phase.
 const List<_FeatureData> _kFeatures = [
   _FeatureData(
     icon: Icons.visibility_off_rounded,
     iconColor: Color(0xFF1F6B45),
     title: 'Ad-Free Experience',
     subtitle: 'No interruptions, ever',
+    tier: _Tier.pro,
   ),
   _FeatureData(
     icon: CupertinoIcons.lock_fill,
     iconColor: Color(0xFF4A2A8B),
     title: 'Privacy Vault',
     subtitle: 'Lock sensitive videos with Face ID',
+    tier: _Tier.pro,
   ),
   _FeatureData(
     icon: CupertinoIcons.clock_fill,
     iconColor: Color(0xFF1A5A6B),
     title: 'Playback Speed Control',
-    subtitle: '0.5× to 2× speed',
-  ),
-  _FeatureData(
-    icon: CupertinoIcons.bookmark_fill,
-    iconColor: Color(0xFF7D5A2A),
-    title: 'Smart Collections',
-    subtitle: 'Auto-grouped by date and location',
-  ),
-  _FeatureData(
-    icon: CupertinoIcons.star_fill,
-    iconColor: Color(0xFF7D2E2E),
-    title: 'Early Access',
-    subtitle: 'First to get every new feature',
+    subtitle: '2× fast-forward on long-press',
+    tier: _Tier.pro,
   ),
 ];
 
@@ -117,7 +116,11 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // ── Feature list ─────────────────────────────────────────
-                  ..._kFeatures.map((f) => _FeatureRow(data: f)),
+                  ..._kFeatures.map((f) => _FeatureRow(
+                        data: f,
+                        included: f.tier == _Tier.pro ||
+                            _selected == _Plan.annual,
+                      )),
                   const SizedBox(height: RRSpace.sp20),
 
                   // ── Pricing cards ────────────────────────────────────────
@@ -304,57 +307,91 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
 // ─── Feature row ──────────────────────────────────────────────────────────────
 
 class _FeatureRow extends StatelessWidget {
-  const _FeatureRow({required this.data});
+  const _FeatureRow({required this.data, required this.included});
 
   final _FeatureData data;
+  final bool included;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: RRSpace.sp12),
-      child: Row(
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: data.iconColor,
-              borderRadius: BorderRadius.circular(10),
+      child: Opacity(
+        opacity: included ? 1.0 : 0.45,
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: data.iconColor,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              alignment: Alignment.center,
+              child: Icon(data.icon, color: Colors.white, size: 20),
             ),
-            alignment: Alignment.center,
-            child: Icon(data.icon, color: Colors.white, size: 20),
-          ),
-          const SizedBox(width: RRSpace.sp16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  data.title,
-                  style: const TextStyle(
-                    color: RRColors.textPrimary,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+            const SizedBox(width: RRSpace.sp16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        data.title,
+                        style: const TextStyle(
+                          color: RRColors.textPrimary,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      if (data.tier == _Tier.plus) ...[
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 1),
+                          decoration: BoxDecoration(
+                            color: RRColors.accentCyan
+                                .withValues(alpha: 0.15),
+                            borderRadius:
+                                BorderRadius.circular(RRSpace.radiusFull),
+                          ),
+                          child: const Text(
+                            'PLUS',
+                            style: TextStyle(
+                              color: RRColors.accentCyan,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  data.subtitle,
-                  style: const TextStyle(
-                    color: RRColors.textSecond,
-                    fontSize: 13,
+                  const SizedBox(height: 2),
+                  Text(
+                    data.subtitle,
+                    style: const TextStyle(
+                      color: RRColors.textSecond,
+                      fontSize: 13,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          const SizedBox(width: RRSpace.sp12),
-          const Icon(
-            CupertinoIcons.check_mark_circled_solid,
-            color: RRColors.accentGreen,
-            size: 24,
-          ),
-        ],
+            const SizedBox(width: RRSpace.sp12),
+            Icon(
+              included
+                  ? CupertinoIcons.check_mark_circled_solid
+                  : CupertinoIcons.lock_fill,
+              color: included
+                  ? RRColors.accentGreen
+                  : RRColors.textDisabled,
+              size: included ? 24 : 20,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -410,7 +447,7 @@ class _PricingCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(RRSpace.radiusFull),
             ),
             child: Text(
-              _isLifetime ? 'Best Value' : 'Includes On This Day',
+              _isLifetime ? 'RollReel Pro' : 'RollReel Plus',
               style: TextStyle(
                 color: _isLifetime
                     ? RRColors.accentAmber
