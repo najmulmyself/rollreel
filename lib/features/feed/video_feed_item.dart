@@ -671,9 +671,25 @@ class _Sidebar extends StatelessWidget {
   final VoidCallback onFullscreen;
   final VoidCallback onOptions;
 
+  static final _shareBtnKey = GlobalKey();
+
+  // iPad shows the share sheet as a popover and requires an anchor rect —
+  // without one it renders at (0,0) and gets dismissed before it's visible.
+  static Rect get _sharePopoverOrigin {
+    final box = _shareBtnKey.currentContext?.findRenderObject() as RenderBox?;
+    if (box == null) return Rect.zero;
+    final pos = box.localToGlobal(Offset.zero);
+    return pos & box.size;
+  }
+
   Future<void> _share() async {
     final file = await asset.file;
-    if (file != null) await Share.shareXFiles([XFile(file.path)]);
+    if (file != null) {
+      await Share.shareXFiles(
+        [XFile(file.path)],
+        sharePositionOrigin: _sharePopoverOrigin,
+      );
+    }
   }
 
   @override
@@ -690,6 +706,7 @@ class _Sidebar extends StatelessWidget {
         ),
         const SizedBox(height: 22),
         _SideBtn(
+          key: _shareBtnKey,
           icon: CupertinoIcons.share,
           label: 'Share',
           onTap: _share,
@@ -709,6 +726,7 @@ class _Sidebar extends StatelessWidget {
 
 class _SideBtn extends StatelessWidget {
   const _SideBtn({
+    super.key,
     required this.icon,
     required this.onTap,
     this.color = Colors.white,
