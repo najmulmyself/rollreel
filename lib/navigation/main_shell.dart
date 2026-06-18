@@ -12,22 +12,27 @@ class MainShell extends ConsumerStatefulWidget {
     super.key,
     required this.onOpenPaywall,
     required this.onOpenVault,
+    this.initialTab = 0,
+    this.onTabChanged,
   });
 
   final VoidCallback onOpenPaywall;
   final VoidCallback onOpenVault;
+  final int initialTab;
+  final ValueChanged<int>? onTabChanged;
 
   @override
   ConsumerState<MainShell> createState() => _MainShellState();
 }
 
 class _MainShellState extends ConsumerState<MainShell> {
-  int _tab = 0;
+  late int _tab = widget.initialTab;
 
   void _setTab(int index) {
     if (_tab == index) return;
     HapticFeedback.selectionClick();
     setState(() => _tab = index);
+    widget.onTabChanged?.call(index);
   }
 
   @override

@@ -27,6 +27,7 @@ class AppRouter extends StatefulWidget {
 
 class _AppRouterState extends State<AppRouter> with WidgetsBindingObserver {
   RRRoute _route = RRRoute.splash;
+  int _mainTab = 0;
 
   @override
   void initState() {
@@ -97,6 +98,8 @@ class _AppRouterState extends State<AppRouter> with WidgetsBindingObserver {
         return OnboardingScreen(onDone: _finishOnboarding);
       case RRRoute.main:
         return MainShell(
+          initialTab: _mainTab,
+          onTabChanged: (tab) => _mainTab = tab,
           onOpenPaywall: () => _go(RRRoute.paywall),
           onOpenVault: () => _go(RRRoute.vault),
         );
