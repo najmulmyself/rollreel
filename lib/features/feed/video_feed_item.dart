@@ -116,7 +116,6 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
 
     final settings = ref.read(settingsProvider);
     ctrl.setLooping(settings.loopShortVideos && widget.asset.duration < 30);
-    ctrl.addListener(_onTick);
 
     setState(() {
       _controller = ctrl;
@@ -131,10 +130,6 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
       }
       widget.onControllerReady(ctrl);
     }
-  }
-
-  void _onTick() {
-    if (mounted) setState(() {});
   }
 
   @override
@@ -172,7 +167,6 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
   void dispose() {
     _controlsHideTimer?.cancel();
     _seekFlashTimer?.cancel();
-    _controller?.removeListener(_onTick);
     _controller?.dispose();
     // Restore screen brightness when leaving
     ScreenBrightness().resetScreenBrightness();
@@ -299,7 +293,7 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
                 context: context,
                 backgroundColor: Colors.transparent,
                 isScrollControlled: true,
-                builder: (_) => _VideoInfoSheet(asset: widget.asset),
+                builder: (_) => VideoInfoSheet(asset: widget.asset),
               );
             },
             child: const Text('Get Info'),
@@ -884,13 +878,24 @@ class _InfoCard extends StatelessWidget {
                     color: RRColors.accentAmber,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(
-                    isPlaying
-                        ? CupertinoIcons.pause_fill
-                        : CupertinoIcons.play_fill,
-                    color: Colors.black,
-                    size: 24,
-                  ),
+                  child: controller != null
+                      ? ValueListenableBuilder<VideoPlayerValue>(
+                          valueListenable: controller!,
+                          builder: (context, value, _) => Icon(
+                            value.isPlaying
+                                ? CupertinoIcons.pause_fill
+                                : CupertinoIcons.play_fill,
+                            color: Colors.black,
+                            size: 24,
+                          ),
+                        )
+                      : Icon(
+                          isPlaying
+                              ? CupertinoIcons.pause_fill
+                              : CupertinoIcons.play_fill,
+                          color: Colors.black,
+                          size: 24,
+                        ),
                 ),
               ),
               _CardIconBtn(
@@ -1220,15 +1225,15 @@ class _LandscapeVideoPageState extends State<_LandscapeVideoPage> {
 
 // ─── Video info sheet ─────────────────────────────────────────────────────────
 
-class _VideoInfoSheet extends StatefulWidget {
-  const _VideoInfoSheet({required this.asset});
+class VideoInfoSheet extends StatefulWidget {
+  const VideoInfoSheet({required this.asset});
   final AssetEntity asset;
 
   @override
-  State<_VideoInfoSheet> createState() => _VideoInfoSheetState();
+  State<VideoInfoSheet> createState() => VideoInfoSheetState();
 }
 
-class _VideoInfoSheetState extends State<_VideoInfoSheet> {
+class VideoInfoSheetState extends State<VideoInfoSheet> {
   int? _fileSizeBytes;
 
   @override

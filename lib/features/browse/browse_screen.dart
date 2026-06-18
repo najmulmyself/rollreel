@@ -9,6 +9,7 @@ import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
 import '../../core/video/video_library_provider.dart';
 import '../../shared/widgets/local_badge.dart';
+import '../feed/video_feed_item.dart' show VideoInfoSheet;
 import '../states/empty_state.dart';
 import '../states/loading_state.dart';
 import 'filter_sheet.dart';
@@ -135,7 +136,42 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
     }
   }
 
-  Future<void> _showDeleteSheet(AssetEntity asset) async {
+  Future<void> _showVideoOptions(AssetEntity asset) async {
+    await showCupertinoModalPopup<void>(
+      context: context,
+      builder: (_) => CupertinoActionSheet(
+        actions: [
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(context);
+              showModalBottomSheet<void>(
+                context: context,
+                backgroundColor: Colors.transparent,
+                isScrollControlled: true,
+                builder: (_) => VideoInfoSheet(asset: asset),
+              );
+            },
+            child: const Text('Get Info'),
+          ),
+          CupertinoActionSheetAction(
+            isDestructiveAction: true,
+            onPressed: () {
+              Navigator.pop(context);
+              _confirmDelete(asset);
+            },
+            child: const Text('Delete Video'),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          isDefaultAction: true,
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _confirmDelete(AssetEntity asset) async {
     // Capture messenger before any async gap
     final messenger = ScaffoldMessenger.of(context);
     final confirmed = await showCupertinoModalPopup<bool>(
@@ -374,25 +410,39 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
             // ── Quick filter chips ─────────────────────────────────────────
             SizedBox(
               height: 44,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: RRSpace.sp16),
-                itemCount: _quickChips.length,
-                itemBuilder: (context, i) {
-                  final chip = _quickChips[i];
-                  final active = _isQuickChipActive(chip.label, filter);
-                  return _QuickChipTile(
-                    chip: chip,
-                    active: active,
-                    onTap: () => _onQuickChipTap(chip.label),
-                  );
-                },
+              child: ShaderMask(
+                shaderCallback: (rect) => LinearGradient(
+                  begin: Alignment.centerRight,
+                  end: const Alignment(0.82, 0),
+                  colors: const [Colors.transparent, Colors.white],
+                ).createShader(rect),
+                blendMode: BlendMode.dstIn,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.fromLTRB(
+                      RRSpace.sp16, 0, RRSpace.sp32, 0),
+                  itemCount: _quickChips.length,
+                  itemBuilder: (context, i) {
+                    final chip = _quickChips[i];
+                    final active = _isQuickChipActive(chip.label, filter);
+                    return _QuickChipTile(
+                      chip: chip,
+                      active: active,
+                      onTap: () => _onQuickChipTap(chip.label),
+                    );
+                  },
+                ),
               ),
             ),
 
+            const SizedBox(height: RRSpace.sp12),
+
             // ── Divider ────────────────────────────────────────────────────
-            const Divider(height: 1, color: RRColors.divider),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: RRSpace.sp16),
+              child: Divider(height: 1, thickness: 1, color: RRColors.divider),
+            ),
+            const SizedBox(height: RRSpace.sp4),
 
             // ── Main list ──────────────────────────────────────────────────
             Expanded(
@@ -447,7 +497,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                           widget.onPlayAt?.call(asset.id);
                           widget.onBack?.call();
                         },
-                        onLongPress: () => _showDeleteSheet(asset),
+                        onLongPress: () => _showVideoOptions(asset),
                       );
                     },
                   );
@@ -609,17 +659,24 @@ class _VideoRow extends StatefulWidget {
 
 class _VideoRowState extends State<_VideoRow> {
   Uint8List? _thumb;
+  String? _title;
 
   @override
   void initState() {
     super.initState();
     _loadThumb();
+    _loadTitle();
   }
 
   Future<void> _loadThumb() async {
     final bytes = await widget.asset
         .thumbnailDataWithSize(const ThumbnailSize(160, 160));
     if (mounted) setState(() => _thumb = bytes);
+  }
+
+  Future<void> _loadTitle() async {
+    final title = await widget.asset.titleAsync;
+    if (mounted && title.isNotEmpty) setState(() => _title = title);
   }
 
   String _relativeDate(DateTime dt) {
@@ -649,8 +706,9 @@ class _VideoRowState extends State<_VideoRow> {
 
   @override
   Widget build(BuildContext context) {
-    final title =
-        widget.asset.title ?? _relativeDate(widget.asset.createDateTime);
+    final title = _title ??
+        widget.asset.title ??
+        _relativeDate(widget.asset.createDateTime);
     final durationStr = _formatDuration(widget.asset.duration);
     final dateStr = _relativeDate(widget.asset.createDateTime);
     final subtitle = '$durationStr · $dateStr';
