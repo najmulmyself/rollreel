@@ -293,7 +293,7 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
                 context: context,
                 backgroundColor: Colors.transparent,
                 isScrollControlled: true,
-                builder: (_) => _VideoInfoSheet(asset: widget.asset),
+                builder: (_) => VideoInfoSheet(asset: widget.asset),
               );
             },
             child: const Text('Get Info'),
@@ -1225,15 +1225,15 @@ class _LandscapeVideoPageState extends State<_LandscapeVideoPage> {
 
 // ─── Video info sheet ─────────────────────────────────────────────────────────
 
-class _VideoInfoSheet extends StatefulWidget {
-  const _VideoInfoSheet({required this.asset});
+class VideoInfoSheet extends StatefulWidget {
+  const VideoInfoSheet({required this.asset});
   final AssetEntity asset;
 
   @override
-  State<_VideoInfoSheet> createState() => _VideoInfoSheetState();
+  State<VideoInfoSheet> createState() => VideoInfoSheetState();
 }
 
-class _VideoInfoSheetState extends State<_VideoInfoSheet> {
+class VideoInfoSheetState extends State<VideoInfoSheet> {
   int? _fileSizeBytes;
 
   @override
