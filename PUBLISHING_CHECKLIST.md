@@ -48,20 +48,22 @@ Phase 1 for full detail and Phase 2+ for the post-launch roadmap.
 
 - [x] App record created in App Store Connect with the final bundle ID
 - [ ] App Name set: `RollReel – Local Video Player` (see `APP_STORE_LISTING.md`)
-- [ ] Subtitle set: `Swipe Camera Roll Like Reels`
+- [ ] Subtitle set: `Swipe Your Camera Roll Videos`
 - [ ] Promotional Text, Description, Keywords, "What's New" pasted from `APP_STORE_LISTING.md`
+      (no competitor trademarks — TikTok/Reels references removed)
 - [ ] Primary category: Photo & Video / Secondary: Utilities
-- [ ] Age rating questionnaire completed (expected 4+)
+- [x] Age rating questionnaire completed — 4+ (Third-Party Advertising: Yes,
+      everything else None, no UGC)
 - [ ] Pricing: Free (with in-app purchases)
 - [ ] Copyright string filled in with your real name/entity (currently a placeholder)
-- [ ] Support URL set and resolves to something real (mailto: is acceptable)
-- [ ] Marketing URL set (optional)
+- [x] Support URL set: `https://najmulmyself.github.io/rollreel/support.html`
+- [x] Marketing URL set: `https://najmulmyself.github.io/rollreel/`
 
 ## 4. Privacy & compliance
 
-- [ ] Privacy Policy actually hosted and live at the URL referenced in-app
-      (`https://rollreel.app/privacy`, see `settings_screen.dart`) — Apple
-      checks this URL during review
+- [x] Privacy Policy hosted via GitHub Pages:
+      `https://najmulmyself.github.io/rollreel/privacy.html` (source: `docs/privacy.html`).
+      **Enable GitHub Pages in repo Settings → Pages (source: branch, `/docs` folder) if not already on.**
 - [ ] App Privacy "Nutrition Label" questionnaire completed in App Store
       Connect, disclosing AdMob's data collection (device/advertising identifiers)
 - [ ] `NSPhotoLibraryUsageDescription` / `NSPhotoLibraryAddUsageDescription` /
@@ -129,6 +131,7 @@ Phase 1 for full detail and Phase 2+ for the post-launch roadmap.
 | AdMob app ID | `ios/Runner/Info.plist`, `android/app/src/main/AndroidManifest.xml` |
 | IAP product IDs | `lib/core/iap/iap_provider.dart` |
 | Privacy policy URL referenced in-app | `lib/features/settings/settings_screen.dart` |
+| Privacy/support page source | `docs/privacy.html`, `docs/support.html`, `docs/index.html` |
 | App version/build number | `pubspec.yaml` |
 | Full listing copy | `APP_STORE_LISTING.md` |
 | Feature gap detail / post-launch roadmap | `ROADMAP_GAPS.md` |
