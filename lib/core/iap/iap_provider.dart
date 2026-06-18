@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -85,6 +86,10 @@ class IAPNotifier extends StateNotifier<IAPState> {
     final response = await InAppPurchase.instance
         .queryProductDetails({kProductLifetime, kProductMonthly});
 
+    debugPrint(
+        '[RollReel] IAP products found: ${response.productDetails.map((p) => p.id).toList()}, '
+        'not found: ${response.notFoundIDs}, error: ${response.error}');
+
     state = IAPState(
       available: true,
       products: {for (final p in response.productDetails) p.id: p},
@@ -93,7 +98,10 @@ class IAPNotifier extends StateNotifier<IAPState> {
 
   Future<void> purchase(String productId) async {
     final product = state.products[productId];
-    if (product == null) return;
+    if (product == null) {
+      debugPrint('[RollReel] purchase() called for $productId but product not found');
+      return;
+    }
     state = state.copyWith(loading: true, clearError: true);
     final param = PurchaseParam(productDetails: product);
     await InAppPurchase.instance.buyNonConsumable(purchaseParam: param);
