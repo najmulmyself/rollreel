@@ -35,8 +35,9 @@ class SettingsScreen extends ConsumerWidget {
 
   void _shareApp(BuildContext context) {
     Share.share(
-      'Check out RollReel – swipe your camera roll like TikTok!\n'
-      'https://apps.apple.com/app/rollreel',
+      'Check out RollReel – swipe through your camera roll videos, '
+      '100% offline!\n'
+      'https://apps.apple.com/app/id6781843410',
     );
   }
 
