@@ -49,6 +49,8 @@
 	</array>
 	<key>NSFaceIDUsageDescription</key>
 	<string>RollReel uses Face ID to unlock your private video vault.</string>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>RollReel uses this to show you more relevant ads. Your videos are never tracked or shared — only ad personalization data.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>

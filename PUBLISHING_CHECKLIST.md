@@ -62,14 +62,18 @@ Phase 1 for full detail and Phase 2+ for the post-launch roadmap.
 
 - [x] Privacy Policy hosted via GitHub Pages and confirmed live:
       `https://najmulmyself.github.io/rollreel/privacy.html`
-- [ ] App Privacy "Nutrition Label" questionnaire completed in App Store
-      Connect, disclosing AdMob's data collection (device/advertising identifiers)
-- [ ] `NSPhotoLibraryUsageDescription` / `NSPhotoLibraryAddUsageDescription` /
-      `NSFaceIDUsageDescription` strings present and accurate (already set in
-      `ios/Runner/Info.plist` — confirm no changes needed)
-- [ ] ATT (App Tracking Transparency) — confirm decision: v1.0 ships without
-      personalized ads / no ATT prompt (per PRD recommendation) or add the
-      prompt if personalized ads are enabled
+- [x] App Privacy "Nutrition Label" questionnaire completed in App Store
+      Connect — Device ID collected, linked to identity, used for tracking
+      (personalized ads via AdMob)
+- [x] `NSPhotoLibraryUsageDescription` / `NSPhotoLibraryAddUsageDescription` /
+      `NSFaceIDUsageDescription` / `NSUserTrackingUsageDescription` strings
+      present and accurate in `ios/Runner/Info.plist`
+- [x] ATT (App Tracking Transparency) — decision: personalized ads enabled.
+      `app_tracking_transparency` added to `pubspec.yaml`; prompt is requested
+      in `lib/navigation/app_router.dart` (`_requestTrackingIfNeeded`) right
+      after permission/onboarding resolves and before the feed (and its ads)
+      ever mounts. **Still pending: run `flutter pub get` and rebuild on your
+      Mac to pull in the new native dependency before archiving.**
 
 ## 5. Ads (AdMob)
 
