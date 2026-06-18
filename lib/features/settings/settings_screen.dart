@@ -34,10 +34,15 @@ class SettingsScreen extends ConsumerWidget {
   }
 
   void _shareApp(BuildContext context) {
+    final box = context.findRenderObject() as RenderBox?;
+    final origin = box != null
+        ? box.localToGlobal(Offset.zero) & box.size
+        : null;
     Share.share(
       'Check out RollReel – swipe through your camera roll videos, '
       '100% offline!\n'
       'https://apps.apple.com/app/id6781843410',
+      sharePositionOrigin: origin,
     );
   }
 
