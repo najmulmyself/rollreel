@@ -46,7 +46,7 @@ Phase 1 for full detail and Phase 2+ for the post-launch roadmap.
 
 ## 3. App Store Connect — app record
 
-- [ ] App record created in App Store Connect with the final bundle ID
+- [x] App record created in App Store Connect with the final bundle ID
 - [ ] App Name set: `RollReel – Local Video Player` (see `APP_STORE_LISTING.md`)
 - [ ] Subtitle set: `Swipe Camera Roll Like Reels`
 - [ ] Promotional Text, Description, Keywords, "What's New" pasted from `APP_STORE_LISTING.md`
