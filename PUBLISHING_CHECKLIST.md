@@ -38,10 +38,8 @@ Phase 1 for full detail and Phase 2+ for the post-launch roadmap.
 ## 2. Apple Developer account & signing
 
 - [x] Apple Developer Program enrollment active ($99/yr)
-- [ ] Bundle ID registered under your team and changed in code from the
-      placeholder `com.example.rollreel` to your real reverse-DNS ID
-      (`ios/Runner.xcodeproj/project.pbxproj` — 4 occurrences: Runner +
-      RunnerTests, Debug/Release/Profile)
+- [x] Bundle ID registered under your team (`com.rollreel.player`) and
+      changed in code (`ios/Runner.xcodeproj/project.pbxproj`)
 - [ ] Signing certificate (Apple Distribution) created
 - [ ] Provisioning profile created and selected in Xcode → Signing & Capabilities
 - [ ] Archive builds and validates in Xcode without signing errors
