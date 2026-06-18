@@ -7,6 +7,8 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../core/ads/ads_provider.dart';
+import '../../core/permissions/permission_provider.dart';
+import '../../core/review/review_prompt_provider.dart';
 import '../../core/settings/settings_provider.dart';
 import '../../core/theme/colors.dart';
 import '../../core/video/video_library_provider.dart';
@@ -111,6 +113,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   void _onPageChanged(int index, List<AssetEntity> videos) {
     HapticFeedback.mediumImpact();
     ref.read(adsProvider.notifier).registerSwipe();
+    ref.read(reviewPromptProvider).recordSwipe();
 
     final prev = videos[_currentIndex];
     final next = videos[index];
@@ -191,6 +194,8 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     final settings = ref.watch(settingsProvider);
     final activeFilter = ref.watch(feedFilterProvider);
     final safeTop = MediaQuery.paddingOf(context).top;
+    final permission = ref.watch(permissionProvider).valueOrNull;
+    final isLimitedAccess = permission == PermissionState.limited;
 
     ref.listen<AsyncValue<List<AssetEntity>>>(feedVideosProvider, (_, next) {
       if (_awaitingDeletion && next.hasValue && !next.isLoading) {
@@ -271,6 +276,13 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                 },
               ),
             ),
+            if (isLimitedAccess)
+              Positioned(
+                top: safeTop + 52,
+                left: 0,
+                right: 0,
+                child: const _LimitedAccessBanner(accessibleCount: 0),
+              ),
           ],
         ),
       );
@@ -347,7 +359,75 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
               right: 0,
               child: Center(child: DateLabel(label: _dateLabelText)),
             ),
+          // ── Limited Photo Library access banner ──────────────────────────
+          if (isLimitedAccess)
+            Positioned(
+              top: safeTop + 52,
+              left: 0,
+              right: 0,
+              child: IgnorePointer(
+                ignoring: !_navVisible,
+                child: AnimatedOpacity(
+                  opacity: _navVisible ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 250),
+                  child: _LimitedAccessBanner(accessibleCount: videos.length),
+                ),
+              ),
+            ),
         ],
+      ),
+    );
+  }
+}
+
+// ─── Limited Photo Library access banner ───────────────────────────────────
+
+class _LimitedAccessBanner extends StatelessWidget {
+  const _LimitedAccessBanner({required this.accessibleCount});
+
+  final int accessibleCount;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: GestureDetector(
+        onTap: () => PhotoManager.presentLimited(),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.55),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.15)),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.lock_outline, color: Colors.white, size: 16),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Managing $accessibleCount of your videos',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                'Manage',
+                style: TextStyle(
+                  color: RRColors.accentCyan,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const Icon(Icons.chevron_right, color: RRColors.accentCyan, size: 16),
+            ],
+          ),
+        ),
       ),
     );
   }
