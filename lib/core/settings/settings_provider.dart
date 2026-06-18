@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../theme/colors.dart';
+
 // ─── Keys ────────────────────────────────────────────────────────────────────
 
 const _kLoop = 'settings_loop_short_videos';
@@ -8,6 +10,7 @@ const _kAutoPlay = 'settings_auto_play';
 const _kDateLabels = 'settings_show_date_labels';
 const _kDurationBadges = 'settings_show_duration_badges';
 const _kDefaultFilter = 'settings_default_filter';
+const _kDarkMode = 'settings_dark_mode';
 
 // ─── Feed filter enum ─────────────────────────────────────────────────────────
 
@@ -36,6 +39,7 @@ class AppSettings {
   final bool showDateLabels;
   final bool showDurationBadges;
   final FeedFilter defaultFilter;
+  final bool darkMode;
 
   const AppSettings({
     this.loopShortVideos = true,
@@ -43,6 +47,7 @@ class AppSettings {
     this.showDateLabels = true,
     this.showDurationBadges = true,
     this.defaultFilter = FeedFilter.all,
+    this.darkMode = true,
   });
 
   AppSettings copyWith({
@@ -51,6 +56,7 @@ class AppSettings {
     bool? showDateLabels,
     bool? showDurationBadges,
     FeedFilter? defaultFilter,
+    bool? darkMode,
   }) =>
       AppSettings(
         loopShortVideos: loopShortVideos ?? this.loopShortVideos,
@@ -58,6 +64,7 @@ class AppSettings {
         showDateLabels: showDateLabels ?? this.showDateLabels,
         showDurationBadges: showDurationBadges ?? this.showDurationBadges,
         defaultFilter: defaultFilter ?? this.defaultFilter,
+        darkMode: darkMode ?? this.darkMode,
       );
 }
 
@@ -72,12 +79,15 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final filterIndex = prefs.getInt(_kDefaultFilter) ?? 0;
+      final darkMode = prefs.getBool(_kDarkMode) ?? true;
+      RRColors.isDark.value = darkMode;
       state = AppSettings(
         loopShortVideos: prefs.getBool(_kLoop) ?? true,
         autoPlay: prefs.getBool(_kAutoPlay) ?? true,
         showDateLabels: prefs.getBool(_kDateLabels) ?? true,
         showDurationBadges: prefs.getBool(_kDurationBadges) ?? true,
         defaultFilter: FeedFilter.values[filterIndex.clamp(0, FeedFilter.values.length - 1)],
+        darkMode: darkMode,
       );
     } catch (_) {}
   }
@@ -110,6 +120,13 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     state = state.copyWith(defaultFilter: value);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_kDefaultFilter, value.index);
+  }
+
+  Future<void> setDarkMode(bool value) async {
+    state = state.copyWith(darkMode: value);
+    RRColors.isDark.value = value;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_kDarkMode, value);
   }
 }
 

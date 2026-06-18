@@ -19,7 +19,7 @@ class NoVideosState extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(
+              Icon(
                 CupertinoIcons.film,
                 size: 64,
                 color: RRColors.textDisabled,
@@ -36,7 +36,7 @@ class NoVideosState extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: RRSpace.sp12),
-              const Text(
+              Text(
                 'Your camera roll videos will appear here.',
                 style: TextStyle(
                   color: RRColors.textSecond,

@@ -524,12 +524,12 @@ class _PhotoAccessVisual extends StatelessWidget {
               border: Border.all(
                   color: RRColors.accentCyan.withValues(alpha: 0.30)),
             ),
-            child: const Row(
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(CupertinoIcons.info_circle,
+                const Icon(CupertinoIcons.info_circle,
                     size: 16, color: RRColors.accentCyan),
-                SizedBox(width: RRSpace.sp8),
+                const SizedBox(width: RRSpace.sp8),
                 Expanded(
                   child: Text(
                     'We only read videos — never photos, never uploads.',

@@ -1,21 +1,36 @@
 import 'package:flutter/material.dart';
 
+/// App-wide light/dark switch. Video-playback screens (Feed) intentionally
+/// stay black regardless of this value — only chrome screens (Settings,
+/// Paywall, Browse, Vault, onboarding, etc.) read it.
 class RRColors {
   const RRColors._();
 
-  static const Color bgDeep = Color(0xFF07070F);
-  static const Color bgSurface = Color(0xFF111118);
-  static const Color bgElevated = Color(0xFF1C1C26);
+  static final ValueNotifier<bool> isDark = ValueNotifier<bool>(true);
 
-  static const Color glassLight = Color(0x33FFFFFF);
-  static const Color glassDark = Color(0x99000000);
-  static const Color glassBorder = Color(0x22FFFFFF);
+  static Color get bgDeep =>
+      isDark.value ? const Color(0xFF07070F) : const Color(0xFFF5F5F7);
+  static Color get bgSurface =>
+      isDark.value ? const Color(0xFF111118) : const Color(0xFFFFFFFF);
+  static Color get bgElevated =>
+      isDark.value ? const Color(0xFF1C1C26) : const Color(0xFFFFFFFF);
 
-  static const Color textPrimary = Color(0xFFFFFFFF);
-  static const Color textSecond = Color(0xFFAAAAAB);
-  static const Color textDisabled = Color(0xFF555565);
+  static Color get glassLight =>
+      isDark.value ? const Color(0x33FFFFFF) : const Color(0x33000000);
+  static Color get glassDark =>
+      isDark.value ? const Color(0x99000000) : const Color(0x99FFFFFF);
+  static Color get glassBorder =>
+      isDark.value ? const Color(0x22FFFFFF) : const Color(0x22000000);
 
-  static const Color divider = Color(0xFF1E1E2E);
+  static Color get textPrimary =>
+      isDark.value ? const Color(0xFFFFFFFF) : const Color(0xFF0A0A0F);
+  static Color get textSecond =>
+      isDark.value ? const Color(0xFFAAAAAB) : const Color(0xFF6B6B76);
+  static Color get textDisabled =>
+      isDark.value ? const Color(0xFF555565) : const Color(0xFFB0B0BA);
+
+  static Color get divider =>
+      isDark.value ? const Color(0xFF1E1E2E) : const Color(0xFFE2E2E8);
 
   static const Color accentCoral = Color(0xFFFF5E5E);
   static const Color accentCyan = Color(0xFF00D4FF);

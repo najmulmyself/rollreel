@@ -5,7 +5,7 @@ import 'colors.dart';
 class RRTypography {
   const RRTypography._();
 
-  static const TextStyle title1 = TextStyle(
+  static TextStyle get title1 => TextStyle(
     fontFamily: '.SF Pro Display',
     fontSize: 28,
     fontWeight: FontWeight.w700,
@@ -13,7 +13,7 @@ class RRTypography {
     color: RRColors.textPrimary,
   );
 
-  static const TextStyle title2 = TextStyle(
+  static TextStyle get title2 => TextStyle(
     fontFamily: '.SF Pro Display',
     fontSize: 22,
     fontWeight: FontWeight.w600,
@@ -21,7 +21,7 @@ class RRTypography {
     color: RRColors.textPrimary,
   );
 
-  static const TextStyle headline = TextStyle(
+  static TextStyle get headline => TextStyle(
     fontFamily: '.SF Pro Text',
     fontSize: 17,
     fontWeight: FontWeight.w600,
@@ -29,20 +29,20 @@ class RRTypography {
     color: RRColors.textPrimary,
   );
 
-  static const TextStyle body = TextStyle(
+  static TextStyle get body => TextStyle(
     fontFamily: '.SF Pro Text',
     fontSize: 16,
     fontWeight: FontWeight.w400,
     color: RRColors.textPrimary,
   );
 
-  static const TextStyle subheadline = TextStyle(
+  static TextStyle get subheadline => TextStyle(
     fontFamily: '.SF Pro Text',
     fontSize: 14,
     color: RRColors.textSecond,
   );
 
-  static const TextStyle caption = TextStyle(
+  static TextStyle get caption => TextStyle(
     fontFamily: '.SF Pro Text',
     fontSize: 12,
     color: RRColors.textSecond,

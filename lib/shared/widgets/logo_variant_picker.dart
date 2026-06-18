@@ -17,8 +17,8 @@ class LogoVariantPicker extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.only(left: RRSpace.sp20, bottom: RRSpace.sp12),
+        Padding(
+          padding: const EdgeInsets.only(left: RRSpace.sp20, bottom: RRSpace.sp12),
           child: Text(
             'APP ICON STYLE',
             style: TextStyle(

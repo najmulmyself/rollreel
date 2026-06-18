@@ -326,8 +326,8 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                   autofocus: true,
                   placeholder: 'Search videos…',
                   placeholderStyle:
-                      const TextStyle(color: RRColors.textDisabled),
-                  style: const TextStyle(color: RRColors.textPrimary),
+                      TextStyle(color: RRColors.textDisabled),
+                  style: TextStyle(color: RRColors.textPrimary),
                   padding: const EdgeInsets.symmetric(
                       horizontal: RRSpace.sp12, vertical: RRSpace.sp8),
                   decoration: BoxDecoration(
@@ -336,8 +336,8 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                         BorderRadius.circular(RRSpace.radiusMd),
                   ),
                   clearButtonMode: OverlayVisibilityMode.editing,
-                  prefix: const Padding(
-                    padding: EdgeInsets.only(left: 8),
+                  prefix: Padding(
+                    padding: const EdgeInsets.only(left: 8),
                     child: Icon(CupertinoIcons.search,
                         color: RRColors.textDisabled, size: 16),
                   ),
@@ -356,7 +356,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         allAsync.when(
-                          loading: () => const Text(
+                          loading: () => Text(
                             'Videos',
                             style: TextStyle(
                               fontSize: 34,
@@ -365,7 +365,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                               letterSpacing: -0.5,
                             ),
                           ),
-                          error: (_, __) => const Text(
+                          error: (_, __) => Text(
                             'Videos',
                             style: TextStyle(
                               fontSize: 34,
@@ -376,7 +376,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                           ),
                           data: (all) => Text(
                             '${all.length} Videos',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 34,
                               fontWeight: FontWeight.w800,
                               color: RRColors.textPrimary,
@@ -385,7 +385,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                           ),
                         ),
                         const SizedBox(height: 2),
-                        const Text(
+                        Text(
                           'Your Library',
                           style: TextStyle(
                             fontSize: 14,
@@ -438,8 +438,8 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
             const SizedBox(height: RRSpace.sp12),
 
             // ── Divider ────────────────────────────────────────────────────
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: RRSpace.sp16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: RRSpace.sp16),
               child: Divider(height: 1, thickness: 1, color: RRColors.divider),
             ),
             const SizedBox(height: RRSpace.sp4),
@@ -451,7 +451,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                 error: (e, _) => Center(
                   child: Text(
                     'Error: $e',
-                    style: const TextStyle(color: RRColors.textSecond),
+                    style: TextStyle(color: RRColors.textSecond),
                   ),
                 ),
                 data: (rawVideos) {
@@ -530,7 +530,7 @@ class _FilterBtn extends StatelessWidget {
           color: RRColors.bgElevated,
           borderRadius: BorderRadius.circular(20),
         ),
-        child: const Row(
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
@@ -538,7 +538,7 @@ class _FilterBtn extends StatelessWidget {
               size: 14,
               color: RRColors.textSecond,
             ),
-            SizedBox(width: 6),
+            const SizedBox(width: 6),
             Text(
               'Filter',
               style: TextStyle(
@@ -627,7 +627,7 @@ class _SectionHeader extends StatelessWidget {
           RRSpace.sp16, 20, RRSpace.sp16, RRSpace.sp8),
       child: Text(
         label,
-        style: const TextStyle(
+        style: TextStyle(
           color: RRColors.textDisabled,
           fontSize: 12,
           fontWeight: FontWeight.w700,
@@ -734,7 +734,7 @@ class _VideoRowState extends State<_VideoRow> {
                     title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: RRColors.textPrimary,
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
@@ -743,7 +743,7 @@ class _VideoRowState extends State<_VideoRow> {
                   const SizedBox(height: 4),
                   Text(
                     subtitle,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: RRColors.textSecond,
                       fontSize: 13,
                     ),
@@ -752,7 +752,7 @@ class _VideoRowState extends State<_VideoRow> {
               ),
             ),
             const SizedBox(width: RRSpace.sp8),
-            const Icon(
+            Icon(
               CupertinoIcons.chevron_right,
               color: RRColors.textDisabled,
               size: 16,

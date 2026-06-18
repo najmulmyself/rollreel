@@ -183,7 +183,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                         ? 'One-time purchase · No subscription'
                         : 'Auto-renews annually · Cancel anytime',
                     textAlign: TextAlign.center,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: RRColors.textDisabled,
                       fontSize: 13,
                     ),
@@ -191,7 +191,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                   const SizedBox(height: RRSpace.sp16),
                   GestureDetector(
                     onTap: iap.loading ? null : _restore,
-                    child: const Text(
+                    child: Text(
                       'Restore Purchases',
                       textAlign: TextAlign.center,
                       style: TextStyle(
@@ -202,7 +202,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                     ),
                   ),
                   const SizedBox(height: RRSpace.sp12),
-                  const Text(
+                  Text(
                     'Payment charged to Apple ID. Subscription auto-renews unless cancelled 24h before period ends.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -339,7 +339,7 @@ class _FeatureRow extends StatelessWidget {
                     children: [
                       Text(
                         data.title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           color: RRColors.textPrimary,
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
@@ -372,7 +372,7 @@ class _FeatureRow extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     data.subtitle,
-                    style: const TextStyle(
+                    style: TextStyle(
                       color: RRColors.textSecond,
                       fontSize: 13,
                     ),
@@ -460,7 +460,7 @@ class _PricingCard extends StatelessWidget {
           const SizedBox(height: RRSpace.sp12),
           Text(
             _displayPrice,
-            style: const TextStyle(
+            style: TextStyle(
               color: RRColors.textPrimary,
               fontSize: 26,
               fontWeight: FontWeight.w800,
@@ -469,7 +469,7 @@ class _PricingCard extends StatelessWidget {
           const SizedBox(height: 2),
           Text(
             _subLabel,
-            style: const TextStyle(
+            style: TextStyle(
               color: RRColors.textSecond,
               fontSize: 13,
             ),

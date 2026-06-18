@@ -24,7 +24,7 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
 
   // ─── Section label style ──────────────────────────────────────────────────
 
-  static const TextStyle _sectionLabelStyle = TextStyle(
+  static TextStyle get _sectionLabelStyle => TextStyle(
     color: RRColors.textDisabled,
     fontSize: 12,
     fontWeight: FontWeight.w700,
@@ -101,7 +101,7 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
             ),
           ),
           if (!isLast)
-            const Divider(height: 1, color: RRColors.divider, indent: RRSpace.sp16),
+            Divider(height: 1, color: RRColors.divider, indent: RRSpace.sp16),
         ],
       ),
     );
@@ -113,7 +113,7 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
       padding:
           EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
       child: Container(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: RRColors.bgSurface,
           borderRadius: BorderRadius.vertical(
             top: Radius.circular(RRSpace.radiusXl),
@@ -143,7 +143,7 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
                     RRSpace.sp16, RRSpace.sp16, RRSpace.sp8, RRSpace.sp8),
                 child: Row(
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Text(
                         'Filter',
                         style: TextStyle(
@@ -173,7 +173,7 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(
                     RRSpace.sp16, RRSpace.sp8, RRSpace.sp16, RRSpace.sp4),
-                child: const Text('TIME PERIOD', style: _sectionLabelStyle),
+                child: Text('TIME PERIOD', style: _sectionLabelStyle),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(
@@ -230,7 +230,7 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(
                     RRSpace.sp16, RRSpace.sp12, RRSpace.sp16, RRSpace.sp4),
-                child: const Text('DURATION', style: _sectionLabelStyle),
+                child: Text('DURATION', style: _sectionLabelStyle),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(
@@ -269,7 +269,7 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(
                     RRSpace.sp16, RRSpace.sp12, RRSpace.sp16, RRSpace.sp8),
-                child: const Text('SORT BY', style: _sectionLabelStyle),
+                child: Text('SORT BY', style: _sectionLabelStyle),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(
@@ -319,7 +319,7 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
                           BorderRadius.circular(RRSpace.radiusFull),
                     ),
                     alignment: Alignment.center,
-                    child: const Text(
+                    child: Text(
                       'Apply Filters',
                       style: TextStyle(
                         color: RRColors.textPrimary,

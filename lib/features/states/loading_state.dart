@@ -73,7 +73,7 @@ class _LoadingStateState extends State<LoadingState>
               ),
 
               // Divider
-              const Divider(height: 1, color: RRColors.divider),
+              Divider(height: 1, color: RRColors.divider),
 
               // Date label skeleton
               Padding(
@@ -128,7 +128,7 @@ class _LoadingStateState extends State<LoadingState>
                     const CupertinoActivityIndicator(
                         color: RRColors.accentCyan),
                     const SizedBox(width: 10),
-                    const Text(
+                    Text(
                       'Loading your library...',
                       style: TextStyle(
                         color: RRColors.textSecond,
