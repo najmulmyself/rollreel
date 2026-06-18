@@ -17,15 +17,15 @@ RollReel – Local Video Player
 ## Subtitle (30 char max)
 
 ```
-Swipe Camera Roll Like Reels
+Swipe Your Camera Roll Videos
 ```
-(28/30 chars)
+(29/30 chars)
 
 ## Promotional Text (170 char max — editable without a new build)
 
 ```
 100% offline video feed for your camera roll. No uploads, no account,
-no tracking. Just swipe and watch — like Reels, but it's all yours.
+no tracking. Just swipe and watch — it's all yours.
 ```
 
 ## Description
@@ -39,8 +39,8 @@ Open the app. Swipe up. Watch your life, one memory at a time.
 
 WHY ROLLREEL
 
-• Full-screen vertical swipe feed of your local videos — TikTok-style,
-  zero learning curve
+• Full-screen vertical swipe feed of your local videos, zero learning
+  curve
 • 100% on-device. No uploads, no cloud sync, no account, no sign-in
 • Auto-play, auto-loop short clips, instant preloading for smooth
   swiping
