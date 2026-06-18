@@ -70,7 +70,7 @@ only permission it asks for — nothing else, ever.
 ## Keywords (100 char max — do not repeat words already in Name/Subtitle)
 
 ```
-offline,local,private,vault,gallery,reels,camera roll,memories,tiktok,rewind
+offline,local,private,vault,gallery,swipe feed,camera roll,memories,rewind,clips
 ```
 
 ## What's New in This Version (first release)
