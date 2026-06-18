@@ -54,7 +54,7 @@ Phase 1 for full detail and Phase 2+ for the post-launch roadmap.
 - [x] Primary category: Photo & Video / Secondary: Utilities
 - [x] Age rating questionnaire completed — calculated 4+ confirmed, no override applied
 - [x] Pricing: Free (with in-app purchases)
-- [ ] Copyright string filled in with your real name/entity (currently a placeholder)
+- [x] Copyright string filled in with your real name/entity
 - [x] Support URL set: `https://najmulmyself.github.io/rollreel/support.html`
 - [x] Marketing URL set: `https://najmulmyself.github.io/rollreel/`
 
