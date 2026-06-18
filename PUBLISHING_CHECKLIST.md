@@ -89,12 +89,13 @@ Phase 1 for full detail and Phase 2+ for the post-launch roadmap.
 
 ## 6. In-App Purchases
 
-- [ ] `com.rollreel.pro.lifetime` (Non-Consumable) created in App Store Connect
-- [ ] `com.rollreel.pro.annual` (Auto-Renewing Subscription) created in App Store Connect
+- [ ] `com.rollreel.pro.lifetime` (Non-Consumable, $4.99) created in App Store Connect
+- [ ] `com.rollreel.plus.monthly` (Auto-Renewing Subscription, $0.99–$1.99/mo) created
+      in App Store Connect
 - [ ] Both Product IDs match **byte-for-byte** what's hardcoded in
       `lib/core/iap/iap_provider.dart` (`queryProductDetails` silently
       returns nothing on any mismatch)
-- [ ] Subscription group, pricing, and localized display name/description set for the annual plan
+- [ ] Subscription group, pricing, and localized display name/description set for the monthly plan
 - [ ] IAPs submitted for review alongside the app build (first-time IAPs require this)
 - [ ] Paywall tested against the **Sandbox** Apple ID — prices and purchase flow confirmed working
 

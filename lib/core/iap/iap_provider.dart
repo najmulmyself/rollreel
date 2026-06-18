@@ -5,7 +5,7 @@ import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const kProductLifetime = 'com.rollreel.pro.lifetime';
-const kProductAnnual = 'com.rollreel.pro.annual';
+const kProductMonthly = 'com.rollreel.plus.monthly';
 
 // ─── is-pro provider ──────────────────────────────────────────────────────────
 
@@ -83,7 +83,7 @@ class IAPNotifier extends StateNotifier<IAPState> {
     );
 
     final response = await InAppPurchase.instance
-        .queryProductDetails({kProductLifetime, kProductAnnual});
+        .queryProductDetails({kProductLifetime, kProductMonthly});
 
     state = IAPState(
       available: true,

@@ -57,11 +57,13 @@ RollReel never uploads, transmits, or stores your videos anywhere but
 your device. There's no account because there's no server. Your
 memories stay exactly where they belong — on your iPhone.
 
-ROLLREEL PRO
+ROLLREEL PRO & PLUS
 
 Prefer an ad-free experience? RollReel Pro removes ads for good and
-unlocks a private, Face ID-protected Vault for the videos you don't
-want in the main feed.
+unlocks a private, Face ID-protected Vault and custom app icons —
+yours forever with a single purchase. RollReel Plus offers the same
+features for a low monthly price, plus founding-member access to
+every feature we ship after launch.
 
 RollReel needs Photo Library access to show your videos. That's the
 only permission it asks for — nothing else, ever.
@@ -76,8 +78,8 @@ offline,local,private,vault,gallery,swipe feed,camera roll,memories,rewind,clips
 ## What's New in This Version (first release)
 
 ```
-Welcome to RollReel — swipe through your camera roll videos like Reels,
-100% offline. No uploads, no account, no tracking.
+Welcome to RollReel — swipe through your camera roll videos in a
+vertical feed, 100% offline. No uploads, no account, no tracking.
 ```
 
 ---
@@ -99,8 +101,8 @@ Welcome to RollReel — swipe through your camera roll videos like Reels,
 
 | Reference Name | Product ID | Type | Price |
 |---|---|---|---|
-| RollReel Pro (Lifetime) | `com.rollreel.pro.lifetime` | Non-Consumable | $4.99 (or $2.99 intro per PRD §11) |
-| RollReel Plus (Annual) | `com.rollreel.pro.annual` | Auto-Renewing Subscription | $14.99/year |
+| RollReel Pro (Lifetime) | `com.rollreel.pro.lifetime` | Non-Consumable | $4.99 |
+| RollReel Plus (Monthly) | `com.rollreel.plus.monthly` | Auto-Renewing Subscription | $0.99–$1.99/mo (founding-member pricing, may increase later) |
 
 > These exact product IDs are already wired into `lib/core/iap/iap_provider.dart` — they must match byte-for-byte in App Store Connect or `queryProductDetails` will silently return nothing.
 

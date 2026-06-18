@@ -56,11 +56,11 @@ const List<_FeatureData> _kFeatures = [
 
 // ─── Plan enum ────────────────────────────────────────────────────────────────
 
-enum _Plan { lifetime, annual }
+enum _Plan { lifetime, monthly }
 
 extension _PlanX on _Plan {
   String get productId =>
-      this == _Plan.lifetime ? kProductLifetime : kProductAnnual;
+      this == _Plan.lifetime ? kProductLifetime : kProductMonthly;
 }
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
@@ -119,7 +119,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                   ..._kFeatures.map((f) => _FeatureRow(
                         data: f,
                         included: f.tier == _Tier.pro ||
-                            _selected == _Plan.annual,
+                            _selected == _Plan.monthly,
                       )),
                   const SizedBox(height: RRSpace.sp20),
 
@@ -138,11 +138,11 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                       const SizedBox(width: RRSpace.sp12),
                       Expanded(
                         child: _PricingCard(
-                          plan: _Plan.annual,
-                          selected: _selected == _Plan.annual,
-                          price: iap.products[kProductAnnual]?.price,
+                          plan: _Plan.monthly,
+                          selected: _selected == _Plan.monthly,
+                          price: iap.products[kProductMonthly]?.price,
                           onTap: () =>
-                              setState(() => _selected = _Plan.annual),
+                              setState(() => _selected = _Plan.monthly),
                         ),
                       ),
                     ],
@@ -181,7 +181,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                   Text(
                     _selected == _Plan.lifetime
                         ? 'One-time purchase · No subscription'
-                        : 'Auto-renews annually · Cancel anytime',
+                        : 'Auto-renews monthly · Cancel anytime',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: RRColors.textDisabled,
@@ -416,13 +416,12 @@ class _PricingCard extends StatelessWidget {
 
   String get _displayPrice {
     if (price != null) return price!;
-    return _isLifetime ? '\$4.99' : '\$14.99/yr';
+    return _isLifetime ? '\$4.99' : '\$0.99/mo';
   }
 
   String get _subLabel {
     if (_isLifetime) return 'Lifetime Access';
-    // For annual, show per-month breakdown if possible
-    return '\$1.25/month';
+    return 'Founding-member pricing';
   }
 
   Widget _inner() {
