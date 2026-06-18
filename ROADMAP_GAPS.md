@@ -9,7 +9,6 @@ Everything not listed here as missing/partial is implemented and working.
 
 | Item | PRD Ref | Status | Gap |
 |---|---|---|---|
-| Limited Photo Library access banner | F2 | ⚠️ Partial | Limited access is treated like full access — no persistent "Managing X of Y videos" banner with tap-to-expand-access CTA |
 | Controls auto-hide timing | F3 | ⚠️ Deviation | Auto-hides after 1s, PRD specifies 3s |
 | Long-press gesture | F3 | ⚠️ Deviation | PRD specifies 0.5× slow-motion preview on long-press; current build uses long-press for 2× fast-forward instead |
 | Location tag on video info overlay | F6 | ❌ Missing | No EXIF/GPS read-back ("Dhaka, BD" style tag) — only filename/date/duration shown |
@@ -57,7 +56,7 @@ Everything not listed here as missing/partial is implemented and working.
 ## Already implemented (for reference, not a gap)
 
 - F1 Vertical swipe feed, auto-play, auto-loop short videos, haptic feedback
-- F2 Full/Limited/Denied permission states with empty-state CTA
+- F2 Full/Limited/Denied permission states with empty-state CTA + persistent "Managing X videos" limited-access banner with tap-to-expand-access CTA
 - F3 Tap pause/resume, double-tap ±10s seek, edge-swipe volume/brightness, scrubbing seek bar
 - F4 Date grouping header label
 - F5 Quick filter tabs (All / Today / Shorts / Long)
