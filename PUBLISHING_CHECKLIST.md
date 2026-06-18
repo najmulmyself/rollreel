@@ -60,9 +60,8 @@ Phase 1 for full detail and Phase 2+ for the post-launch roadmap.
 
 ## 4. Privacy & compliance
 
-- [x] Privacy Policy hosted via GitHub Pages:
-      `https://najmulmyself.github.io/rollreel/privacy.html` (source: `docs/privacy.html`).
-      **Enable GitHub Pages in repo Settings → Pages (source: branch, `/docs` folder) if not already on.**
+- [x] Privacy Policy hosted via GitHub Pages and confirmed live:
+      `https://najmulmyself.github.io/rollreel/privacy.html`
 - [ ] App Privacy "Nutrition Label" questionnaire completed in App Store
       Connect, disclosing AdMob's data collection (device/advertising identifiers)
 - [ ] `NSPhotoLibraryUsageDescription` / `NSPhotoLibraryAddUsageDescription` /
