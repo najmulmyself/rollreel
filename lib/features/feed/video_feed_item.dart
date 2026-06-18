@@ -52,8 +52,13 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
   bool _showPlayIcon = false;
   bool _iconIsPlay = false;
 
-  // Slow-motion state
-  bool _slowMotion = false;
+  // Double-tap seek flash
+  bool _showSeekFlash = false;
+  bool _seekFlashIsForward = true;
+  Timer? _seekFlashTimer;
+
+  // Long-press fast-forward state
+  bool _fastForward = false;
 
   // Volume / brightness gesture state
   _DragType _dragType = _DragType.none;
@@ -145,9 +150,21 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
     });
   }
 
+  void _flashSeek(bool isForward) {
+    _seekFlashTimer?.cancel();
+    setState(() {
+      _showSeekFlash = true;
+      _seekFlashIsForward = isForward;
+    });
+    _seekFlashTimer = Timer(const Duration(milliseconds: 600), () {
+      if (mounted) setState(() => _showSeekFlash = false);
+    });
+  }
+
   @override
   void dispose() {
     _controlsHideTimer?.cancel();
+    _seekFlashTimer?.cancel();
     _controller?.removeListener(_onTick);
     _controller?.dispose();
     // Restore screen brightness when leaving
@@ -179,19 +196,19 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
     });
   }
 
-  // ── Slow motion ─────────────────────────────────────────────────────────────
+  // ── Long-press fast-forward (2×) ─────────────────────────────────────────────
 
-  void _startSlowMotion() {
+  void _startFastForward() {
     if (!_initialized || _controller == null) return;
     HapticFeedback.heavyImpact();
-    _controller!.setPlaybackSpeed(0.5);
-    setState(() => _slowMotion = true);
+    _controller!.setPlaybackSpeed(2.0);
+    setState(() => _fastForward = true);
   }
 
-  void _endSlowMotion() {
+  void _endFastForward() {
     if (!_initialized || _controller == null) return;
     _controller!.setPlaybackSpeed(1.0);
-    setState(() => _slowMotion = false);
+    setState(() => _fastForward = false);
   }
 
   // ── Volume / brightness gestures ─────────────────────────────────────────────
@@ -271,13 +288,6 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
           CupertinoActionSheetAction(
             onPressed: () {
               Navigator.pop(context);
-              _openLandscape(context);
-            },
-            child: const Text('Open Fullscreen'),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(context);
               showModalBottomSheet<void>(
                 context: context,
                 backgroundColor: Colors.transparent,
@@ -316,24 +326,25 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
   Widget build(BuildContext context) {
     final safeBottom = MediaQuery.paddingOf(context).bottom;
     final isFavorited = ref.watch(favoritesIdsProvider).contains(widget.asset.id);
-    final isSaved = ref.watch(vaultIdsProvider).contains(widget.asset.id);
 
     return DynamicBackground(
       thumbnailBytes: _thumbnail,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: _togglePlay,
-        onLongPressStart: (_) => _startSlowMotion(),
-        onLongPressEnd: (_) => _endSlowMotion(),
+        onLongPressStart: (_) => _startFastForward(),
+        onLongPressEnd: (_) => _endFastForward(),
         onDoubleTapDown: (d) {
           HapticFeedback.lightImpact();
           final half = MediaQuery.sizeOf(context).width / 2;
-          final offset = d.localPosition.dx > half
+          final isForward = d.localPosition.dx > half;
+          final offset = isForward
               ? const Duration(seconds: 10)
               : const Duration(seconds: -10);
           final next =
               (_controller?.value.position ?? Duration.zero) + offset;
           _controller?.seekTo(next.isNegative ? Duration.zero : next);
+          _flashSeek(isForward);
         },
         child: Stack(
           fit: StackFit.expand,
@@ -422,8 +433,8 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
               ),
             ),
 
-            // ── Slow-motion badge ────────────────────────────────────────────
-            if (_slowMotion)
+            // ── Fast-forward badge ───────────────────────────────────────────
+            if (_fastForward)
               IgnorePointer(
                 child: Positioned(
                   top: 72,
@@ -438,7 +449,7 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
                         borderRadius: BorderRadius.circular(100),
                       ),
                       child: const Text(
-                        '0.5×',
+                        '2×',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 14,
@@ -449,6 +460,39 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
                   ),
                 ),
               ),
+
+            // ── Double-tap seek flash ────────────────────────────────────────
+            Positioned(
+              top: 0,
+              bottom: 0,
+              left: _seekFlashIsForward
+                  ? MediaQuery.sizeOf(context).width / 2
+                  : 0,
+              width: MediaQuery.sizeOf(context).width / 2,
+              child: IgnorePointer(
+                child: AnimatedOpacity(
+                  opacity: _showSeekFlash ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 150),
+                  child: Center(
+                    child: Container(
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.52),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        _seekFlashIsForward
+                            ? CupertinoIcons.goforward_10
+                            : CupertinoIcons.gobackward_10,
+                        color: Colors.white,
+                        size: 30,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
 
             // ── Volume / brightness overlay ──────────────────────────────────
             if (_showDragOverlay)
@@ -467,17 +511,13 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
                 child: _Sidebar(
                   asset: widget.asset,
                   isFavorited: isFavorited,
-                  isSaved: isSaved,
                   onFavorite: () {
                     HapticFeedback.lightImpact();
                     ref
                         .read(favoritesIdsProvider.notifier)
                         .toggle(widget.asset.id);
                   },
-                  onSave: () {
-                    HapticFeedback.lightImpact();
-                    ref.read(vaultIdsProvider.notifier).toggle(widget.asset.id);
-                  },
+                  onFullscreen: () => _openLandscape(context),
                   onOptions: () => _showOptions(context),
                 ),
               ),
@@ -619,16 +659,14 @@ class _Sidebar extends StatelessWidget {
   const _Sidebar({
     required this.asset,
     required this.isFavorited,
-    required this.isSaved,
     required this.onFavorite,
-    required this.onSave,
+    required this.onFullscreen,
     required this.onOptions,
   });
   final AssetEntity asset;
   final bool isFavorited;
-  final bool isSaved;
   final VoidCallback onFavorite;
-  final VoidCallback onSave;
+  final VoidCallback onFullscreen;
   final VoidCallback onOptions;
 
   Future<void> _share() async {
@@ -656,12 +694,9 @@ class _Sidebar extends StatelessWidget {
         ),
         const SizedBox(height: 22),
         _SideBtn(
-          icon: isSaved
-              ? CupertinoIcons.bookmark_fill
-              : CupertinoIcons.bookmark,
-          color: isSaved ? RRColors.accentAmber : Colors.white,
-          label: 'Save',
-          onTap: onSave,
+          icon: Icons.fullscreen_rounded,
+          label: 'Expand',
+          onTap: onFullscreen,
         ),
         const SizedBox(height: 22),
         _SideBtn(icon: CupertinoIcons.ellipsis, onTap: onOptions),
