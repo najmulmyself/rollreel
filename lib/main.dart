@@ -5,6 +5,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'navigation/app_router.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   MobileAds.instance.initialize();
   runApp(const ProviderScope(child: MyApp()));
 }
