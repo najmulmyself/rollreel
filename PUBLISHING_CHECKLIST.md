@@ -52,8 +52,7 @@ Phase 1 for full detail and Phase 2+ for the post-launch roadmap.
 - [ ] Promotional Text, Description, Keywords, "What's New" pasted from `APP_STORE_LISTING.md`
       (no competitor trademarks — TikTok/Reels references removed)
 - [ ] Primary category: Photo & Video / Secondary: Utilities
-- [x] Age rating questionnaire completed — 4+ (Third-Party Advertising: Yes,
-      everything else None, no UGC)
+- [x] Age rating questionnaire completed — calculated 4+ confirmed, no override applied
 - [ ] Pricing: Free (with in-app purchases)
 - [ ] Copyright string filled in with your real name/entity (currently a placeholder)
 - [x] Support URL set: `https://najmulmyself.github.io/rollreel/support.html`
