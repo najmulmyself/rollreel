@@ -3,10 +3,8 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../iap/iap_provider.dart';
 
-// Google's public test interstitial unit — swap for the real AdMob unit ID
-// before release.
 const String kInterstitialAdUnitId =
-    'ca-app-pub-3940256099942544/4411468910';
+    'ca-app-pub-3549493907002564/1729166596';
 
 const int kSwipesPerInterstitial = 6;
 

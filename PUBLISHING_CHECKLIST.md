@@ -84,7 +84,8 @@ Phase 1 for full detail and Phase 2+ for the post-launch roadmap.
 - [ ] `com.google.android.gms.ads.APPLICATION_ID` in
       `android/app/src/main/AndroidManifest.xml` replaced with the real ID
       (only needed if shipping Android — still on Google's test ID)
-- [ ] Real ad unit IDs (not test units) wired into `lib/core/ads/ads_provider.dart`
+- [x] Real ad unit IDs (not test units) wired into `lib/core/ads/ads_provider.dart`
+      (interstitial: `ca-app-pub-3549493907002564/1729166596`)
 
 ## 6. In-App Purchases
 
