@@ -435,11 +435,11 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
 
             // ── Fast-forward badge ───────────────────────────────────────────
             if (_fastForward)
-              IgnorePointer(
-                child: Positioned(
-                  top: 72,
-                  left: 0,
-                  right: 0,
+              Positioned(
+                top: 72,
+                left: 0,
+                right: 0,
+                child: IgnorePointer(
                   child: Center(
                     child: Container(
                       padding: const EdgeInsets.symmetric(
