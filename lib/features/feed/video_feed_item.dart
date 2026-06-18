@@ -49,6 +49,7 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
   VideoPlayerController? _controller;
   bool _initialized = false;
   Uint8List? _thumbnail;
+  String? _title;
   bool _showPlayIcon = false;
   bool _iconIsPlay = false;
 
@@ -87,6 +88,7 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
   void initState() {
     super.initState();
     _loadThumbnail();
+    _loadTitle();
     _initController();
   }
 
@@ -94,6 +96,11 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
     final bytes = await widget.asset
         .thumbnailDataWithSize(const ThumbnailSize(400, 700));
     if (mounted) setState(() => _thumbnail = bytes);
+  }
+
+  Future<void> _loadTitle() async {
+    final title = await widget.asset.titleAsync;
+    if (mounted && title.isNotEmpty) setState(() => _title = title);
   }
 
   Future<void> _initController() async {
@@ -541,6 +548,7 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
                       opacity: _controlsVisible ? 1.0 : 0.0,
                       child: _InfoCard(
                         asset: widget.asset,
+                        title: _title,
                         controller: _controller,
                         isPlaying: _controller?.value.isPlaying ?? false,
                         onTogglePlay: _togglePlay,
@@ -760,11 +768,13 @@ class _InfoCard extends StatelessWidget {
     required this.controller,
     required this.isPlaying,
     required this.onTogglePlay,
+    this.title,
     this.onOpenLibrary,
     this.onOpenSettings,
   });
 
   final AssetEntity asset;
+  final String? title;
   final VideoPlayerController? controller;
   final bool isPlaying;
   final VoidCallback onTogglePlay;
@@ -794,9 +804,10 @@ class _InfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tag = asset.duration < 60 ? 'Shorts' : 'Long';
-    final title = (asset.title != null && asset.title!.isNotEmpty)
-        ? asset.title!
-        : 'Video';
+    final resolvedTitle = title ??
+        (asset.title != null && asset.title!.isNotEmpty
+            ? asset.title!
+            : 'Video');
 
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
@@ -813,7 +824,7 @@ class _InfoCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  title,
+                  resolvedTitle,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
