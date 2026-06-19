@@ -5,6 +5,7 @@ import 'package:in_app_review/in_app_review.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/iap/iap_provider.dart';
 import '../../core/settings/settings_provider.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
@@ -122,6 +123,7 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final s = ref.watch(settingsProvider);
     final notifier = ref.read(settingsProvider.notifier);
+    final isPro = ref.watch(isProProvider);
 
     return Scaffold(
       backgroundColor: RRColors.bgDeep,
@@ -219,8 +221,8 @@ class SettingsScreen extends ConsumerWidget {
                           color: Color(0xFF1A5A6B),
                           icon: Icons.face_retouching_natural),
                       label: 'App Lock (Face ID)',
-                      trailingText: 'Pro',
-                      onTap: onOpenPaywall,
+                      trailingText: isPro ? null : 'Pro',
+                      onTap: isPro ? onOpenVault : onOpenPaywall,
                     ),
                   ]),
                   const SizedBox(height: RRSpace.sp24),

@@ -310,7 +310,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
             itemBuilder: (context, index) => VideoFeedItem(
               key: ValueKey(videos[index].id),
               asset: videos[index],
-              isActive: index == safeIndex,
+              isActive: index == safeIndex && widget.isTabActive,
               onControllerReady: _handleControllerReady,
               onDelete: () => _deleteCurrentVideo(videos),
               onPlayStateChanged: _handlePlayStateChanged,
