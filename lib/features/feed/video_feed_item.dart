@@ -53,6 +53,11 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
   bool _showPlayIcon = false;
   bool _iconIsPlay = false;
 
+  // Anchor for the iPad share-sheet popover. Must be unique per video item —
+  // PageView keeps adjacent pages mounted, so a shared/static key would
+  // trigger a "Duplicate GlobalKey" crash.
+  final GlobalKey _shareBtnKey = GlobalKey();
+
   // Double-tap seek flash
   bool _showSeekFlash = false;
   bool _seekFlashIsForward = true;
@@ -512,6 +517,7 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
                 child: _Sidebar(
                   asset: widget.asset,
                   isFavorited: isFavorited,
+                  shareBtnKey: _shareBtnKey,
                   onFavorite: () {
                     HapticFeedback.lightImpact();
                     ref
@@ -661,22 +667,22 @@ class _Sidebar extends StatelessWidget {
   const _Sidebar({
     required this.asset,
     required this.isFavorited,
+    required this.shareBtnKey,
     required this.onFavorite,
     required this.onFullscreen,
     required this.onOptions,
   });
   final AssetEntity asset;
   final bool isFavorited;
+  final GlobalKey shareBtnKey;
   final VoidCallback onFavorite;
   final VoidCallback onFullscreen;
   final VoidCallback onOptions;
 
-  static final _shareBtnKey = GlobalKey();
-
   // iPad shows the share sheet as a popover and requires an anchor rect —
   // without one it renders at (0,0) and gets dismissed before it's visible.
-  static Rect get _sharePopoverOrigin {
-    final box = _shareBtnKey.currentContext?.findRenderObject() as RenderBox?;
+  Rect get _sharePopoverOrigin {
+    final box = shareBtnKey.currentContext?.findRenderObject() as RenderBox?;
     if (box == null) return Rect.zero;
     final pos = box.localToGlobal(Offset.zero);
     return pos & box.size;
@@ -706,7 +712,7 @@ class _Sidebar extends StatelessWidget {
         ),
         const SizedBox(height: 22),
         _SideBtn(
-          key: _shareBtnKey,
+          key: shareBtnKey,
           icon: CupertinoIcons.share,
           label: 'Share',
           onTap: _share,

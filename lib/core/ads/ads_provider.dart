@@ -16,14 +16,18 @@ class AdsNotifier extends StateNotifier<int> {
 
   final Ref _ref;
   InterstitialAd? _interstitial;
+  bool _isLoading = false;
 
   void _loadInterstitial() {
+    if (_isLoading) return;
+    _isLoading = true;
     InterstitialAd.load(
       adUnitId: kInterstitialAdUnitId,
       request: const AdRequest(),
       adLoadCallback: InterstitialAdLoadCallback(
         onAdLoaded: (ad) {
           debugPrint('[RollReel] Interstitial loaded');
+          _isLoading = false;
           _interstitial = ad;
           ad.fullScreenContentCallback = FullScreenContentCallback(
             onAdDismissedFullScreenContent: (ad) {
@@ -40,7 +44,10 @@ class AdsNotifier extends StateNotifier<int> {
         },
         onAdFailedToLoad: (error) {
           debugPrint('[RollReel] Interstitial failed to load: $error');
+          _isLoading = false;
           _interstitial = null;
+          // Retry shortly instead of waiting for the next swipe-threshold hit.
+          Future.delayed(const Duration(seconds: 5), _loadInterstitial);
         },
       ),
     );
@@ -53,13 +60,17 @@ class AdsNotifier extends StateNotifier<int> {
 
     final count = state + 1;
     if (count >= kSwipesPerInterstitial) {
-      state = 0;
       final ad = _interstitial;
       if (ad != null) {
+        state = 0;
         _interstitial = null;
         ad.show();
       } else {
+        // Not ready yet — hold at the threshold and retry on the next swipe
+        // instead of silently resetting and losing this ad opportunity.
         debugPrint('[RollReel] Swipe threshold hit but no interstitial ready yet');
+        state = count;
+        _loadInterstitial();
       }
     } else {
       state = count;
