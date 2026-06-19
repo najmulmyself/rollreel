@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -382,17 +383,57 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
 
 // ─── Limited Photo Library access banner ───────────────────────────────────
 
-class _LimitedAccessBanner extends StatelessWidget {
+class _LimitedAccessBanner extends ConsumerWidget {
   const _LimitedAccessBanner({required this.accessibleCount});
 
   final int accessibleCount;
 
+  Future<void> _manage(BuildContext context, WidgetRef ref) async {
+    final choice = await showCupertinoModalPopup<String>(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        title: const Text('Photo Library Access'),
+        message: const Text(
+            'You\'re currently sharing a limited selection of videos.'),
+        actions: [
+          CupertinoActionSheetAction(
+            onPressed: () => Navigator.pop(ctx, 'select'),
+            child: const Text('Select More Videos'),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () => Navigator.pop(ctx, 'settings'),
+            child: const Text('Allow Full Access'),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          isDefaultAction: true,
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('Cancel'),
+        ),
+      ),
+    );
+
+    if (choice == 'select') {
+      await PhotoManager.presentLimited();
+    } else if (choice == 'settings') {
+      // iOS only lets a limited grant be promoted to full access from the
+      // system Settings app — there's no in-app API for it.
+      await PhotoManager.openSetting();
+    } else {
+      return;
+    }
+    // The system picker/Settings mutate the accessible-asset set without
+    // notifying the app — force a refetch so the feed reflects the change.
+    ref.invalidate(videoLibraryProvider);
+    ref.invalidate(permissionProvider);
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: GestureDetector(
-        onTap: () => PhotoManager.presentLimited(),
+        onTap: () => _manage(context, ref),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           decoration: BoxDecoration(

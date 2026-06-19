@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
@@ -22,6 +23,7 @@ class AdsNotifier extends StateNotifier<int> {
       request: const AdRequest(),
       adLoadCallback: InterstitialAdLoadCallback(
         onAdLoaded: (ad) {
+          debugPrint('[RollReel] Interstitial loaded');
           _interstitial = ad;
           ad.fullScreenContentCallback = FullScreenContentCallback(
             onAdDismissedFullScreenContent: (ad) {
@@ -36,7 +38,8 @@ class AdsNotifier extends StateNotifier<int> {
             },
           );
         },
-        onAdFailedToLoad: (_) {
+        onAdFailedToLoad: (error) {
+          debugPrint('[RollReel] Interstitial failed to load: $error');
           _interstitial = null;
         },
       ),
@@ -55,6 +58,8 @@ class AdsNotifier extends StateNotifier<int> {
       if (ad != null) {
         _interstitial = null;
         ad.show();
+      } else {
+        debugPrint('[RollReel] Swipe threshold hit but no interstitial ready yet');
       }
     } else {
       state = count;
