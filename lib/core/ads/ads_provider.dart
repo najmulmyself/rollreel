@@ -4,8 +4,13 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../iap/iap_provider.dart';
 
-const String kInterstitialAdUnitId =
-    'ca-app-pub-3549493907002564/1729166596';
+// Real ad units return "No ad to show" (zero fill) until the AdMob account
+// has enough traffic history — that's expected, not a bug. Use Google's
+// official test unit in debug builds so the ad pipeline itself can be
+// verified without depending on real fill.
+const String kInterstitialAdUnitId = kDebugMode
+    ? 'ca-app-pub-3940256099942544/4411468910'
+    : 'ca-app-pub-3549493907002564/1729166596';
 
 const int kSwipesPerInterstitial = 6;
 

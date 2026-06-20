@@ -53,11 +53,6 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
   bool _showPlayIcon = false;
   bool _iconIsPlay = false;
 
-  // Anchor for the iPad share-sheet popover. Must be unique per video item —
-  // PageView keeps adjacent pages mounted, so a shared/static key would
-  // trigger a "Duplicate GlobalKey" crash.
-  final GlobalKey _shareBtnKey = GlobalKey();
-
   // Double-tap seek flash
   bool _showSeekFlash = false;
   bool _seekFlashIsForward = true;
@@ -517,7 +512,6 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
                 child: _Sidebar(
                   asset: widget.asset,
                   isFavorited: isFavorited,
-                  shareBtnKey: _shareBtnKey,
                   onFavorite: () {
                     HapticFeedback.lightImpact();
                     ref
@@ -667,35 +661,32 @@ class _Sidebar extends StatelessWidget {
   const _Sidebar({
     required this.asset,
     required this.isFavorited,
-    required this.shareBtnKey,
     required this.onFavorite,
     required this.onFullscreen,
     required this.onOptions,
   });
   final AssetEntity asset;
   final bool isFavorited;
-  final GlobalKey shareBtnKey;
   final VoidCallback onFavorite;
   final VoidCallback onFullscreen;
   final VoidCallback onOptions;
 
   // iPad shows the share sheet as a popover and requires an anchor rect —
   // without one it renders at (0,0) and gets dismissed before it's visible.
-  Rect get _sharePopoverOrigin {
-    final box = shareBtnKey.currentContext?.findRenderObject() as RenderBox?;
-    if (box == null) return Rect.zero;
-    final pos = box.localToGlobal(Offset.zero);
-    return pos & box.size;
-  }
-
-  Future<void> _share() async {
+  // [btnContext] is the share button's own BuildContext, captured at tap
+  // time via a Builder below, so no GlobalKey (and its duplicate-key risk
+  // across the PageView's simultaneously-mounted pages) is needed.
+  Future<void> _share(BuildContext btnContext) async {
     final file = await asset.file;
-    if (file != null) {
-      await Share.shareXFiles(
-        [XFile(file.path)],
-        sharePositionOrigin: _sharePopoverOrigin,
-      );
-    }
+    if (file == null) return;
+    final box = btnContext.findRenderObject() as RenderBox?;
+    final origin = box == null
+        ? Rect.zero
+        : (box.localToGlobal(Offset.zero) & box.size);
+    await Share.shareXFiles(
+      [XFile(file.path)],
+      sharePositionOrigin: origin,
+    );
   }
 
   @override
@@ -711,11 +702,12 @@ class _Sidebar extends StatelessWidget {
           onTap: onFavorite,
         ),
         const SizedBox(height: 22),
-        _SideBtn(
-          key: shareBtnKey,
-          icon: CupertinoIcons.share,
-          label: 'Share',
-          onTap: _share,
+        Builder(
+          builder: (btnContext) => _SideBtn(
+            icon: CupertinoIcons.share,
+            label: 'Share',
+            onTap: () => _share(btnContext),
+          ),
         ),
         const SizedBox(height: 22),
         _SideBtn(
