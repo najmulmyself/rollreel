@@ -5,6 +5,7 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/review/review_prompt_provider.dart';
+import '../core/video/video_library_provider.dart';
 import '../features/onboarding/onboarding_screen.dart';
 import '../features/paywall/paywall_screen.dart';
 import '../features/permission/permission_denied_screen.dart';
@@ -108,7 +109,15 @@ class _AppRouterState extends ConsumerState<AppRouter> with WidgetsBindingObserv
     await prefs.setBool('has_seen_onboarding', true);
     if (perm.isAuth || perm == PermissionState.limited) {
       await _requestTrackingIfNeeded();
+      // On a fresh grant the Photos library can take a moment to finish
+      // syncing internally — videoLibraryProvider already retries once on
+      // an empty result, but force a second refresh shortly after landing
+      // on the feed in case that race is still lost.
+      ref.invalidate(videoLibraryProvider);
       _go(RRRoute.main);
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) ref.invalidate(videoLibraryProvider);
+      });
     } else {
       _go(RRRoute.permissionDenied);
     }
