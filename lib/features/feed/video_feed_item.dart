@@ -671,25 +671,22 @@ class _Sidebar extends StatelessWidget {
   final VoidCallback onFullscreen;
   final VoidCallback onOptions;
 
-  static final _shareBtnKey = GlobalKey();
-
   // iPad shows the share sheet as a popover and requires an anchor rect —
   // without one it renders at (0,0) and gets dismissed before it's visible.
-  static Rect get _sharePopoverOrigin {
-    final box = _shareBtnKey.currentContext?.findRenderObject() as RenderBox?;
-    if (box == null) return Rect.zero;
-    final pos = box.localToGlobal(Offset.zero);
-    return pos & box.size;
-  }
-
-  Future<void> _share() async {
+  // [btnContext] is the share button's own BuildContext, captured at tap
+  // time via a Builder below, so no GlobalKey (and its duplicate-key risk
+  // across the PageView's simultaneously-mounted pages) is needed.
+  Future<void> _share(BuildContext btnContext) async {
     final file = await asset.file;
-    if (file != null) {
-      await Share.shareXFiles(
-        [XFile(file.path)],
-        sharePositionOrigin: _sharePopoverOrigin,
-      );
-    }
+    if (file == null) return;
+    final box = btnContext.findRenderObject() as RenderBox?;
+    final origin = box == null
+        ? Rect.zero
+        : (box.localToGlobal(Offset.zero) & box.size);
+    await Share.shareXFiles(
+      [XFile(file.path)],
+      sharePositionOrigin: origin,
+    );
   }
 
   @override
@@ -705,11 +702,12 @@ class _Sidebar extends StatelessWidget {
           onTap: onFavorite,
         ),
         const SizedBox(height: 22),
-        _SideBtn(
-          key: _shareBtnKey,
-          icon: CupertinoIcons.share,
-          label: 'Share',
-          onTap: _share,
+        Builder(
+          builder: (btnContext) => _SideBtn(
+            icon: CupertinoIcons.share,
+            label: 'Share',
+            onTap: () => _share(btnContext),
+          ),
         ),
         const SizedBox(height: 22),
         _SideBtn(

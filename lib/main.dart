@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
+import 'core/theme/app_theme.dart';
 import 'core/theme/colors.dart';
 import 'navigation/app_router.dart';
 
@@ -21,6 +22,9 @@ class MyApp extends StatelessWidget {
       builder: (context, isDark, _) => MaterialApp(
         debugShowCheckedModeBanner: false,
         key: ValueKey(isDark),
+        theme: RRAppTheme.dark(),
+        darkTheme: RRAppTheme.dark(),
+        themeMode: ThemeMode.dark,
         home: const AppRouter(),
       ),
     );
