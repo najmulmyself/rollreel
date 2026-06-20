@@ -1,4 +1,3 @@
-import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -70,19 +69,6 @@ class _AppRouterState extends ConsumerState<AppRouter> with WidgetsBindingObserv
 
   void _go(RRRoute route) => setState(() => _route = route);
 
-  // Must be requested while the app is active/foreground, before the first
-  // ad request, so AdMob knows whether it may serve personalized ads.
-  Future<void> _requestTrackingIfNeeded() async {
-    try {
-      final status = await AppTrackingTransparency.trackingAuthorizationStatus;
-      if (status == TrackingStatus.notDetermined) {
-        await AppTrackingTransparency.requestTrackingAuthorization();
-      }
-    } catch (_) {
-      // Platform without ATT support (e.g. Android) — no-op.
-    }
-  }
-
   Future<void> _afterSplash() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -94,7 +80,6 @@ class _AppRouterState extends ConsumerState<AppRouter> with WidgetsBindingObserv
       // Silent check — no dialog shown when permission already determined
       final perm = await PhotoManager.requestPermissionExtend();
       if (perm.isAuth || perm == PermissionState.limited) {
-        await _requestTrackingIfNeeded();
         _go(RRRoute.main);
       } else {
         _go(RRRoute.permissionDenied);
@@ -108,7 +93,6 @@ class _AppRouterState extends ConsumerState<AppRouter> with WidgetsBindingObserv
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('has_seen_onboarding', true);
     if (perm.isAuth || perm == PermissionState.limited) {
-      await _requestTrackingIfNeeded();
       // On a fresh grant the Photos library can take a moment to finish
       // syncing internally — videoLibraryProvider already retries once on
       // an empty result, but force a second refresh shortly after landing
