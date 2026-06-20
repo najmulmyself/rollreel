@@ -58,14 +58,23 @@ Future<List<AssetEntity>> _fetchVideos() async {
 /// Returns ALL videos from the device library (no filter applied).
 final videoLibraryProvider = FutureProvider<List<AssetEntity>>((ref) async {
   try {
-    final result = await _fetchVideos();
     // Right after the OS permission dialog is granted on a fresh install,
-    // PhotoManager's asset fetch can momentarily return an empty list
-    // before the Photos library finishes syncing internally — retry once
-    // after a short delay rather than showing "no videos" until restart.
-    if (result.isEmpty) {
-      await Future.delayed(const Duration(milliseconds: 800));
-      return _fetchVideos();
+    // PhotoManager's asset fetch can keep returning an empty list for a
+    // few seconds while the Photos library finishes syncing/indexing
+    // internally — poll a few times with backoff instead of giving up
+    // and showing "no videos" until the app is restarted.
+    const delays = [
+      Duration(milliseconds: 500),
+      Duration(milliseconds: 1000),
+      Duration(seconds: 2),
+      Duration(seconds: 3),
+    ];
+    var result = await _fetchVideos();
+    for (final delay in delays) {
+      if (result.isNotEmpty) break;
+      await Future.delayed(delay);
+      await PhotoManager.clearFileCache();
+      result = await _fetchVideos();
     }
     return result;
   } catch (e) {
