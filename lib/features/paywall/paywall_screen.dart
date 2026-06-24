@@ -1,10 +1,16 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/iap/iap_provider.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
+
+const String kTermsOfUseUrl =
+    'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/';
+const String kPrivacyPolicyUrl =
+    'https://najmulmyself.github.io/rollreel/privacy.html';
 
 // ─── Feature data ─────────────────────────────────────────────────────────────
 
@@ -84,6 +90,13 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
 
   void _restore() {
     ref.read(iapProvider.notifier).restore();
+  }
+
+  Future<void> _openUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 
   @override
@@ -213,6 +226,37 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                       fontSize: 11,
                       height: 1.5,
                     ),
+                  ),
+                  const SizedBox(height: RRSpace.sp12),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      GestureDetector(
+                        onTap: () => _openUrl(kTermsOfUseUrl),
+                        child: Text(
+                          'Terms of Use (EULA)',
+                          style: TextStyle(
+                            color: RRColors.textSecond,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: RRSpace.sp16),
+                      GestureDetector(
+                        onTap: () => _openUrl(kPrivacyPolicyUrl),
+                        child: Text(
+                          'Privacy Policy',
+                          style: TextStyle(
+                            color: RRColors.textSecond,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
