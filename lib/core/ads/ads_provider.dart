@@ -1,10 +1,16 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import '../iap/iap_provider.dart';
 
-const String kInterstitialAdUnitId =
-    'ca-app-pub-3549493907002564/1729166596';
+// Real ad units return "No ad to show" (zero fill) until the AdMob account
+// has enough traffic history — that's expected, not a bug. Use Google's
+// official test unit in debug builds so the ad pipeline itself can be
+// verified without depending on real fill.
+const String kInterstitialAdUnitId = kDebugMode
+    ? 'ca-app-pub-3940256099942544/4411468910'
+    : 'ca-app-pub-3549493907002564/1729166596';
 
 const int kSwipesPerInterstitial = 6;
 
@@ -15,13 +21,18 @@ class AdsNotifier extends StateNotifier<int> {
 
   final Ref _ref;
   InterstitialAd? _interstitial;
+  bool _isLoading = false;
 
   void _loadInterstitial() {
+    if (_isLoading) return;
+    _isLoading = true;
     InterstitialAd.load(
       adUnitId: kInterstitialAdUnitId,
       request: const AdRequest(),
       adLoadCallback: InterstitialAdLoadCallback(
         onAdLoaded: (ad) {
+          debugPrint('[RollReel] Interstitial loaded');
+          _isLoading = false;
           _interstitial = ad;
           ad.fullScreenContentCallback = FullScreenContentCallback(
             onAdDismissedFullScreenContent: (ad) {
@@ -36,8 +47,12 @@ class AdsNotifier extends StateNotifier<int> {
             },
           );
         },
-        onAdFailedToLoad: (_) {
+        onAdFailedToLoad: (error) {
+          debugPrint('[RollReel] Interstitial failed to load: $error');
+          _isLoading = false;
           _interstitial = null;
+          // Retry shortly instead of waiting for the next swipe-threshold hit.
+          Future.delayed(const Duration(seconds: 5), _loadInterstitial);
         },
       ),
     );
@@ -50,11 +65,17 @@ class AdsNotifier extends StateNotifier<int> {
 
     final count = state + 1;
     if (count >= kSwipesPerInterstitial) {
-      state = 0;
       final ad = _interstitial;
       if (ad != null) {
+        state = 0;
         _interstitial = null;
         ad.show();
+      } else {
+        // Not ready yet — hold at the threshold and retry on the next swipe
+        // instead of silently resetting and losing this ad opportunity.
+        debugPrint('[RollReel] Swipe threshold hit but no interstitial ready yet');
+        state = count;
+        _loadInterstitial();
       }
     } else {
       state = count;

@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:app_tracking_transparency/app_tracking_transparency.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -27,6 +30,31 @@ class MainShell extends ConsumerStatefulWidget {
 
 class _MainShellState extends ConsumerState<MainShell> {
   late int _tab = widget.initialTab;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _requestAttIfNeeded());
+  }
+
+  // Apple rejected a previous submission because the ATT prompt couldn't be
+  // found on iPadOS during review — requesting it right after runApp()/route
+  // switch can fire before the root view controller is fully presented.
+  // Requesting from a mounted screen's first post-frame callback, with an
+  // extra delay, guarantees the window is actually on screen first.
+  Future<void> _requestAttIfNeeded() async {
+    if (!Platform.isIOS) return;
+    await Future.delayed(const Duration(seconds: 1));
+    if (!mounted) return;
+    try {
+      final status = await AppTrackingTransparency.trackingAuthorizationStatus;
+      if (status == TrackingStatus.notDetermined) {
+        await AppTrackingTransparency.requestTrackingAuthorization();
+      }
+    } catch (_) {
+      // Platform without ATT support — no-op.
+    }
+  }
 
   void _setTab(int index) {
     if (_tab == index) return;

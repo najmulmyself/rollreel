@@ -46,17 +46,37 @@ class BrowseFilter {
 final browseFilterProvider =
     StateProvider<BrowseFilter>((ref) => const BrowseFilter());
 
+Future<List<AssetEntity>> _fetchVideos() async {
+  final paths = await PhotoManager.getAssetPathList(
+    type: RequestType.video,
+    onlyAll: true,
+  );
+  if (paths.isEmpty) return [];
+  return paths.first.getAssetListRange(start: 0, end: 9999);
+}
+
 /// Returns ALL videos from the device library (no filter applied).
 final videoLibraryProvider = FutureProvider<List<AssetEntity>>((ref) async {
   try {
-    final paths = await PhotoManager.getAssetPathList(
-      type: RequestType.video,
-      onlyAll: true,
-    );
-
-    if (paths.isEmpty) return [];
-
-    return paths.first.getAssetListRange(start: 0, end: 9999);
+    // Right after the OS permission dialog is granted on a fresh install,
+    // PhotoManager's asset fetch can keep returning an empty list for a
+    // few seconds while the Photos library finishes syncing/indexing
+    // internally — poll a few times with backoff instead of giving up
+    // and showing "no videos" until the app is restarted.
+    const delays = [
+      Duration(milliseconds: 500),
+      Duration(milliseconds: 1000),
+      Duration(seconds: 2),
+      Duration(seconds: 3),
+    ];
+    var result = await _fetchVideos();
+    for (final delay in delays) {
+      if (result.isNotEmpty) break;
+      await Future.delayed(delay);
+      await PhotoManager.clearFileCache();
+      result = await _fetchVideos();
+    }
+    return result;
   } catch (e) {
     debugPrint('Video library error: $e');
     return [];

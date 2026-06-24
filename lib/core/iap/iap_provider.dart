@@ -100,6 +100,9 @@ class IAPNotifier extends StateNotifier<IAPState> {
     final product = state.products[productId];
     if (product == null) {
       debugPrint('[RollReel] purchase() called for $productId but product not found');
+      state = state.copyWith(
+        error: 'This plan isn\'t available right now. Please try again later.',
+      );
       return;
     }
     state = state.copyWith(loading: true, clearError: true);

@@ -5,6 +5,7 @@ import 'package:in_app_review/in_app_review.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/iap/iap_provider.dart';
 import '../../core/settings/settings_provider.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
@@ -24,8 +25,6 @@ class SettingsScreen extends ConsumerWidget {
   static const String _version = '1.0.0';
   static const String _build = '1';
 
-  static final _shareRowKey = GlobalKey();
-
   Future<void> _rateApp() async {
     final review = InAppReview.instance;
     if (await review.isAvailable()) {
@@ -37,24 +36,17 @@ class SettingsScreen extends ConsumerWidget {
 
   // iPad shows the share sheet as a popover and requires an anchor rect —
   // without one it renders at (0,0) and gets dismissed before it's visible.
-  static Rect get _sharePopoverOrigin {
-    final box = _shareRowKey.currentContext?.findRenderObject() as RenderBox?;
-    if (box == null) return Rect.zero;
-    final pos = box.localToGlobal(Offset.zero);
-    return pos & box.size;
-  }
-
-  void _shareApp(BuildContext context) {
-    debugPrint('[RollReel] _shareApp tapped, origin=$_sharePopoverOrigin');
+  // [btnContext] is the row's own BuildContext, captured at tap time via a
+  // Builder, so no GlobalKey is needed.
+  void _shareApp(BuildContext btnContext) {
+    final box = btnContext.findRenderObject() as RenderBox?;
+    final origin =
+        box == null ? Rect.zero : (box.localToGlobal(Offset.zero) & box.size);
     Share.share(
       'Check out RollReel – swipe through your camera roll videos, '
       '100% offline!\n'
       'https://apps.apple.com/app/id6781843410',
-      sharePositionOrigin: _sharePopoverOrigin,
-    ).then(
-      (_) => debugPrint('[RollReel] Share.share completed'),
-      onError: (Object e, StackTrace st) =>
-          debugPrint('[RollReel] Share.share failed: $e'),
+      sharePositionOrigin: origin,
     );
   }
 
@@ -122,6 +114,7 @@ class SettingsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final s = ref.watch(settingsProvider);
     final notifier = ref.read(settingsProvider.notifier);
+    final isPro = ref.watch(isProProvider);
 
     return Scaffold(
       backgroundColor: RRColors.bgDeep,
@@ -219,8 +212,8 @@ class SettingsScreen extends ConsumerWidget {
                           color: Color(0xFF1A5A6B),
                           icon: Icons.face_retouching_natural),
                       label: 'App Lock (Face ID)',
-                      trailingText: 'Pro',
-                      onTap: onOpenPaywall,
+                      trailingText: isPro ? null : 'Pro',
+                      onTap: isPro ? onOpenVault : onOpenPaywall,
                     ),
                   ]),
                   const SizedBox(height: RRSpace.sp24),
@@ -243,13 +236,14 @@ class SettingsScreen extends ConsumerWidget {
                       label: 'Rate RollReel',
                       onTap: _rateApp,
                     ),
-                    _NavRow(
-                      key: _shareRowKey,
-                      icon: const _SettingIcon(
-                          color: Color(0xFF1A4A8B),
-                          icon: CupertinoIcons.share),
-                      label: 'Share RollReel',
-                      onTap: () => _shareApp(context),
+                    Builder(
+                      builder: (btnContext) => _NavRow(
+                        icon: const _SettingIcon(
+                            color: Color(0xFF1A4A8B),
+                            icon: CupertinoIcons.share),
+                        label: 'Share RollReel',
+                        onTap: () => _shareApp(btnContext),
+                      ),
                     ),
                     _NavRow(
                       icon: const _SettingIcon(
