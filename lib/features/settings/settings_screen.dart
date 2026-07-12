@@ -9,6 +9,7 @@ import '../../core/iap/iap_provider.dart';
 import '../../core/settings/settings_provider.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
+import '../../l10n/app_localizations.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({
@@ -39,12 +40,12 @@ class SettingsScreen extends ConsumerWidget {
   // [btnContext] is the row's own BuildContext, captured at tap time via a
   // Builder, so no GlobalKey is needed.
   void _shareApp(BuildContext btnContext) {
+    final l10n = AppLocalizations.of(btnContext)!;
     final box = btnContext.findRenderObject() as RenderBox?;
     final origin =
         box == null ? Rect.zero : (box.localToGlobal(Offset.zero) & box.size);
     Share.share(
-      'Check out RollReel – swipe through your camera roll videos, '
-      '100% offline!\n'
+      '${l10n.shareAppMessage}\n'
       'https://apps.apple.com/app/id6781843410',
       sharePositionOrigin: origin,
     );
@@ -56,19 +57,16 @@ class SettingsScreen extends ConsumerWidget {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } else {
       if (!context.mounted) return;
+      final l10n = AppLocalizations.of(context)!;
       showCupertinoDialog<void>(
         context: context,
         builder: (_) => CupertinoAlertDialog(
-          title: const Text('Privacy Policy'),
-          content: const Text(
-            'RollReel does not upload, transmit, or store any of your '
-            'videos outside your device. No account is required. '
-            'No personal data is shared with third parties.',
-          ),
+          title: Text(l10n.privacyPolicy),
+          content: Text(l10n.privacyPolicyBody),
           actions: [
             CupertinoDialogAction(
               onPressed: () => Navigator.pop(context),
-              child: const Text('OK'),
+              child: Text(l10n.ok),
             ),
           ],
         ),
@@ -76,12 +74,26 @@ class SettingsScreen extends ConsumerWidget {
     }
   }
 
+  static String _filterLabel(AppLocalizations l10n, FeedFilter f) {
+    switch (f) {
+      case FeedFilter.all:
+        return l10n.filterAll;
+      case FeedFilter.today:
+        return l10n.filterToday;
+      case FeedFilter.shorts:
+        return l10n.filterShorts;
+      case FeedFilter.long:
+        return l10n.filterLong;
+    }
+  }
+
   Future<void> _showDefaultFilterPicker(
       BuildContext context, AppSettings s, SettingsNotifier notifier) async {
+    final l10n = AppLocalizations.of(context)!;
     await showCupertinoModalPopup<void>(
       context: context,
       builder: (_) => CupertinoActionSheet(
-        title: const Text('Default Filter'),
+        title: Text(l10n.defaultFilter),
         actions: FeedFilter.values.map((f) {
           return CupertinoActionSheetAction(
             onPressed: () {
@@ -91,7 +103,7 @@ class SettingsScreen extends ConsumerWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(f.label),
+                Text(_filterLabel(l10n, f)),
                 if (s.defaultFilter == f) ...[
                   const SizedBox(width: 8),
                   const Icon(CupertinoIcons.checkmark,
@@ -104,7 +116,7 @@ class SettingsScreen extends ConsumerWidget {
         cancelButton: CupertinoActionSheetAction(
           isDefaultAction: true,
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(l10n.cancel),
         ),
       ),
     );
@@ -112,6 +124,7 @@ class SettingsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final s = ref.watch(settingsProvider);
     final notifier = ref.read(settingsProvider.notifier);
     final isPro = ref.watch(isProProvider);
@@ -133,14 +146,14 @@ class SettingsScreen extends ConsumerWidget {
                   const SizedBox(height: RRSpace.sp24),
 
                   // ── PLAYBACK ─────────────────────────────────────────────
-                  const _SectionLabel('PLAYBACK'),
+                  _SectionLabel(l10n.playbackSection),
                   const SizedBox(height: RRSpace.sp8),
                   _SettingsGroup(rows: [
                     _ToggleRow(
                       icon: const _SettingIcon(
                           color: Color(0xFF7D5A2A),
                           icon: CupertinoIcons.arrow_2_circlepath),
-                      label: 'Loop Short Videos',
+                      label: l10n.loopShortVideos,
                       value: s.loopShortVideos,
                       onChanged: notifier.setLoopShortVideos,
                     ),
@@ -148,7 +161,7 @@ class SettingsScreen extends ConsumerWidget {
                       icon: const _SettingIcon(
                           color: Color(0xFF1B6F6F),
                           icon: CupertinoIcons.play_fill),
-                      label: 'Auto-play on Launch',
+                      label: l10n.autoPlayOnLaunch,
                       value: s.autoPlay,
                       onChanged: notifier.setAutoPlay,
                     ),
@@ -156,8 +169,8 @@ class SettingsScreen extends ConsumerWidget {
                       icon: const _SettingIcon(
                           color: Color(0xFF7D2E2E),
                           icon: CupertinoIcons.line_horizontal_3_decrease),
-                      label: 'Default Filter',
-                      trailingText: s.defaultFilter.label,
+                      label: l10n.defaultFilter,
+                      trailingText: _filterLabel(l10n, s.defaultFilter),
                       onTap: () =>
                           _showDefaultFilterPicker(context, s, notifier),
                     ),
@@ -165,14 +178,14 @@ class SettingsScreen extends ConsumerWidget {
                   const SizedBox(height: RRSpace.sp24),
 
                   // ── APPEARANCE ───────────────────────────────────────────
-                  const _SectionLabel('APPEARANCE'),
+                  _SectionLabel(l10n.appearanceSection),
                   const SizedBox(height: RRSpace.sp8),
                   _SettingsGroup(rows: [
                     _ToggleRow(
                       icon: const _SettingIcon(
                           color: Color(0xFF5A3D1A),
                           icon: CupertinoIcons.moon_fill),
-                      label: 'Dark Mode',
+                      label: l10n.darkMode,
                       value: s.darkMode,
                       onChanged: notifier.setDarkMode,
                     ),
@@ -180,7 +193,7 @@ class SettingsScreen extends ConsumerWidget {
                       icon: const _SettingIcon(
                           color: Color(0xFF3D3FB8),
                           icon: CupertinoIcons.calendar),
-                      label: 'Show Date Labels',
+                      label: l10n.showDateLabels,
                       value: s.showDateLabels,
                       onChanged: notifier.setShowDateLabels,
                     ),
@@ -188,7 +201,7 @@ class SettingsScreen extends ConsumerWidget {
                       icon: const _SettingIcon(
                           color: Color(0xFF237A4A),
                           icon: CupertinoIcons.clock_fill),
-                      label: 'Show Duration Badges',
+                      label: l10n.showDurationBadges,
                       value: s.showDurationBadges,
                       onChanged: notifier.setShowDurationBadges,
                     ),
@@ -196,44 +209,44 @@ class SettingsScreen extends ConsumerWidget {
                   const SizedBox(height: RRSpace.sp24),
 
                   // ── PRIVACY ──────────────────────────────────────────────
-                  const _SectionLabel('PRIVACY'),
+                  _SectionLabel(l10n.privacySection),
                   const SizedBox(height: RRSpace.sp8),
                   _SettingsGroup(rows: [
                     _NavRow(
                       icon: const _SettingIcon(
                           color: Color(0xFF4A2A8B),
                           icon: CupertinoIcons.lock_fill),
-                      label: 'Privacy Vault',
-                      trailingText: 'Set Up',
+                      label: l10n.privacyVault,
+                      trailingText: l10n.setUp,
                       onTap: onOpenVault,
                     ),
                     _NavRow(
                       icon: const _SettingIcon(
                           color: Color(0xFF1A5A6B),
                           icon: Icons.face_retouching_natural),
-                      label: 'App Lock (Face ID)',
-                      trailingText: isPro ? null : 'Pro',
+                      label: l10n.appLockFaceId,
+                      trailingText: isPro ? null : l10n.proBadge,
                       onTap: isPro ? onOpenVault : onOpenPaywall,
                     ),
                   ]),
                   const SizedBox(height: RRSpace.sp24),
 
                   // ── ABOUT ────────────────────────────────────────────────
-                  const _SectionLabel('ABOUT'),
+                  _SectionLabel(l10n.aboutSection),
                   const SizedBox(height: RRSpace.sp8),
                   _SettingsGroup(rows: [
                     _NavRow(
                       icon: const _SettingIcon(
                           color: Color(0xFF2A6B3A),
                           icon: CupertinoIcons.shield_fill),
-                      label: 'Privacy Policy',
+                      label: l10n.privacyPolicy,
                       onTap: () => _openPrivacyPolicy(context),
                     ),
                     _NavRow(
                       icon: const _SettingIcon(
                           color: Color(0xFF8B6A1A),
                           icon: CupertinoIcons.star_fill),
-                      label: 'Rate RollReel',
+                      label: l10n.rateApp,
                       onTap: _rateApp,
                     ),
                     Builder(
@@ -241,7 +254,7 @@ class SettingsScreen extends ConsumerWidget {
                         icon: const _SettingIcon(
                             color: Color(0xFF1A4A8B),
                             icon: CupertinoIcons.share),
-                        label: 'Share RollReel',
+                        label: l10n.shareApp,
                         onTap: () => _shareApp(btnContext),
                       ),
                     ),
@@ -249,7 +262,7 @@ class SettingsScreen extends ConsumerWidget {
                       icon: const _SettingIcon(
                           color: Color(0xFF2A2D4A),
                           icon: CupertinoIcons.info_circle_fill),
-                      label: 'Version',
+                      label: l10n.version,
                       trailingText: '$_version (Build $_build)',
                       showChevron: false,
                     ),
@@ -266,6 +279,7 @@ class SettingsScreen extends ConsumerWidget {
   // ── Top nav ──────────────────────────────────────────────────────────────────
 
   Widget _buildTopNav(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.symmetric(
           horizontal: RRSpace.sp4, vertical: RRSpace.sp4),
@@ -279,15 +293,15 @@ class SettingsScreen extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(
                   horizontal: RRSpace.sp12, vertical: RRSpace.sp8),
               onPressed: onBack,
-              child: const Row(
+              child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(CupertinoIcons.chevron_left,
+                  const Icon(CupertinoIcons.chevron_left,
                       color: RRColors.accentCyan, size: 18),
-                  SizedBox(width: 2),
+                  const SizedBox(width: 2),
                   Text(
-                    'Back',
-                    style: TextStyle(
+                    l10n.back,
+                    style: const TextStyle(
                       color: RRColors.accentCyan,
                       fontSize: 16,
                       fontWeight: FontWeight.w400,
@@ -298,7 +312,7 @@ class SettingsScreen extends ConsumerWidget {
             ),
           ),
           Text(
-            'Settings',
+            l10n.settings,
             style: TextStyle(
               color: RRColors.textPrimary,
               fontSize: 18,
@@ -313,6 +327,7 @@ class SettingsScreen extends ConsumerWidget {
   // ── Pro banner ───────────────────────────────────────────────────────────────
 
   Widget _buildProBanner(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return GestureDetector(
       onTap: onOpenPaywall,
       child: Container(
@@ -331,9 +346,9 @@ class SettingsScreen extends ConsumerWidget {
                 color: Colors.white.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(RRSpace.radiusFull),
               ),
-              child: const Text(
-                'PRO',
-                style: TextStyle(
+              child: Text(
+                l10n.pro,
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 11,
                   fontWeight: FontWeight.w800,
@@ -342,22 +357,22 @@ class SettingsScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(width: RRSpace.sp12),
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'RollReel Pro',
-                    style: TextStyle(
+                    l10n.paywallTitle,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  SizedBox(height: 2),
+                  const SizedBox(height: 2),
                   Text(
-                    'Ad-free · Vault · Speed · Collections',
-                    style: TextStyle(
+                    l10n.proCardSubtitle,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 13,
                       fontWeight: FontWeight.w400,

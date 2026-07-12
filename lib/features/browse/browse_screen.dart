@@ -3,7 +3,10 @@ import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:photo_manager/photo_manager.dart';
+
+import '../../l10n/app_localizations.dart';
 
 import '../../core/iap/iap_provider.dart';
 import '../../core/memories/on_this_day_provider.dart';
@@ -86,62 +89,76 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
 
   static const List<_QuickChip> _quickChips = [
     _QuickChip(
-      label: 'All',
+      id: _QuickChipId.all,
       icon: CupertinoIcons.rectangle_stack_fill,
     ),
     _QuickChip(
-      label: 'Today',
+      id: _QuickChipId.today,
       icon: CupertinoIcons.calendar,
     ),
     _QuickChip(
-      label: 'Shorts',
+      id: _QuickChipId.shorts,
       icon: CupertinoIcons.bolt_fill,
     ),
     _QuickChip(
-      label: 'Long',
+      id: _QuickChipId.long,
       icon: CupertinoIcons.video_camera_solid,
     ),
     _QuickChip(
-      label: 'Recent',
+      id: _QuickChipId.recent,
       icon: CupertinoIcons.clock_fill,
     ),
   ];
 
-  bool _isQuickChipActive(String label, BrowseFilter filter) {
-    switch (label) {
-      case 'All':
-        return filter.period == VideoTimePeriod.all &&
-            filter.duration == VideoDurationFilter.any;
-      case 'Today':
-        return filter.period == VideoTimePeriod.today;
-      case 'Shorts':
-        return filter.duration == VideoDurationFilter.short;
-      case 'Long':
-        return filter.duration == VideoDurationFilter.long;
-      case 'Recent':
-        return filter.period == VideoTimePeriod.thisWeek;
-      default:
-        return false;
+  String _quickChipLabel(_QuickChipId id, AppLocalizations l10n) {
+    switch (id) {
+      case _QuickChipId.all:
+        return l10n.filterAll;
+      case _QuickChipId.today:
+        return l10n.filterToday;
+      case _QuickChipId.shorts:
+        return l10n.filterShorts;
+      case _QuickChipId.long:
+        return l10n.filterLong;
+      case _QuickChipId.recent:
+        return l10n.filterRecent;
     }
   }
 
-  void _onQuickChipTap(String label) {
+  bool _isQuickChipActive(_QuickChipId id, BrowseFilter filter) {
+    switch (id) {
+      case _QuickChipId.all:
+        return filter.period == VideoTimePeriod.all &&
+            filter.duration == VideoDurationFilter.any;
+      case _QuickChipId.today:
+        return filter.period == VideoTimePeriod.today;
+      case _QuickChipId.shorts:
+        return filter.duration == VideoDurationFilter.short;
+      case _QuickChipId.long:
+        return filter.duration == VideoDurationFilter.long;
+      case _QuickChipId.recent:
+        return filter.period == VideoTimePeriod.thisWeek;
+    }
+  }
+
+  void _onQuickChipTap(_QuickChipId id) {
     final notifier = ref.read(browseFilterProvider.notifier);
-    switch (label) {
-      case 'All':
+    switch (id) {
+      case _QuickChipId.all:
         notifier.state = const BrowseFilter();
-      case 'Today':
+      case _QuickChipId.today:
         notifier.state = const BrowseFilter(period: VideoTimePeriod.today);
-      case 'Shorts':
+      case _QuickChipId.shorts:
         notifier.state = const BrowseFilter(duration: VideoDurationFilter.short);
-      case 'Long':
+      case _QuickChipId.long:
         notifier.state = const BrowseFilter(duration: VideoDurationFilter.long);
-      case 'Recent':
+      case _QuickChipId.recent:
         notifier.state = const BrowseFilter(period: VideoTimePeriod.thisWeek);
     }
   }
 
   Future<void> _showVideoOptions(AssetEntity asset) async {
+    final l10n = AppLocalizations.of(context)!;
     await showCupertinoModalPopup<void>(
       context: context,
       builder: (_) => CupertinoActionSheet(
@@ -156,7 +173,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                 builder: (_) => VideoInfoSheet(asset: asset),
               );
             },
-            child: const Text('Get Info'),
+            child: Text(l10n.getInfo),
           ),
           CupertinoActionSheetAction(
             isDestructiveAction: true,
@@ -164,13 +181,13 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
               Navigator.pop(context);
               _confirmDelete(asset);
             },
-            child: const Text('Delete Video'),
+            child: Text(l10n.deleteVideo),
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
           isDefaultAction: true,
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(l10n.cancel),
         ),
       ),
     );
@@ -179,23 +196,23 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
   Future<void> _confirmDelete(AssetEntity asset) async {
     // Capture messenger before any async gap
     final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showCupertinoModalPopup<bool>(
       context: context,
       builder: (_) => CupertinoActionSheet(
-        title: Text(asset.title ?? 'This video'),
-        message: const Text(
-            'This will permanently delete the video from your library.'),
+        title: Text(asset.title ?? l10n.thisVideo),
+        message: Text(l10n.deleteVideoWarning),
         actions: [
           CupertinoActionSheetAction(
             isDestructiveAction: true,
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete Video'),
+            child: Text(l10n.deleteVideo),
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
           isDefaultAction: true,
           onPressed: () => Navigator.pop(context, false),
-          child: const Text('Cancel'),
+          child: Text(l10n.cancel),
         ),
       ),
     );
@@ -206,7 +223,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
       ref.invalidate(videoLibraryProvider);
       messenger.showSnackBar(
         SnackBar(
-          content: const Text('Video deleted'),
+          content: Text(l10n.videoDeleted),
           behavior: SnackBarBehavior.floating,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -227,31 +244,30 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
 
   // ── Date grouping helpers ─────────────────────────────────────────────────
 
-  String _groupLabel(DateTime dt, DateTime now) {
+  String _groupLabel(BuildContext context, DateTime dt, DateTime now) {
+    final l10n = AppLocalizations.of(context)!;
     final today = DateTime(now.year, now.month, now.day);
     final itemDay = DateTime(dt.year, dt.month, dt.day);
 
-    if (itemDay == today) return 'TODAY';
-    if (itemDay == today.subtract(const Duration(days: 1))) return 'YESTERDAY';
-
-    const months = [
-      'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN',
-      'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC',
-    ];
-
-    if (dt.year == now.year) {
-      return '${months[dt.month - 1]} ${dt.day}';
+    if (itemDay == today) return l10n.today.toUpperCase();
+    if (itemDay == today.subtract(const Duration(days: 1))) {
+      return l10n.yesterday.toUpperCase();
     }
-    return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
+
+    final locale = Localizations.localeOf(context).toString();
+    if (dt.year == now.year) {
+      return DateFormat.MMMd(locale).format(dt).toUpperCase();
+    }
+    return DateFormat.yMMMd(locale).format(dt).toUpperCase();
   }
 
-  List<Object> _buildFlatList(List<AssetEntity> videos) {
+  List<Object> _buildFlatList(BuildContext context, List<AssetEntity> videos) {
     final now = DateTime.now();
     final List<Object> flat = [];
     String? lastLabel;
 
     for (final v in videos) {
-      final label = _groupLabel(v.createDateTime, now);
+      final label = _groupLabel(context, v.createDateTime, now);
       if (label != lastLabel) {
         flat.add(label);
         lastLabel = label;
@@ -265,6 +281,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final filter = ref.watch(browseFilterProvider);
     final videosAsync = ref.watch(browseVideosProvider);
     final allAsync = ref.watch(videoLibraryProvider);
@@ -289,9 +306,9 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                       size: 16,
                       color: RRColors.accentCyan,
                     ),
-                    label: const Text(
-                      'Feed',
-                      style: TextStyle(
+                    label: Text(
+                      l10n.feed,
+                      style: const TextStyle(
                         color: RRColors.accentCyan,
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
@@ -329,7 +346,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                 child: CupertinoTextField(
                   controller: _searchCtrl,
                   autofocus: true,
-                  placeholder: 'Search videos…',
+                  placeholder: l10n.searchVideos,
                   placeholderStyle:
                       TextStyle(color: RRColors.textDisabled),
                   style: TextStyle(color: RRColors.textPrimary),
@@ -362,7 +379,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                       children: [
                         allAsync.when(
                           loading: () => Text(
-                            'Videos',
+                            l10n.videosTitle,
                             style: TextStyle(
                               fontSize: 34,
                               fontWeight: FontWeight.w800,
@@ -371,7 +388,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                             ),
                           ),
                           error: (_, __) => Text(
-                            'Videos',
+                            l10n.videosTitle,
                             style: TextStyle(
                               fontSize: 34,
                               fontWeight: FontWeight.w800,
@@ -380,7 +397,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                             ),
                           ),
                           data: (all) => Text(
-                            '${all.length} Videos',
+                            l10n.videosCount(all.length),
                             style: TextStyle(
                               fontSize: 34,
                               fontWeight: FontWeight.w800,
@@ -391,7 +408,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          'Your Library',
+                          l10n.yourLibrary,
                           style: TextStyle(
                             fontSize: 14,
                             color: RRColors.textSecond,
@@ -403,7 +420,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      const LocalBadge(label: 'Local'),
+                      LocalBadge(label: l10n.localBadge),
                       const SizedBox(height: RRSpace.sp8),
                       _FilterBtn(onTap: _openFilterSheet),
                     ],
@@ -432,11 +449,12 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                   itemCount: _quickChips.length,
                   itemBuilder: (context, i) {
                     final chip = _quickChips[i];
-                    final active = _isQuickChipActive(chip.label, filter);
+                    final active = _isQuickChipActive(chip.id, filter);
                     return _QuickChipTile(
                       chip: chip,
+                      label: _quickChipLabel(chip.id, l10n),
                       active: active,
-                      onTap: () => _onQuickChipTap(chip.label),
+                      onTap: () => _onQuickChipTap(chip.id),
                     );
                   },
                 ),
@@ -458,7 +476,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                 loading: () => const LoadingState(),
                 error: (e, _) => Center(
                   child: Text(
-                    'Error: $e',
+                    l10n.couldNotLoadVideos('$e'),
                     style: TextStyle(color: RRColors.textSecond),
                   ),
                 ),
@@ -468,14 +486,14 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                     return EmptyState(
                       icon: CupertinoIcons.search,
                       title: _searchQuery.isNotEmpty
-                          ? 'No Results'
-                          : 'No Videos Found',
+                          ? l10n.noResults
+                          : l10n.noVideosFound,
                       body: _searchQuery.isNotEmpty
-                          ? 'No videos match "$_searchQuery".'
-                          : 'Try a different filter.',
+                          ? l10n.noSearchMatches(_searchQuery)
+                          : l10n.tryDifferentFilter,
                       buttonLabel: _searchQuery.isNotEmpty
-                          ? 'Clear Search'
-                          : 'Clear Filters',
+                          ? l10n.clearSearch
+                          : l10n.clearFilters,
                       onPressed: () {
                         if (_searchQuery.isNotEmpty) {
                           _searchCtrl.clear();
@@ -487,7 +505,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                     );
                   }
 
-                  final flat = _buildFlatList(videos);
+                  final flat = _buildFlatList(context, videos);
 
                   return ListView.builder(
                     controller: _scrollController,
@@ -533,8 +551,10 @@ class _OnThisDayCard extends ConsumerWidget {
     final memories = ref.watch(onThisDayProvider).valueOrNull ?? const [];
     if (memories.isEmpty) return const SizedBox.shrink();
 
+    final l10n = AppLocalizations.of(context)!;
     final isPro = ref.watch(isProProvider);
     final years = DateTime.now().year - memories.first.createDateTime.year;
+    final yearsAgo = years == 1 ? l10n.yearsAgoOne : l10n.yearsAgoMany(years);
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -584,7 +604,7 @@ class _OnThisDayCard extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'On This Day',
+                      l10n.onThisDay,
                       style: TextStyle(
                         color: RRColors.textPrimary,
                         fontSize: 15,
@@ -594,8 +614,8 @@ class _OnThisDayCard extends ConsumerWidget {
                     const SizedBox(height: 2),
                     Text(
                       memories.length == 1
-                          ? '1 memory from $years ${years == 1 ? 'year' : 'years'} ago'
-                          : '${memories.length} memories from past years',
+                          ? l10n.onThisDaySubtitleOne(yearsAgo)
+                          : l10n.onThisDaySubtitleMany(memories.length),
                       style: TextStyle(
                         color: RRColors.textSecond,
                         fontSize: 12,
@@ -646,7 +666,7 @@ class _FilterBtn extends StatelessWidget {
             ),
             const SizedBox(width: 6),
             Text(
-              'Filter',
+              AppLocalizations.of(context)!.filter,
               style: TextStyle(
                 fontSize: 13,
                 color: RRColors.textSecond,
@@ -664,21 +684,25 @@ class _FilterBtn extends StatelessWidget {
 // Quick chip data + tile
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _QuickChip {
-  const _QuickChip({required this.label, required this.icon});
+enum _QuickChipId { all, today, shorts, long, recent }
 
-  final String label;
+class _QuickChip {
+  const _QuickChip({required this.id, required this.icon});
+
+  final _QuickChipId id;
   final IconData icon;
 }
 
 class _QuickChipTile extends StatelessWidget {
   const _QuickChipTile({
     required this.chip,
+    required this.label,
     required this.active,
     required this.onTap,
   });
 
   final _QuickChip chip;
+  final String label;
   final bool active;
   final VoidCallback onTap;
 
@@ -703,7 +727,7 @@ class _QuickChipTile extends StatelessWidget {
             Icon(chip.icon, size: 14, color: fg),
             const SizedBox(width: RRSpace.sp8),
             Text(
-              chip.label,
+              label,
               style: TextStyle(
                 color: fg,
                 fontSize: 12,
@@ -785,23 +809,22 @@ class _VideoRowState extends State<_VideoRow> {
     if (mounted && title.isNotEmpty) setState(() => _title = title);
   }
 
-  String _relativeDate(DateTime dt) {
+  String _relativeDate(BuildContext context, DateTime dt) {
+    final l10n = AppLocalizations.of(context)!;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final itemDay = DateTime(dt.year, dt.month, dt.day);
 
-    if (itemDay == today) return 'Today';
-    if (itemDay == today.subtract(const Duration(days: 1))) return 'Yesterday';
-
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
-
-    if (dt.year == now.year) {
-      return '${months[dt.month - 1]} ${dt.day}';
+    if (itemDay == today) return l10n.today;
+    if (itemDay == today.subtract(const Duration(days: 1))) {
+      return l10n.yesterday;
     }
-    return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
+
+    final locale = Localizations.localeOf(context).toString();
+    if (dt.year == now.year) {
+      return DateFormat.MMMd(locale).format(dt);
+    }
+    return DateFormat.yMMMd(locale).format(dt);
   }
 
   String _formatDuration(int seconds) {
@@ -814,9 +837,9 @@ class _VideoRowState extends State<_VideoRow> {
   Widget build(BuildContext context) {
     final title = _title ??
         widget.asset.title ??
-        _relativeDate(widget.asset.createDateTime);
+        _relativeDate(context, widget.asset.createDateTime);
     final durationStr = _formatDuration(widget.asset.duration);
-    final dateStr = _relativeDate(widget.asset.createDateTime);
+    final dateStr = _relativeDate(context, widget.asset.createDateTime);
     final subtitle = '$durationStr · $dateStr';
 
     return InkWell(

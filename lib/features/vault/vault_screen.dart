@@ -9,6 +9,7 @@ import 'package:photo_manager/photo_manager.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
 import '../../core/vault/vault_provider.dart';
+import '../../l10n/app_localizations.dart';
 
 class VaultScreen extends ConsumerStatefulWidget {
   const VaultScreen({super.key, required this.onBack});
@@ -27,19 +28,20 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
   Future<void> _unlock() async {
     if (_authenticating) return;
     setState(() => _authenticating = true);
+    final l10n = AppLocalizations.of(context)!;
     try {
       final canCheck = await _auth.canCheckBiometrics;
       if (!canCheck) {
-        _showError('Face ID is not available on this device.');
+        _showError(l10n.faceIdUnavailable);
         return;
       }
       final ok = await _auth.authenticate(
-        localizedReason: 'Unlock your Private Vault',
+        localizedReason: l10n.unlockVaultReason,
         options: const AuthenticationOptions(biometricOnly: true),
       );
       if (ok && mounted) setState(() => _unlocked = true);
     } catch (_) {
-      if (mounted) _showError('Authentication failed. Please try again.');
+      if (mounted) _showError(l10n.authFailed);
     } finally {
       if (mounted) setState(() => _authenticating = false);
     }
@@ -100,15 +102,15 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
             padding: const EdgeInsets.symmetric(
                 horizontal: RRSpace.sp8, vertical: RRSpace.sp8),
             onPressed: widget.onBack,
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(CupertinoIcons.chevron_left,
+                const Icon(CupertinoIcons.chevron_left,
                     color: Colors.white54, size: 16),
-                SizedBox(width: 4),
+                const SizedBox(width: 4),
                 Text(
-                  'Back',
-                  style: TextStyle(color: Colors.white54, fontSize: 16),
+                  AppLocalizations.of(context)!.back,
+                  style: const TextStyle(color: Colors.white54, fontSize: 16),
                 ),
               ],
             ),
@@ -117,9 +119,9 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
           if (_unlocked)
             Padding(
               padding: const EdgeInsets.only(right: RRSpace.sp8),
-              child: const Text(
-                'Private Vault',
-                style: TextStyle(
+              child: Text(
+                AppLocalizations.of(context)!.vaultTitle,
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 17,
                   fontWeight: FontWeight.w600,
@@ -134,6 +136,7 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
   // ── Locked state ───────────────────────────────────────────────────────────
 
   Widget _buildLocked() {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: RRSpace.sp32),
@@ -146,19 +149,19 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
               color: Colors.white38,
             ),
             const SizedBox(height: RRSpace.sp24),
-            const Text(
-              'Vault Locked',
-              style: TextStyle(
+            Text(
+              l10n.vaultLocked,
+              style: const TextStyle(
                 color: Colors.white,
                 fontSize: 28,
                 fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(height: RRSpace.sp8),
-            const Text(
-              'Your private videos are safe here',
+            Text(
+              l10n.vaultLockedSubtitle,
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white60,
                 fontSize: 15,
               ),
@@ -183,15 +186,15 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
                           ),
                         ),
                       )
-                    : const Row(
+                    : Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.face_retouching_natural,
+                          const Icon(Icons.face_retouching_natural,
                               color: Colors.white, size: 22),
-                          SizedBox(width: RRSpace.sp8),
+                          const SizedBox(width: RRSpace.sp8),
                           Text(
-                            'Unlock with Face ID',
-                            style: TextStyle(
+                            l10n.unlockWithFaceId,
+                            style: const TextStyle(
                               color: Colors.white,
                               fontSize: 16,
                               fontWeight: FontWeight.w700,
@@ -211,14 +214,15 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
 
   Widget _buildUnlocked() {
     final assetsAsync = ref.watch(vaultAssetsProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return assetsAsync.when(
       loading: () => const Center(
         child: CupertinoActivityIndicator(color: Colors.white),
       ),
-      error: (_, __) => const Center(
-        child: Text('Failed to load vault',
-            style: TextStyle(color: Colors.white60)),
+      error: (_, __) => Center(
+        child: Text(l10n.vaultLoadFailed,
+            style: const TextStyle(color: Colors.white60)),
       ),
       data: (assets) {
         if (assets.isEmpty) {
@@ -229,18 +233,18 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
                 const Icon(CupertinoIcons.lock_open_fill,
                     size: 64, color: Colors.white54),
                 const SizedBox(height: RRSpace.sp16),
-                const Text(
-                  'Vault is empty',
-                  style: TextStyle(
+                Text(
+                  l10n.vaultEmpty,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: RRSpace.sp8),
-                const Text(
-                  'Tap ••• on any video to add it here',
-                  style: TextStyle(color: Colors.white60, fontSize: 14),
+                Text(
+                  AppLocalizations.of(context)!.vaultEmptyHint,
+                  style: const TextStyle(color: Colors.white60, fontSize: 14),
                 ),
               ],
             ),
@@ -290,11 +294,12 @@ class _VaultThumbState extends ConsumerState<_VaultThumb> {
   }
 
   void _confirmRemove(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showCupertinoDialog<void>(
       context: context,
       builder: (_) => CupertinoAlertDialog(
-        title: const Text('Remove from Vault?'),
-        content: const Text('This video will return to your main library.'),
+        title: Text(l10n.removeFromVaultTitle),
+        content: Text(l10n.removeFromVaultBody),
         actions: [
           CupertinoDialogAction(
             isDestructiveAction: true,
@@ -302,12 +307,12 @@ class _VaultThumbState extends ConsumerState<_VaultThumb> {
               Navigator.pop(context);
               ref.read(vaultIdsProvider.notifier).toggle(widget.asset.id);
             },
-            child: const Text('Remove'),
+            child: Text(l10n.remove),
           ),
           CupertinoDialogAction(
             isDefaultAction: true,
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
         ],
       ),

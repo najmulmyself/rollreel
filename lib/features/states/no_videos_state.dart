@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
+import '../../l10n/app_localizations.dart';
 
 class NoVideosState extends StatelessWidget {
   const NoVideosState({super.key, required this.onOpenPhotos});
@@ -11,6 +12,7 @@ class NoVideosState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: RRColors.bgDeep,
       body: Center(
@@ -25,9 +27,9 @@ class NoVideosState extends StatelessWidget {
                 color: RRColors.textDisabled,
               ),
               const SizedBox(height: RRSpace.sp24),
-              const Text(
-                'No Videos Yet',
-                style: TextStyle(
+              Text(
+                l10n.noVideosYetTitle,
+                style: const TextStyle(
                   color: Colors.white,
                   fontSize: 26,
                   fontWeight: FontWeight.w700,
@@ -37,8 +39,8 @@ class NoVideosState extends StatelessWidget {
               ),
               const SizedBox(height: RRSpace.sp12),
               Text(
-                'Your camera roll videos will appear here.',
-                style: TextStyle(
+                l10n.noVideosYetBody,
+                style: const TextStyle(
                   color: RRColors.textSecond,
                   fontSize: 15,
                   height: 1.5,
@@ -57,9 +59,9 @@ class NoVideosState extends StatelessWidget {
                         BorderRadius.circular(RRSpace.radiusFull),
                   ),
                   alignment: Alignment.center,
-                  child: const Text(
-                    'Open Photos App',
-                    style: TextStyle(
+                  child: Text(
+                    l10n.openPhotosApp,
+                    style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,
                       fontWeight: FontWeight.w600,

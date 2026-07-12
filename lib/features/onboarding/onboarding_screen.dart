@@ -5,6 +5,7 @@ import 'package:photo_manager/photo_manager.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
 import '../../core/theme/typography.dart';
+import '../../l10n/app_localizations.dart';
 import '../../shared/widgets/primary_button.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -43,6 +44,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: RRColors.bgDeep,
       body: Stack(
@@ -65,9 +67,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         padding: const EdgeInsets.symmetric(
                             horizontal: RRSpace.sp12, vertical: RRSpace.sp8),
                       ),
-                      child: const Text(
-                        'Skip',
-                        style: TextStyle(
+                      child: Text(
+                        l10n.skip,
+                        style: const TextStyle(
                             fontSize: 16, fontWeight: FontWeight.w400),
                       ),
                     ),
@@ -112,9 +114,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       RRSpace.sp20, RRSpace.sp20, RRSpace.sp20, RRSpace.sp32),
                   child: PrimaryButton(
                     label: switch (_index) {
-                      0 => 'Get Started',
-                      1 => 'Continue',
-                      _ => _requesting ? 'Requesting…' : 'Allow Access',
+                      0 => l10n.getStarted,
+                      1 => l10n.continueLabel,
+                      _ => _requesting ? l10n.requesting : l10n.allowAccess,
                     },
                     onPressed: switch (_index) {
                       0 => _next,
@@ -194,19 +196,19 @@ class _Page1 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    final l10n = AppLocalizations.of(context)!;
+    return Column(
       children: [
-        Spacer(flex: 1),
-        _CardStack(),
-        SizedBox(height: 20),
-        _SwipeHint(),
-        Spacer(flex: 2),
+        const Spacer(flex: 1),
+        const _CardStack(),
+        const SizedBox(height: 20),
+        const _SwipeHint(),
+        const Spacer(flex: 2),
         _PageText(
-          title: 'Your Videos.\nFinally Watchable.',
-          body:
-              'Swipe through your camera roll like a real feed. No uploads, no accounts. Just your memories.',
+          title: l10n.onboardingTitle,
+          body: l10n.onboardingSubtitle,
         ),
-        SizedBox(height: RRSpace.sp24),
+        const SizedBox(height: RRSpace.sp24),
       ],
     );
   }
@@ -358,13 +360,15 @@ class _SwipeHint extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    final l10n = AppLocalizations.of(context)!;
+    return Column(
       children: [
-        Icon(CupertinoIcons.chevron_up, color: RRColors.accentCyan, size: 13),
-        SizedBox(height: 3),
+        const Icon(CupertinoIcons.chevron_up,
+            color: RRColors.accentCyan, size: 13),
+        const SizedBox(height: 3),
         Text(
-          'SWIPE',
-          style: TextStyle(
+          l10n.swipeHint,
+          style: const TextStyle(
             color: RRColors.accentCyan,
             fontSize: 10,
             fontWeight: FontWeight.w600,
@@ -383,17 +387,17 @@ class _Page2 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    final l10n = AppLocalizations.of(context)!;
+    return Column(
       children: [
-        Spacer(flex: 1),
-        _PrivacyVisual(),
-        Spacer(flex: 2),
+        const Spacer(flex: 1),
+        const _PrivacyVisual(),
+        const Spacer(flex: 2),
         _PageText(
-          title: '100% Private.\n100% Yours.',
-          body:
-              'Your videos never leave your phone. No cloud, no sign-in, no tracking. Just you.',
+          title: l10n.onboardingPrivacyTitle,
+          body: l10n.onboardingPrivacyBody,
         ),
-        SizedBox(height: RRSpace.sp24),
+        const SizedBox(height: RRSpace.sp24),
       ],
     );
   }
@@ -404,14 +408,15 @@ class _PrivacyVisual extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return SizedBox(
       width: 220,
       height: 160,
       child: Stack(
         alignment: Alignment.center,
         clipBehavior: Clip.none,
-        children: const [
-          Icon(
+        children: [
+          const Icon(
             CupertinoIcons.lock_fill,
             size: 82,
             color: RRColors.accentViolet,
@@ -420,18 +425,18 @@ class _PrivacyVisual extends StatelessWidget {
           Positioned(
             left: -18,
             top: 28,
-            child: _PillLabel('No Cloud'),
+            child: _PillLabel(l10n.onboardingNoCloud),
           ),
           // No Account – top right
           Positioned(
             right: -28,
             top: 2,
-            child: _PillLabel('No Account'),
+            child: _PillLabel(l10n.onboardingNoAccount),
           ),
           // No Tracking – bottom center
           Positioned(
             bottom: 0,
-            child: _PillLabel('No Tracking'),
+            child: _PillLabel(l10n.onboardingNoTracking),
           ),
         ],
       ),
@@ -473,17 +478,17 @@ class _Page3 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    final l10n = AppLocalizations.of(context)!;
+    return Column(
       children: [
-        Spacer(flex: 1),
-        _PhotoAccessVisual(),
-        Spacer(flex: 2),
+        const Spacer(flex: 1),
+        const _PhotoAccessVisual(),
+        const Spacer(flex: 2),
         _PageText(
-          title: "Let's Find\nYour Videos",
-          body:
-              'RollReel needs access to your photo library to show your videos. They stay on your device, always.',
+          title: l10n.onboardingPermissionTitle,
+          body: l10n.onboardingPermissionBody,
         ),
-        SizedBox(height: RRSpace.sp24),
+        const SizedBox(height: RRSpace.sp24),
       ],
     );
   }
@@ -494,6 +499,7 @@ class _PhotoAccessVisual extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: RRSpace.sp24),
       child: Column(
@@ -532,8 +538,8 @@ class _PhotoAccessVisual extends StatelessWidget {
                 const SizedBox(width: RRSpace.sp8),
                 Expanded(
                   child: Text(
-                    'We only read videos — never photos, never uploads.',
-                    style: TextStyle(
+                    l10n.onboardingPermissionNote,
+                    style: const TextStyle(
                         color: RRColors.textSecond, fontSize: 13, height: 1.4),
                   ),
                 ),

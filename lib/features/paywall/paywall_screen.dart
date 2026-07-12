@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/iap/iap_provider.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
+import '../../l10n/app_localizations.dart';
 
 const String kTermsOfUseUrl =
     'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/';
@@ -16,19 +17,19 @@ const String kPrivacyPolicyUrl =
 
 enum _Tier { pro, plus }
 
+enum _FeatureId { adFree, vault, speed, onThisDay }
+
 class _FeatureData {
   const _FeatureData({
     required this.icon,
     required this.iconColor,
-    required this.title,
-    required this.subtitle,
+    required this.id,
     required this.tier,
   });
 
   final IconData icon;
   final Color iconColor;
-  final String title;
-  final String subtitle;
+  final _FeatureId id;
   final _Tier tier;
 }
 
@@ -40,29 +41,25 @@ const List<_FeatureData> _kFeatures = [
   _FeatureData(
     icon: Icons.visibility_off_rounded,
     iconColor: Color(0xFF1F6B45),
-    title: 'Ad-Free Experience',
-    subtitle: 'No interruptions, ever',
+    id: _FeatureId.adFree,
     tier: _Tier.pro,
   ),
   _FeatureData(
     icon: CupertinoIcons.lock_fill,
     iconColor: Color(0xFF4A2A8B),
-    title: 'Privacy Vault',
-    subtitle: 'Lock sensitive videos with Face ID',
+    id: _FeatureId.vault,
     tier: _Tier.pro,
   ),
   _FeatureData(
     icon: CupertinoIcons.clock_fill,
     iconColor: Color(0xFF1A5A6B),
-    title: 'Playback Speed Control',
-    subtitle: '2× fast-forward on long-press',
+    id: _FeatureId.speed,
     tier: _Tier.pro,
   ),
   _FeatureData(
     icon: CupertinoIcons.calendar_today,
     iconColor: Color(0xFF8B5CF6),
-    title: 'On This Day',
-    subtitle: 'Relive videos from past years',
+    id: _FeatureId.onThisDay,
     tier: _Tier.pro,
   ),
 ];
@@ -108,6 +105,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final iap = ref.watch(iapProvider);
     final isPro = ref.watch(isProProvider);
 
@@ -187,9 +185,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                           ? const CupertinoActivityIndicator(
                               color: Colors.white)
                           : Text(
-                              isPro
-                                  ? 'You\'re Pro!'
-                                  : 'Unlock RollReel Pro',
+                              isPro ? l10n.youArePro : l10n.unlockPro,
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 17,
@@ -203,8 +199,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                   // ── Footer ───────────────────────────────────────────────
                   Text(
                     _selected == _Plan.lifetime
-                        ? 'One-time purchase · No subscription'
-                        : 'Auto-renews monthly · Cancel anytime',
+                        ? l10n.lifetimeFooter
+                        : l10n.monthlyFooter,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: RRColors.textDisabled,
@@ -215,7 +211,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                   GestureDetector(
                     onTap: iap.loading ? null : _restore,
                     child: Text(
-                      'Restore Purchases',
+                      l10n.restorePurchases,
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: RRColors.textSecond,
@@ -226,7 +222,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                   ),
                   const SizedBox(height: RRSpace.sp12),
                   Text(
-                    'Payment charged to Apple ID. Subscription auto-renews unless cancelled 24h before period ends.',
+                    l10n.subscriptionDisclaimer,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: RRColors.textDisabled,
@@ -241,7 +237,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                       GestureDetector(
                         onTap: () => _openUrl(kTermsOfUseUrl),
                         child: Text(
-                          'Terms of Use (EULA)',
+                          l10n.termsOfUse,
                           style: TextStyle(
                             color: RRColors.textSecond,
                             fontSize: 12,
@@ -254,7 +250,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                       GestureDetector(
                         onTap: () => _openUrl(kPrivacyPolicyUrl),
                         child: Text(
-                          'Privacy Policy',
+                          l10n.privacyPolicy,
                           style: TextStyle(
                             color: RRColors.textSecond,
                             fontSize: 12,
@@ -277,6 +273,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
   // ── Header (gradient, extends behind status bar) ────────────────────────────
 
   Widget _buildHeader(BuildContext context, bool isPro) {
+    final l10n = AppLocalizations.of(context)!;
     final topPad = MediaQuery.of(context).padding.top;
     return Container(
       width: double.infinity,
@@ -303,7 +300,7 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                   borderRadius: BorderRadius.circular(RRSpace.radiusFull),
                 ),
                 child: Text(
-                  isPro ? 'ACTIVE' : 'PRO',
+                  isPro ? l10n.active : l10n.pro,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 13,
@@ -333,9 +330,9 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
             ],
           ),
           const SizedBox(height: RRSpace.sp20),
-          const Text(
-            'RollReel Pro',
-            style: TextStyle(
+          Text(
+            l10n.paywallTitle,
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 38,
               fontWeight: FontWeight.w800,
@@ -343,9 +340,9 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
             ),
           ),
           const SizedBox(height: RRSpace.sp8),
-          const Text(
-            'Watch more. Worry less.',
-            style: TextStyle(
+          Text(
+            l10n.paywallTagline,
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 16,
               fontWeight: FontWeight.w400,
@@ -366,8 +363,35 @@ class _FeatureRow extends StatelessWidget {
   final _FeatureData data;
   final bool included;
 
+  static String _title(AppLocalizations l10n, _FeatureId id) {
+    switch (id) {
+      case _FeatureId.adFree:
+        return l10n.featureAdFree;
+      case _FeatureId.vault:
+        return l10n.featureVault;
+      case _FeatureId.speed:
+        return l10n.featureSpeed;
+      case _FeatureId.onThisDay:
+        return l10n.featureOnThisDay;
+    }
+  }
+
+  static String _subtitle(AppLocalizations l10n, _FeatureId id) {
+    switch (id) {
+      case _FeatureId.adFree:
+        return l10n.featureAdFreeSub;
+      case _FeatureId.vault:
+        return l10n.featureVaultSub;
+      case _FeatureId.speed:
+        return l10n.featureSpeedSub;
+      case _FeatureId.onThisDay:
+        return l10n.featureOnThisDaySub;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: RRSpace.sp12),
       child: Opacity(
@@ -392,7 +416,7 @@ class _FeatureRow extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        data.title,
+                        _title(l10n, data.id),
                         style: TextStyle(
                           color: RRColors.textPrimary,
                           fontSize: 16,
@@ -410,9 +434,9 @@ class _FeatureRow extends StatelessWidget {
                             borderRadius:
                                 BorderRadius.circular(RRSpace.radiusFull),
                           ),
-                          child: const Text(
-                            'PLUS',
-                            style: TextStyle(
+                          child: Text(
+                            l10n.plus,
+                            style: const TextStyle(
                               color: RRColors.accentCyan,
                               fontSize: 10,
                               fontWeight: FontWeight.w800,
@@ -425,7 +449,7 @@ class _FeatureRow extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    data.subtitle,
+                    _subtitle(l10n, data.id),
                     style: TextStyle(
                       color: RRColors.textSecond,
                       fontSize: 13,
@@ -473,12 +497,13 @@ class _PricingCard extends StatelessWidget {
     return _isLifetime ? '\$4.99' : '\$0.99/mo';
   }
 
-  String get _subLabel {
-    if (_isLifetime) return 'Lifetime Access';
-    return 'Founding member';
+  String _subLabel(AppLocalizations l10n) {
+    if (_isLifetime) return l10n.lifetimeAccess;
+    return l10n.foundingMember;
   }
 
-  Widget _inner() {
+  Widget _inner(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(RRSpace.sp16),
@@ -524,7 +549,7 @@ class _PricingCard extends StatelessWidget {
           ),
           const SizedBox(height: 2),
           Text(
-            _subLabel,
+            _subLabel(l10n),
             style: TextStyle(
               color: RRColors.textSecond,
               fontSize: 13,
@@ -551,9 +576,9 @@ class _PricingCard extends StatelessWidget {
                 borderRadius:
                     BorderRadius.circular(RRSpace.radiusLg + 1),
               ),
-              child: _inner(),
+              child: _inner(context),
             )
-          : _inner(),
+          : _inner(context),
     );
   }
 }

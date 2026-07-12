@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
+import '../../l10n/app_localizations.dart';
 
 class LoadingState extends StatefulWidget {
   const LoadingState({super.key});
@@ -129,8 +130,8 @@ class _LoadingStateState extends State<LoadingState>
                         color: RRColors.accentCyan),
                     const SizedBox(width: 10),
                     Text(
-                      'Loading your library...',
-                      style: TextStyle(
+                      AppLocalizations.of(context)!.loadingLibrary,
+                      style: const TextStyle(
                         color: RRColors.textSecond,
                         fontSize: 14,
                       ),

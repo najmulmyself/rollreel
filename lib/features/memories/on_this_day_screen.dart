@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import '../../core/memories/on_this_day_provider.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/theme/colors.dart';
 import '../feed/video_feed_item.dart';
 import '../states/loading_state.dart';
@@ -27,13 +28,14 @@ class _OnThisDayScreenState extends ConsumerState<OnThisDayScreen> {
     super.dispose();
   }
 
-  String _yearsAgoLabel(AssetEntity asset) {
+  String _yearsAgoLabel(AppLocalizations l10n, AssetEntity asset) {
     final years = DateTime.now().year - asset.createDateTime.year;
-    return years == 1 ? '1 year ago' : '$years years ago';
+    return years == 1 ? l10n.yearsAgoOne : l10n.yearsAgoMany(years);
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final videosAsync = ref.watch(onThisDayProvider);
     final safeTop = MediaQuery.paddingOf(context).top;
 
@@ -42,7 +44,7 @@ class _OnThisDayScreenState extends ConsumerState<OnThisDayScreen> {
       body: videosAsync.when(
         loading: () => const LoadingState(),
         error: (e, _) => Center(
-          child: Text('Could not load memories: $e',
+          child: Text(l10n.couldNotLoadMemories('$e'),
               style: const TextStyle(color: Colors.white)),
         ),
         data: (videos) {
@@ -108,7 +110,8 @@ class _OnThisDayScreenState extends ConsumerState<OnThisDayScreen> {
                               color: RRColors.accentCyan, size: 14),
                           const SizedBox(width: 6),
                           Text(
-                            'On This Day · ${_yearsAgoLabel(videos[safeIndex])}',
+                            l10n.onThisDayHeader(
+                                _yearsAgoLabel(l10n, videos[safeIndex])),
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 13,
@@ -130,7 +133,7 @@ class _OnThisDayScreenState extends ConsumerState<OnThisDayScreen> {
                 right: 0,
                 child: Center(
                   child: Text(
-                    '${safeIndex + 1} of ${videos.length}',
+                    l10n.positionCounter(safeIndex + 1, videos.length),
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.6),
                       fontSize: 12,

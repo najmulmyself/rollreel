@@ -6,6 +6,8 @@
   "onboardingPrivacyBody": "Your videos never leave your phone. No cloud, no sign-in, no tracking. Just you.",
   "onboardingPermissionBody": "RollReel needs access to your photo library to show your videos. They stay on your device, always.",
   "onboardingPermissionNote": "We only read videos — never photos, never uploads.",
+  "onboardingPrivacyTitle": "100% Private.\n100% Yours.",
+  "onboardingPermissionTitle": "Let's Find\nYour Videos",
   "onboardingNoCloud": "No Cloud",
   "onboardingNoAccount": "No Account",
   "onboardingNoTracking": "No Tracking",
@@ -104,6 +106,9 @@
   "thisMonth": "This Month",
   "duration": "DURATION",
   "any": "Any",
+  "durationShort": "< 1 min",
+  "durationMedium": "1–5 min",
+  "durationLong": "> 5 min",
   "sortBy": "SORT BY",
   "newestFirst": "Newest First",
   "oldestFirst": "Oldest First",
@@ -112,7 +117,7 @@
   "applyFilters": "Apply Filters",
 
   "onThisDay": "On This Day",
-  "onThisDaySubtitleOne": "1 memory from {years} ago",
+  "onThisDaySubtitleOne": "1 memory from {years}",
   "@onThisDaySubtitleOne": {
     "placeholders": {
       "years": {
@@ -205,6 +210,7 @@
   "authFailed": "Authentication failed. Please try again.",
   "vaultLoadFailed": "Failed to load vault",
   "vaultEmpty": "Vault is empty",
+  "vaultEmptyHint": "Tap ••• on any video to add it here",
   "removeFromVaultTitle": "Remove from Vault?",
   "removeFromVaultBody": "This video will return to your main library.",
 

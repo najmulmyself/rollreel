@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/theme/colors.dart';
+import '../../l10n/app_localizations.dart';
 import '../../core/theme/spacing.dart';
 import '../../core/video/video_library_provider.dart';
 
@@ -109,6 +110,7 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding:
           EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
@@ -145,7 +147,7 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
                   children: [
                     Expanded(
                       child: Text(
-                        'Filter',
+                        l10n.filter,
                         style: TextStyle(
                           color: RRColors.textPrimary,
                           fontSize: 20,
@@ -156,9 +158,9 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
                     TextButton(
                       onPressed: () =>
                           setState(() => _temp = const BrowseFilter()),
-                      child: const Text(
-                        'Reset',
-                        style: TextStyle(
+                      child: Text(
+                        l10n.reset,
+                        style: const TextStyle(
                           color: RRColors.accentCyan,
                           fontSize: 15,
                           fontWeight: FontWeight.w500,
@@ -173,7 +175,7 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(
                     RRSpace.sp16, RRSpace.sp8, RRSpace.sp16, RRSpace.sp4),
-                child: Text('TIME PERIOD', style: _sectionLabelStyle),
+                child: Text(l10n.timePeriod, style: _sectionLabelStyle),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(
@@ -181,25 +183,25 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
                 child: Wrap(
                   children: [
                     _chip(
-                      label: 'All',
+                      label: l10n.filterAll,
                       active: _temp.period == VideoTimePeriod.all,
                       onTap: () => setState(
                           () => _temp = _temp.copyWith(period: VideoTimePeriod.all)),
                     ),
                     _chip(
-                      label: 'Today',
+                      label: l10n.filterToday,
                       active: _temp.period == VideoTimePeriod.today,
                       onTap: () => setState(
                           () => _temp = _temp.copyWith(period: VideoTimePeriod.today)),
                     ),
                     _chip(
-                      label: 'This Week',
+                      label: l10n.thisWeek,
                       active: _temp.period == VideoTimePeriod.thisWeek,
                       onTap: () => setState(
                           () => _temp = _temp.copyWith(period: VideoTimePeriod.thisWeek)),
                     ),
                     _chip(
-                      label: 'This Month',
+                      label: l10n.thisMonth,
                       active: _temp.period == VideoTimePeriod.thisMonth,
                       onTap: () => setState(
                           () => _temp = _temp.copyWith(period: VideoTimePeriod.thisMonth)),
@@ -230,7 +232,7 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(
                     RRSpace.sp16, RRSpace.sp12, RRSpace.sp16, RRSpace.sp4),
-                child: Text('DURATION', style: _sectionLabelStyle),
+                child: Text(l10n.duration, style: _sectionLabelStyle),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(
@@ -238,25 +240,25 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
                 child: Row(
                   children: [
                     _chip(
-                      label: 'Any',
+                      label: l10n.any,
                       active: _temp.duration == VideoDurationFilter.any,
                       onTap: () => setState(
                           () => _temp = _temp.copyWith(duration: VideoDurationFilter.any)),
                     ),
                     _chip(
-                      label: '< 1 min',
+                      label: l10n.durationShort,
                       active: _temp.duration == VideoDurationFilter.short,
                       onTap: () => setState(
                           () => _temp = _temp.copyWith(duration: VideoDurationFilter.short)),
                     ),
                     _chip(
-                      label: '1–5 min',
+                      label: l10n.durationMedium,
                       active: _temp.duration == VideoDurationFilter.medium,
                       onTap: () => setState(
                           () => _temp = _temp.copyWith(duration: VideoDurationFilter.medium)),
                     ),
                     _chip(
-                      label: '> 5 min',
+                      label: l10n.durationLong,
                       active: _temp.duration == VideoDurationFilter.long,
                       onTap: () => setState(
                           () => _temp = _temp.copyWith(duration: VideoDurationFilter.long)),
@@ -269,7 +271,7 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(
                     RRSpace.sp16, RRSpace.sp12, RRSpace.sp16, RRSpace.sp8),
-                child: Text('SORT BY', style: _sectionLabelStyle),
+                child: Text(l10n.sortBy, style: _sectionLabelStyle),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(
@@ -282,19 +284,19 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
                   child: Column(
                     children: [
                       _sortRow(
-                          label: 'Newest First',
+                          label: l10n.newestFirst,
                           value: VideoSortOrder.newest,
                           isLast: false),
                       _sortRow(
-                          label: 'Oldest First',
+                          label: l10n.oldestFirst,
                           value: VideoSortOrder.oldest,
                           isLast: false),
                       _sortRow(
-                          label: 'Shortest First',
+                          label: l10n.shortestFirst,
                           value: VideoSortOrder.shortest,
                           isLast: false),
                       _sortRow(
-                          label: 'Longest First',
+                          label: l10n.longestFirst,
                           value: VideoSortOrder.longest,
                           isLast: true),
                     ],
@@ -320,7 +322,7 @@ class _FilterSheetState extends ConsumerState<FilterSheet> {
                     ),
                     alignment: Alignment.center,
                     child: Text(
-                      'Apply Filters',
+                      l10n.applyFilters,
                       style: TextStyle(
                         color: RRColors.textPrimary,
                         fontSize: 16,
