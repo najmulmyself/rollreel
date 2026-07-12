@@ -12,7 +12,11 @@ const String kInterstitialAdUnitId = kDebugMode
     ? 'ca-app-pub-3940256099942544/4411468910'
     : 'ca-app-pub-3549493907002564/1729166596';
 
-const int kSwipesPerInterstitial = 6;
+const String kBannerAdUnitId = kDebugMode
+    ? 'ca-app-pub-3940256099942544/2934735716'
+    : 'ca-app-pub-3549493907002564/5485502212';
+
+const int kSwipesPerInterstitial = 5;
 
 class AdsNotifier extends StateNotifier<int> {
   AdsNotifier(this._ref) : super(0) {

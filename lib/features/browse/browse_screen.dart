@@ -8,6 +8,7 @@ import 'package:photo_manager/photo_manager.dart';
 
 import '../../l10n/app_localizations.dart';
 
+import '../../core/ads/banner_ad_widget.dart';
 import '../../core/iap/iap_provider.dart';
 import '../../core/memories/on_this_day_provider.dart';
 import '../../core/theme/colors.dart';
@@ -539,6 +540,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                 },
               ),
             ),
+            const Center(child: BannerAdWidget()),
           ],
         ),
       ),
