@@ -4,6 +4,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 
 import 'core/theme/app_theme.dart';
 import 'core/theme/colors.dart';
+import 'l10n/app_localizations.dart';
 import 'navigation/app_router.dart';
 
 void main() {
@@ -31,6 +32,8 @@ class MyApp extends StatelessWidget {
         theme: RRAppTheme.dark(),
         darkTheme: RRAppTheme.dark(),
         themeMode: ThemeMode.dark,
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
         home: const AppRouter(),
       ),
     );

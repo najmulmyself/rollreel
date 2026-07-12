@@ -1,0 +1,235 @@
+{
+  "@@locale": "en",
+
+  "onboardingTitle": "Your Videos.\nFinally Watchable.",
+  "onboardingSubtitle": "Swipe through your camera roll like a real feed. No uploads, no accounts. Just your memories.",
+  "onboardingPrivacyBody": "Your videos never leave your phone. No cloud, no sign-in, no tracking. Just you.",
+  "onboardingPermissionBody": "RollReel needs access to your photo library to show your videos. They stay on your device, always.",
+  "onboardingPermissionNote": "We only read videos — never photos, never uploads.",
+  "onboardingNoCloud": "No Cloud",
+  "onboardingNoAccount": "No Account",
+  "onboardingNoTracking": "No Tracking",
+  "swipeHint": "SWIPE",
+  "skip": "Skip",
+  "getStarted": "Get Started",
+  "continueLabel": "Continue",
+  "requesting": "Requesting…",
+  "allowAccess": "Allow Access",
+
+  "noVideosYetTitle": "No Videos Yet",
+  "noVideosYetBody": "Your camera roll videos will appear here.",
+  "openPhotosApp": "Open Photos App",
+  "loadingLibrary": "Loading your library...",
+
+  "permissionDeniedTitle": "No Videos Found",
+  "permissionDeniedBody": "RollReel needs photo library access to show your local videos. Your videos are never uploaded.",
+  "openSettings": "Open Settings",
+  "continueAnyway": "Continue Anyway",
+
+  "today": "Today",
+  "yesterday": "Yesterday",
+  "cancel": "Cancel",
+  "ok": "OK",
+  "back": "Back",
+  "remove": "Remove",
+  "manage": "Manage",
+  "videoFallbackTitle": "Video",
+
+  "filterAll": "All",
+  "filterToday": "Today",
+  "filterShorts": "Shorts",
+  "filterLong": "Long",
+  "filterRecent": "Recent",
+
+  "videoDeleted": "Video deleted",
+  "getInfo": "Get Info",
+  "addToVault": "Add to Vault",
+  "removeFromVault": "Remove from Vault",
+  "deleteVideo": "Delete Video",
+  "deleteVideoWarning": "This will permanently delete the video from your library.",
+  "thisVideo": "This video",
+  "share": "Share",
+  "expand": "Expand",
+
+  "photoLibraryAccess": "Photo Library Access",
+  "limitedAccessMessage": "You're currently sharing a limited selection of videos.",
+  "selectMoreVideos": "Select More Videos",
+  "allowFullAccess": "Allow Full Access",
+  "managingCount": "Managing {count} of your videos",
+  "@managingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "infoDate": "Date",
+  "infoDuration": "Duration",
+  "infoResolution": "Resolution",
+  "infoFileSize": "File Size",
+  "infoFormat": "Format",
+
+  "feed": "Feed",
+  "searchVideos": "Search videos…",
+  "videosTitle": "Videos",
+  "videosCount": "{count} Videos",
+  "@videosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "yourLibrary": "Your Library",
+  "localBadge": "Local",
+  "noResults": "No Results",
+  "noVideosFound": "No Videos Found",
+  "noSearchMatches": "No videos match \"{query}\".",
+  "@noSearchMatches": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "tryDifferentFilter": "Try a different filter.",
+  "clearSearch": "Clear Search",
+  "clearFilters": "Clear Filters",
+
+  "filter": "Filter",
+  "reset": "Reset",
+  "timePeriod": "TIME PERIOD",
+  "thisWeek": "This Week",
+  "thisMonth": "This Month",
+  "duration": "DURATION",
+  "any": "Any",
+  "sortBy": "SORT BY",
+  "newestFirst": "Newest First",
+  "oldestFirst": "Oldest First",
+  "shortestFirst": "Shortest First",
+  "longestFirst": "Longest First",
+  "applyFilters": "Apply Filters",
+
+  "onThisDay": "On This Day",
+  "onThisDaySubtitleOne": "1 memory from {years} ago",
+  "@onThisDaySubtitleOne": {
+    "placeholders": {
+      "years": {
+        "type": "String"
+      }
+    }
+  },
+  "onThisDaySubtitleMany": "{count} memories from past years",
+  "@onThisDaySubtitleMany": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "yearsAgoOne": "1 year ago",
+  "yearsAgoMany": "{years} years ago",
+  "@yearsAgoMany": {
+    "placeholders": {
+      "years": {
+        "type": "int"
+      }
+    }
+  },
+  "onThisDayHeader": "On This Day · {yearsAgo}",
+  "@onThisDayHeader": {
+    "placeholders": {
+      "yearsAgo": {
+        "type": "String"
+      }
+    }
+  },
+  "positionCounter": "{current} of {total}",
+  "@positionCounter": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "couldNotLoadMemories": "Could not load memories: {error}",
+  "@couldNotLoadMemories": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "couldNotLoadVideos": "Could not load videos: {error}",
+  "@couldNotLoadVideos": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+
+  "settings": "Settings",
+  "playbackSection": "PLAYBACK",
+  "loopShortVideos": "Loop Short Videos",
+  "autoPlayOnLaunch": "Auto-play on Launch",
+  "defaultFilter": "Default Filter",
+  "appearanceSection": "APPEARANCE",
+  "darkMode": "Dark Mode",
+  "showDateLabels": "Show Date Labels",
+  "showDurationBadges": "Show Duration Badges",
+  "privacySection": "PRIVACY",
+  "privacyVault": "Privacy Vault",
+  "setUp": "Set Up",
+  "appLockFaceId": "App Lock (Face ID)",
+  "proBadge": "Pro",
+  "aboutSection": "ABOUT",
+  "privacyPolicy": "Privacy Policy",
+  "privacyPolicyBody": "RollReel does not upload, transmit, or store any of your videos outside your device. No account is required. No personal data is shared with third parties.",
+  "rateApp": "Rate RollReel",
+  "shareApp": "Share RollReel",
+  "version": "Version",
+  "proCardSubtitle": "Ad-free · Vault · Speed · Collections",
+  "shareAppMessage": "Check out RollReel – swipe through your camera roll videos, 100% offline!",
+
+  "vaultTitle": "Private Vault",
+  "vaultLocked": "Vault Locked",
+  "vaultLockedSubtitle": "Your private videos are safe here",
+  "unlockWithFaceId": "Unlock with Face ID",
+  "unlockVaultReason": "Unlock your Private Vault",
+  "faceIdUnavailable": "Face ID is not available on this device.",
+  "authFailed": "Authentication failed. Please try again.",
+  "vaultLoadFailed": "Failed to load vault",
+  "vaultEmpty": "Vault is empty",
+  "removeFromVaultTitle": "Remove from Vault?",
+  "removeFromVaultBody": "This video will return to your main library.",
+
+  "paywallTitle": "RollReel Pro",
+  "paywallTagline": "Watch more. Worry less.",
+  "featureAdFree": "Ad-Free Experience",
+  "featureAdFreeSub": "No interruptions, ever",
+  "featureVault": "Privacy Vault",
+  "featureVaultSub": "Lock sensitive videos with Face ID",
+  "featureSpeed": "Playback Speed Control",
+  "featureSpeedSub": "2× fast-forward on long-press",
+  "featureOnThisDay": "On This Day",
+  "featureOnThisDaySub": "Relive videos from past years",
+  "unlockPro": "Unlock RollReel Pro",
+  "youArePro": "You're Pro!",
+  "lifetimeFooter": "One-time purchase · No subscription",
+  "monthlyFooter": "Auto-renews monthly · Cancel anytime",
+  "restorePurchases": "Restore Purchases",
+  "subscriptionDisclaimer": "Payment charged to Apple ID. Subscription auto-renews unless cancelled 24h before period ends.",
+  "termsOfUse": "Terms of Use (EULA)",
+  "lifetimeAccess": "Lifetime Access",
+  "foundingMember": "Founding member",
+  "planNotAvailable": "This plan isn't available right now. Please try again later.",
+  "purchaseFailed": "Purchase failed",
+  "active": "ACTIVE",
+  "pro": "PRO",
+  "plus": "PLUS"
+}
