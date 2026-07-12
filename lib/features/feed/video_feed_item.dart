@@ -12,6 +12,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../core/favorites/favorites_provider.dart';
+import '../../core/iap/iap_provider.dart';
 import '../../core/settings/settings_provider.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
@@ -33,6 +34,7 @@ class VideoFeedItem extends ConsumerStatefulWidget {
     this.onPlayStateChanged,
     this.onOpenLibrary,
     this.onOpenSettings,
+    this.onOpenPaywall,
   });
 
   final AssetEntity asset;
@@ -42,6 +44,7 @@ class VideoFeedItem extends ConsumerStatefulWidget {
   final ValueChanged<bool>? onPlayStateChanged;
   final VoidCallback? onOpenLibrary;
   final VoidCallback? onOpenSettings;
+  final VoidCallback? onOpenPaywall;
 
   @override
   ConsumerState<VideoFeedItem> createState() => _VideoFeedItemState();
@@ -208,6 +211,10 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
 
   void _startFastForward() {
     if (!_initialized || _controller == null) return;
+    if (!ref.read(isProProvider)) {
+      widget.onOpenPaywall?.call();
+      return;
+    }
     HapticFeedback.heavyImpact();
     _controller!.setPlaybackSpeed(2.0);
     setState(() => _fastForward = true);

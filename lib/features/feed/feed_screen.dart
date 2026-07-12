@@ -25,6 +25,7 @@ class FeedScreen extends ConsumerStatefulWidget {
     super.key,
     this.onOpenBrowse,
     this.onOpenSettings,
+    this.onOpenPaywall,
     this.initialAssetId,
     this.onVideoChanged,
     this.isTabActive = true,
@@ -33,6 +34,7 @@ class FeedScreen extends ConsumerStatefulWidget {
 
   final VoidCallback? onOpenBrowse;
   final VoidCallback? onOpenSettings;
+  final VoidCallback? onOpenPaywall;
   final String? initialAssetId;
   final void Function(String assetId)? onVideoChanged;
   final bool isTabActive;
@@ -325,6 +327,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
               onPlayStateChanged: _handlePlayStateChanged,
               onOpenLibrary: widget.onOpenBrowse,
               onOpenSettings: widget.onOpenSettings,
+              onOpenPaywall: widget.onOpenPaywall,
             ),
           ),
           // ── Filter tabs ────────────────────────────────────────────────────

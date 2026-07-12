@@ -79,6 +79,7 @@ class _MainShellState extends ConsumerState<MainShell> {
             isTabActive: _tab == 0,
             onOpenBrowse: () => _setTab(1),
             onOpenSettings: () => _setTab(2),
+            onOpenPaywall: widget.onOpenPaywall,
           ),
           BrowseScreen(
             onBack: () => _setTab(0),
