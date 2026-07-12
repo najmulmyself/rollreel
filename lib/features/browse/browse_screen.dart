@@ -12,6 +12,7 @@ import '../../core/iap/iap_provider.dart';
 import '../../core/memories/on_this_day_provider.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
+import '../../core/vault/vault_provider.dart';
 import '../../core/video/video_library_provider.dart';
 import '../memories/on_this_day_screen.dart';
 import '../../shared/widgets/local_badge.dart';
@@ -159,6 +160,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
 
   Future<void> _showVideoOptions(AssetEntity asset) async {
     final l10n = AppLocalizations.of(context)!;
+    final inVault = ref.read(vaultIdsProvider).contains(asset.id);
     await showCupertinoModalPopup<void>(
       context: context,
       builder: (_) => CupertinoActionSheet(
@@ -174,6 +176,13 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
               );
             },
             child: Text(l10n.getInfo),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(context);
+              ref.read(vaultIdsProvider.notifier).toggle(asset.id);
+            },
+            child: Text(inVault ? l10n.removeFromVault : l10n.addToVault),
           ),
           CupertinoActionSheetAction(
             isDestructiveAction: true,
