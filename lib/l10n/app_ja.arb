@@ -148,5 +148,6 @@
   "purchaseFailed": "購入に失敗しました",
   "active": "有効",
   "pro": "PRO",
-  "plus": "PLUS"
+  "plus": "PLUS",
+  "retry": "再試行"
 }

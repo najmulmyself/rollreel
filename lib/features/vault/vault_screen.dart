@@ -8,8 +8,11 @@ import 'package:photo_manager/photo_manager.dart';
 
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
+import '../../core/theme/typography.dart';
 import '../../core/vault/vault_provider.dart';
 import '../../l10n/app_localizations.dart';
+import '../../shared/widgets/duration_badge.dart';
+import '../../shared/widgets/primary_button.dart';
 
 class VaultScreen extends ConsumerStatefulWidget {
   const VaultScreen({super.key, required this.onBack});
@@ -63,28 +66,15 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color(0xFF120F35),
-              Color(0xFF4E3AAA),
-              Color(0xFF7C55E0),
-            ],
-            stops: [0.0, 0.45, 1.0],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              _buildNav(),
-              Expanded(
-                child: _unlocked ? _buildUnlocked() : _buildLocked(),
-              ),
-            ],
-          ),
+      backgroundColor: RRColors.bgDeep,
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildNav(),
+            Expanded(
+              child: _unlocked ? _buildUnlocked() : _buildLocked(),
+            ),
+          ],
         ),
       ),
     );
@@ -106,11 +96,12 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Icon(CupertinoIcons.chevron_left,
-                    color: Colors.white54, size: 16),
+                    color: RRColors.accentCyan, size: 16),
                 const SizedBox(width: 4),
                 Text(
                   AppLocalizations.of(context)!.back,
-                  style: const TextStyle(color: Colors.white54, fontSize: 16),
+                  style: const TextStyle(
+                      color: RRColors.accentCyan, fontSize: 16),
                 ),
               ],
             ),
@@ -121,8 +112,8 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
               padding: const EdgeInsets.only(right: RRSpace.sp8),
               child: Text(
                 AppLocalizations.of(context)!.vaultTitle,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: RRColors.textPrimary,
                   fontSize: 17,
                   fontWeight: FontWeight.w600,
                 ),
@@ -143,16 +134,16 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
+            Icon(
               CupertinoIcons.lock_fill,
               size: 80,
-              color: Colors.white38,
+              color: RRColors.textDisabled,
             ),
             const SizedBox(height: RRSpace.sp24),
             Text(
               l10n.vaultLocked,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: RRColors.textPrimary,
                 fontSize: 28,
                 fontWeight: FontWeight.w700,
               ),
@@ -161,48 +152,16 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
             Text(
               l10n.vaultLockedSubtitle,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: Colors.white60,
+              style: TextStyle(
+                color: RRColors.textSecond,
                 fontSize: 15,
               ),
             ),
             const SizedBox(height: RRSpace.sp32),
-            GestureDetector(
-              onTap: _authenticating ? null : _unlock,
-              child: Container(
-                height: RRSpace.buttonHeight,
-                decoration: BoxDecoration(
-                  gradient: RRColors.gradBrand,
-                  borderRadius: BorderRadius.circular(RRSpace.radiusFull),
-                ),
-                child: _authenticating
-                    ? const Center(
-                        child: SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2.5,
-                          ),
-                        ),
-                      )
-                    : Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.face_retouching_natural,
-                              color: Colors.white, size: 22),
-                          const SizedBox(width: RRSpace.sp8),
-                          Text(
-                            l10n.unlockWithFaceId,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
-              ),
+            PrimaryButton(
+              label: l10n.unlockWithFaceId,
+              icon: Icons.face_retouching_natural,
+              onPressed: _authenticating ? null : _unlock,
             ),
           ],
         ),
@@ -217,12 +176,28 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
     final l10n = AppLocalizations.of(context)!;
 
     return assetsAsync.when(
-      loading: () => const Center(
-        child: CupertinoActivityIndicator(color: Colors.white),
+      loading: () => Center(
+        child: CupertinoActivityIndicator(color: RRColors.accentCyan),
       ),
       error: (_, __) => Center(
-        child: Text(l10n.vaultLoadFailed,
-            style: const TextStyle(color: Colors.white60)),
+        child: Padding(
+          padding: const EdgeInsets.all(RRSpace.sp24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(CupertinoIcons.exclamationmark_triangle,
+                  size: 60, color: RRColors.textDisabled),
+              const SizedBox(height: RRSpace.sp16),
+              Text(l10n.vaultLoadFailed,
+                  style: RRTypography.title1, textAlign: TextAlign.center),
+              const SizedBox(height: RRSpace.sp20),
+              PrimaryButton(
+                label: l10n.retry,
+                onPressed: () => ref.invalidate(vaultAssetsProvider),
+              ),
+            ],
+          ),
+        ),
       ),
       data: (assets) {
         if (assets.isEmpty) {
@@ -230,21 +205,21 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(CupertinoIcons.lock_open_fill,
-                    size: 64, color: Colors.white54),
+                Icon(CupertinoIcons.lock_open_fill,
+                    size: 64, color: RRColors.textDisabled),
                 const SizedBox(height: RRSpace.sp16),
                 Text(
                   l10n.vaultEmpty,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: RRColors.textPrimary,
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 const SizedBox(height: RRSpace.sp8),
                 Text(
-                  AppLocalizations.of(context)!.vaultEmptyHint,
-                  style: const TextStyle(color: Colors.white60, fontSize: 14),
+                  l10n.vaultEmptyHint,
+                  style: TextStyle(color: RRColors.textSecond, fontSize: 14),
                 ),
               ],
             ),
@@ -255,8 +230,8 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
           padding: const EdgeInsets.all(RRSpace.sp4),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 3,
-            crossAxisSpacing: 2,
-            mainAxisSpacing: 2,
+            crossAxisSpacing: RRSpace.sp4,
+            mainAxisSpacing: RRSpace.sp4,
             childAspectRatio: 9 / 16,
           ),
           itemCount: assets.length,
@@ -323,40 +298,22 @@ class _VaultThumbState extends ConsumerState<_VaultThumb> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onLongPress: () => _confirmRemove(context),
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          _thumb != null
-              ? Image.memory(_thumb!, fit: BoxFit.cover)
-              : const ColoredBox(color: Color(0xFF1A1535)),
-          // Duration badge
-          Positioned(
-            right: 4,
-            bottom: 4,
-            child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-              decoration: BoxDecoration(
-                color: Colors.black54,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                _fmtDuration(widget.asset.duration),
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600),
-              ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(RRSpace.radiusSm),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            _thumb != null
+                ? Image.memory(_thumb!, fit: BoxFit.cover)
+                : ColoredBox(color: RRColors.bgElevated),
+            Positioned(
+              right: 4,
+              bottom: 4,
+              child: DurationBadge(seconds: widget.asset.duration),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
-  }
-
-  String _fmtDuration(int seconds) {
-    final m = seconds ~/ 60;
-    final s = (seconds % 60).toString().padLeft(2, '0');
-    return '$m:$s';
   }
 }

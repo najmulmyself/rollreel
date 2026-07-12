@@ -148,5 +148,6 @@
   "purchaseFailed": "Acquisto non riuscito",
   "active": "ATTIVO",
   "pro": "PRO",
-  "plus": "PLUS"
+  "plus": "PLUS",
+  "retry": "Riprova"
 }

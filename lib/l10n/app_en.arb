@@ -221,5 +221,6 @@
   "purchaseFailed": "Purchase failed",
   "active": "ACTIVE",
   "pro": "PRO",
-  "plus": "PLUS"
+  "plus": "PLUS",
+  "retry": "Retry"
 }

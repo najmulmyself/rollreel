@@ -148,5 +148,6 @@
   "purchaseFailed": "购买失败",
   "active": "已激活",
   "pro": "PRO",
-  "plus": "PLUS"
+  "plus": "PLUS",
+  "retry": "重试"
 }
