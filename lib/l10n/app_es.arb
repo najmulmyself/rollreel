@@ -1,6 +1,5 @@
 {
   "@@locale": "es",
-
   "onboardingTitle": "Tus videos.\nPor fin disfrutables.",
   "onboardingSubtitle": "Desliza por tu carrete como un feed de verdad. Sin subidas, sin cuentas. Solo tus recuerdos.",
   "onboardingPrivacyBody": "Tus videos nunca salen de tu teléfono. Sin nube, sin inicio de sesión, sin rastreo. Solo tú.",
@@ -17,17 +16,14 @@
   "continueLabel": "Continuar",
   "requesting": "Solicitando…",
   "allowAccess": "Permitir acceso",
-
   "noVideosYetTitle": "Aún no hay videos",
   "noVideosYetBody": "Los videos de tu carrete aparecerán aquí.",
   "openPhotosApp": "Abrir app Fotos",
   "loadingLibrary": "Cargando tu biblioteca...",
-
   "permissionDeniedTitle": "No se encontraron videos",
   "permissionDeniedBody": "RollReel necesita acceso a la fototeca para mostrar tus videos locales. Tus videos nunca se suben.",
   "openSettings": "Abrir Ajustes",
   "continueAnyway": "Continuar de todos modos",
-
   "today": "Hoy",
   "yesterday": "Ayer",
   "cancel": "Cancelar",
@@ -36,13 +32,11 @@
   "remove": "Eliminar",
   "manage": "Gestionar",
   "videoFallbackTitle": "Video",
-
   "filterAll": "Todos",
   "filterToday": "Hoy",
   "filterShorts": "Cortos",
   "filterLong": "Largos",
   "filterRecent": "Recientes",
-
   "videoDeleted": "Video eliminado",
   "getInfo": "Obtener información",
   "addToVault": "Añadir a la bóveda",
@@ -52,19 +46,16 @@
   "thisVideo": "Este video",
   "share": "Compartir",
   "expand": "Expandir",
-
   "photoLibraryAccess": "Acceso a la fototeca",
   "limitedAccessMessage": "Actualmente compartes una selección limitada de videos.",
   "selectMoreVideos": "Seleccionar más videos",
   "allowFullAccess": "Permitir acceso completo",
   "managingCount": "Gestionando {count} de tus videos",
-
   "infoDate": "Fecha",
   "infoDuration": "Duración",
   "infoResolution": "Resolución",
   "infoFileSize": "Tamaño",
   "infoFormat": "Formato",
-
   "feed": "Feed",
   "searchVideos": "Buscar videos…",
   "videosTitle": "Videos",
@@ -77,7 +68,6 @@
   "tryDifferentFilter": "Prueba con otro filtro.",
   "clearSearch": "Borrar búsqueda",
   "clearFilters": "Borrar filtros",
-
   "filter": "Filtrar",
   "reset": "Restablecer",
   "timePeriod": "PERÍODO",
@@ -94,7 +84,6 @@
   "shortestFirst": "Más cortos primero",
   "longestFirst": "Más largos primero",
   "applyFilters": "Aplicar filtros",
-
   "onThisDay": "Tal día como hoy",
   "onThisDaySubtitleOne": "1 recuerdo de {years}",
   "onThisDaySubtitleMany": "{count} recuerdos de años pasados",
@@ -104,7 +93,6 @@
   "positionCounter": "{current} de {total}",
   "couldNotLoadMemories": "No se pudieron cargar los recuerdos: {error}",
   "couldNotLoadVideos": "No se pudieron cargar los videos: {error}",
-
   "settings": "Ajustes",
   "playbackSection": "REPRODUCCIÓN",
   "loopShortVideos": "Repetir videos cortos",
@@ -116,8 +104,6 @@
   "showDurationBadges": "Mostrar duración",
   "privacySection": "PRIVACIDAD",
   "privacyVault": "Bóveda privada",
-  "setUp": "Configurar",
-  "appLockFaceId": "Bloqueo de app (Face ID)",
   "proBadge": "Pro",
   "aboutSection": "ACERCA DE",
   "privacyPolicy": "Política de privacidad",
@@ -127,7 +113,6 @@
   "version": "Versión",
   "proCardSubtitle": "Sin anuncios · Bóveda · Velocidad · Colecciones",
   "shareAppMessage": "Mira RollReel: desliza por los videos de tu carrete, ¡100% sin conexión!",
-
   "vaultTitle": "Bóveda privada",
   "vaultLocked": "Bóveda bloqueada",
   "vaultLockedSubtitle": "Tus videos privados están seguros aquí",
@@ -140,7 +125,6 @@
   "vaultEmptyHint": "Toca ••• en cualquier video para añadirlo aquí",
   "removeFromVaultTitle": "¿Quitar de la bóveda?",
   "removeFromVaultBody": "Este video volverá a tu biblioteca principal.",
-
   "paywallTitle": "RollReel Pro",
   "paywallTagline": "Mira más. Preocúpate menos.",
   "featureAdFree": "Experiencia sin anuncios",

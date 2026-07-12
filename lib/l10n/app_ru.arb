@@ -1,6 +1,5 @@
 {
   "@@locale": "ru",
-
   "onboardingTitle": "Ваши видео.\nНаконец-то удобно.",
   "onboardingSubtitle": "Листайте видео из галереи, как настоящую ленту. Без загрузок и аккаунтов. Только ваши воспоминания.",
   "onboardingPrivacyBody": "Ваши видео никогда не покидают телефон. Без облака, без входа, без отслеживания. Только вы.",
@@ -17,17 +16,14 @@
   "continueLabel": "Продолжить",
   "requesting": "Запрос…",
   "allowAccess": "Разрешить доступ",
-
   "noVideosYetTitle": "Пока нет видео",
   "noVideosYetBody": "Видео из вашей галереи появятся здесь.",
   "openPhotosApp": "Открыть «Фото»",
   "loadingLibrary": "Загрузка медиатеки...",
-
   "permissionDeniedTitle": "Видео не найдены",
   "permissionDeniedBody": "RollReel нужен доступ к медиатеке, чтобы показывать ваши локальные видео. Ваши видео никогда не загружаются в сеть.",
   "openSettings": "Открыть Настройки",
   "continueAnyway": "Продолжить всё равно",
-
   "today": "Сегодня",
   "yesterday": "Вчера",
   "cancel": "Отменить",
@@ -36,13 +32,11 @@
   "remove": "Убрать",
   "manage": "Управлять",
   "videoFallbackTitle": "Видео",
-
   "filterAll": "Все",
   "filterToday": "Сегодня",
   "filterShorts": "Короткие",
   "filterLong": "Длинные",
   "filterRecent": "Недавние",
-
   "videoDeleted": "Видео удалено",
   "getInfo": "Свойства",
   "addToVault": "Добавить в хранилище",
@@ -52,19 +46,16 @@
   "thisVideo": "Это видео",
   "share": "Поделиться",
   "expand": "Развернуть",
-
   "photoLibraryAccess": "Доступ к медиатеке",
   "limitedAccessMessage": "Сейчас вы предоставили доступ только к части видео.",
   "selectMoreVideos": "Выбрать ещё видео",
   "allowFullAccess": "Разрешить полный доступ",
   "managingCount": "Доступно {count} ваших видео",
-
   "infoDate": "Дата",
   "infoDuration": "Длительность",
   "infoResolution": "Разрешение",
   "infoFileSize": "Размер файла",
   "infoFormat": "Формат",
-
   "feed": "Лента",
   "searchVideos": "Поиск видео…",
   "videosTitle": "Видео",
@@ -77,7 +68,6 @@
   "tryDifferentFilter": "Попробуйте другой фильтр.",
   "clearSearch": "Очистить поиск",
   "clearFilters": "Сбросить фильтры",
-
   "filter": "Фильтр",
   "reset": "Сбросить",
   "timePeriod": "ПЕРИОД",
@@ -94,7 +84,6 @@
   "shortestFirst": "Сначала короткие",
   "longestFirst": "Сначала длинные",
   "applyFilters": "Применить фильтры",
-
   "onThisDay": "В этот день",
   "onThisDaySubtitleOne": "1 воспоминание из {years}",
   "onThisDaySubtitleMany": "Воспоминаний прошлых лет: {count}",
@@ -104,7 +93,6 @@
   "positionCounter": "{current} из {total}",
   "couldNotLoadMemories": "Не удалось загрузить воспоминания: {error}",
   "couldNotLoadVideos": "Не удалось загрузить видео: {error}",
-
   "settings": "Настройки",
   "playbackSection": "ВОСПРОИЗВЕДЕНИЕ",
   "loopShortVideos": "Повтор коротких видео",
@@ -116,8 +104,6 @@
   "showDurationBadges": "Показывать длительность",
   "privacySection": "КОНФИДЕНЦИАЛЬНОСТЬ",
   "privacyVault": "Личное хранилище",
-  "setUp": "Настроить",
-  "appLockFaceId": "Блокировка (Face ID)",
   "proBadge": "Pro",
   "aboutSection": "О ПРИЛОЖЕНИИ",
   "privacyPolicy": "Политика конфиденциальности",
@@ -127,7 +113,6 @@
   "version": "Версия",
   "proCardSubtitle": "Без рекламы · Хранилище · Скорость · Коллекции",
   "shareAppMessage": "Попробуйте RollReel — листайте видео из своей галереи, 100% офлайн!",
-
   "vaultTitle": "Личное хранилище",
   "vaultLocked": "Хранилище заблокировано",
   "vaultLockedSubtitle": "Ваши личные видео здесь в безопасности",
@@ -140,7 +125,6 @@
   "vaultEmptyHint": "Нажмите ••• на любом видео, чтобы добавить его сюда",
   "removeFromVaultTitle": "Убрать из хранилища?",
   "removeFromVaultBody": "Это видео вернётся в основную медиатеку.",
-
   "paywallTitle": "RollReel Pro",
   "paywallTagline": "Смотрите больше. Волнуйтесь меньше.",
   "featureAdFree": "Без рекламы",

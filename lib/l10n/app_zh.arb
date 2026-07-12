@@ -1,6 +1,5 @@
 {
   "@@locale": "zh",
-
   "onboardingTitle": "你的视频。\n终于好看了。",
   "onboardingSubtitle": "像刷短视频一样刷你的相册视频。无需上传，无需账号，只有你的回忆。",
   "onboardingPrivacyBody": "你的视频绝不会离开你的手机。没有云端、无需登录、不做追踪。只属于你。",
@@ -17,17 +16,14 @@
   "continueLabel": "继续",
   "requesting": "正在请求…",
   "allowAccess": "允许访问",
-
   "noVideosYetTitle": "还没有视频",
   "noVideosYetBody": "你的相册视频将显示在这里。",
   "openPhotosApp": "打开“照片”App",
   "loadingLibrary": "正在载入你的图库...",
-
   "permissionDeniedTitle": "未找到视频",
   "permissionDeniedBody": "RollReel 需要照片图库访问权限才能显示本地视频。你的视频绝不会被上传。",
   "openSettings": "打开设置",
   "continueAnyway": "仍然继续",
-
   "today": "今天",
   "yesterday": "昨天",
   "cancel": "取消",
@@ -36,13 +32,11 @@
   "remove": "移除",
   "manage": "管理",
   "videoFallbackTitle": "视频",
-
   "filterAll": "全部",
   "filterToday": "今天",
   "filterShorts": "短视频",
   "filterLong": "长视频",
   "filterRecent": "最近",
-
   "videoDeleted": "视频已删除",
   "getInfo": "显示简介",
   "addToVault": "加入保险库",
@@ -52,19 +46,16 @@
   "thisVideo": "此视频",
   "share": "分享",
   "expand": "展开",
-
   "photoLibraryAccess": "照片图库访问权限",
   "limitedAccessMessage": "你目前仅共享了部分选定的视频。",
   "selectMoreVideos": "选择更多视频",
   "allowFullAccess": "允许完全访问",
   "managingCount": "正在管理你的 {count} 个视频",
-
   "infoDate": "日期",
   "infoDuration": "时长",
   "infoResolution": "分辨率",
   "infoFileSize": "文件大小",
   "infoFormat": "格式",
-
   "feed": "动态",
   "searchVideos": "搜索视频…",
   "videosTitle": "视频",
@@ -77,7 +68,6 @@
   "tryDifferentFilter": "试试其他筛选条件。",
   "clearSearch": "清除搜索",
   "clearFilters": "清除筛选",
-
   "filter": "筛选",
   "reset": "重置",
   "timePeriod": "时间范围",
@@ -94,7 +84,6 @@
   "shortestFirst": "最短优先",
   "longestFirst": "最长优先",
   "applyFilters": "应用筛选",
-
   "onThisDay": "历史上的今天",
   "onThisDaySubtitleOne": "来自 {years} 的 1 条回忆",
   "onThisDaySubtitleMany": "来自往年的 {count} 条回忆",
@@ -104,7 +93,6 @@
   "positionCounter": "第 {current} 个，共 {total} 个",
   "couldNotLoadMemories": "无法加载回忆：{error}",
   "couldNotLoadVideos": "无法加载视频：{error}",
-
   "settings": "设置",
   "playbackSection": "播放",
   "loopShortVideos": "循环播放短视频",
@@ -116,8 +104,6 @@
   "showDurationBadges": "显示时长标记",
   "privacySection": "隐私",
   "privacyVault": "隐私保险库",
-  "setUp": "设置",
-  "appLockFaceId": "应用锁定（Face ID）",
   "proBadge": "Pro",
   "aboutSection": "关于",
   "privacyPolicy": "隐私政策",
@@ -127,7 +113,6 @@
   "version": "版本",
   "proCardSubtitle": "无广告 · 保险库 · 倍速 · 合集",
   "shareAppMessage": "来试试 RollReel——像刷短视频一样刷你的相册视频，100% 离线！",
-
   "vaultTitle": "私密保险库",
   "vaultLocked": "保险库已锁定",
   "vaultLockedSubtitle": "你的私密视频安全地保存在这里",
@@ -140,7 +125,6 @@
   "vaultEmptyHint": "轻点任意视频上的 ••• 即可添加到这里",
   "removeFromVaultTitle": "移出保险库？",
   "removeFromVaultBody": "此视频将返回你的主图库。",
-
   "paywallTitle": "RollReel Pro",
   "paywallTagline": "多看一点，少操点心。",
   "featureAdFree": "无广告体验",

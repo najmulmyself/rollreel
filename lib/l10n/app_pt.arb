@@ -1,6 +1,5 @@
 {
   "@@locale": "pt",
-
   "onboardingTitle": "Seus vídeos.\nFinalmente assistíveis.",
   "onboardingSubtitle": "Deslize pelo seu rolo da câmera como um feed de verdade. Sem uploads, sem contas. Só suas memórias.",
   "onboardingPrivacyBody": "Seus vídeos nunca saem do seu celular. Sem nuvem, sem login, sem rastreamento. Só você.",
@@ -17,17 +16,14 @@
   "continueLabel": "Continuar",
   "requesting": "Solicitando…",
   "allowAccess": "Permitir acesso",
-
   "noVideosYetTitle": "Nenhum vídeo ainda",
   "noVideosYetBody": "Os vídeos do seu rolo da câmera aparecerão aqui.",
   "openPhotosApp": "Abrir app Fotos",
   "loadingLibrary": "Carregando sua biblioteca...",
-
   "permissionDeniedTitle": "Nenhum vídeo encontrado",
   "permissionDeniedBody": "O RollReel precisa de acesso à fototeca para mostrar seus vídeos locais. Seus vídeos nunca são enviados.",
   "openSettings": "Abrir Ajustes",
   "continueAnyway": "Continuar mesmo assim",
-
   "today": "Hoje",
   "yesterday": "Ontem",
   "cancel": "Cancelar",
@@ -36,13 +32,11 @@
   "remove": "Remover",
   "manage": "Gerenciar",
   "videoFallbackTitle": "Vídeo",
-
   "filterAll": "Todos",
   "filterToday": "Hoje",
   "filterShorts": "Curtos",
   "filterLong": "Longos",
   "filterRecent": "Recentes",
-
   "videoDeleted": "Vídeo apagado",
   "getInfo": "Ver informações",
   "addToVault": "Adicionar ao cofre",
@@ -52,19 +46,16 @@
   "thisVideo": "Este vídeo",
   "share": "Compartilhar",
   "expand": "Expandir",
-
   "photoLibraryAccess": "Acesso à fototeca",
   "limitedAccessMessage": "Você está compartilhando uma seleção limitada de vídeos.",
   "selectMoreVideos": "Selecionar mais vídeos",
   "allowFullAccess": "Permitir acesso total",
   "managingCount": "Gerenciando {count} dos seus vídeos",
-
   "infoDate": "Data",
   "infoDuration": "Duração",
   "infoResolution": "Resolução",
   "infoFileSize": "Tamanho",
   "infoFormat": "Formato",
-
   "feed": "Feed",
   "searchVideos": "Buscar vídeos…",
   "videosTitle": "Vídeos",
@@ -77,7 +68,6 @@
   "tryDifferentFilter": "Tente outro filtro.",
   "clearSearch": "Limpar busca",
   "clearFilters": "Limpar filtros",
-
   "filter": "Filtrar",
   "reset": "Redefinir",
   "timePeriod": "PERÍODO",
@@ -94,7 +84,6 @@
   "shortestFirst": "Mais curtos primeiro",
   "longestFirst": "Mais longos primeiro",
   "applyFilters": "Aplicar filtros",
-
   "onThisDay": "Neste dia",
   "onThisDaySubtitleOne": "1 memória de {years}",
   "onThisDaySubtitleMany": "{count} memórias de anos anteriores",
@@ -104,7 +93,6 @@
   "positionCounter": "{current} de {total}",
   "couldNotLoadMemories": "Não foi possível carregar as memórias: {error}",
   "couldNotLoadVideos": "Não foi possível carregar os vídeos: {error}",
-
   "settings": "Ajustes",
   "playbackSection": "REPRODUÇÃO",
   "loopShortVideos": "Repetir vídeos curtos",
@@ -116,8 +104,6 @@
   "showDurationBadges": "Mostrar duração",
   "privacySection": "PRIVACIDADE",
   "privacyVault": "Cofre de privacidade",
-  "setUp": "Configurar",
-  "appLockFaceId": "Bloqueio do app (Face ID)",
   "proBadge": "Pro",
   "aboutSection": "SOBRE",
   "privacyPolicy": "Política de Privacidade",
@@ -127,7 +113,6 @@
   "version": "Versão",
   "proCardSubtitle": "Sem anúncios · Cofre · Velocidade · Coleções",
   "shareAppMessage": "Conheça o RollReel – deslize pelos vídeos do seu rolo da câmera, 100% offline!",
-
   "vaultTitle": "Cofre privado",
   "vaultLocked": "Cofre bloqueado",
   "vaultLockedSubtitle": "Seus vídeos privados estão seguros aqui",
@@ -140,7 +125,6 @@
   "vaultEmptyHint": "Toque em ••• em qualquer vídeo para adicioná-lo aqui",
   "removeFromVaultTitle": "Remover do cofre?",
   "removeFromVaultBody": "Este vídeo voltará à sua biblioteca principal.",
-
   "paywallTitle": "RollReel Pro",
   "paywallTagline": "Assista mais. Preocupe-se menos.",
   "featureAdFree": "Experiência sem anúncios",

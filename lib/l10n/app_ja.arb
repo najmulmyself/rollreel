@@ -1,6 +1,5 @@
 {
   "@@locale": "ja",
-
   "onboardingTitle": "あなたの動画を、\nもっと楽しく。",
   "onboardingSubtitle": "カメラロールの動画をフィード感覚でスワイプ。アップロード不要、アカウント不要。あるのは思い出だけ。",
   "onboardingPrivacyBody": "動画がスマホの外に出ることはありません。クラウドなし、ログインなし、トラッキングなし。あなただけのもの。",
@@ -17,17 +16,14 @@
   "continueLabel": "続ける",
   "requesting": "リクエスト中…",
   "allowAccess": "アクセスを許可",
-
   "noVideosYetTitle": "動画がまだありません",
   "noVideosYetBody": "カメラロールの動画がここに表示されます。",
   "openPhotosApp": "「写真」アプリを開く",
   "loadingLibrary": "ライブラリを読み込み中...",
-
   "permissionDeniedTitle": "動画が見つかりません",
   "permissionDeniedBody": "RollReel がローカルの動画を表示するには写真ライブラリへのアクセスが必要です。動画がアップロードされることはありません。",
   "openSettings": "設定を開く",
   "continueAnyway": "このまま続ける",
-
   "today": "今日",
   "yesterday": "昨日",
   "cancel": "キャンセル",
@@ -36,13 +32,11 @@
   "remove": "削除",
   "manage": "管理",
   "videoFallbackTitle": "動画",
-
   "filterAll": "すべて",
   "filterToday": "今日",
   "filterShorts": "ショート",
   "filterLong": "ロング",
   "filterRecent": "最近",
-
   "videoDeleted": "動画を削除しました",
   "getInfo": "情報を見る",
   "addToVault": "金庫に追加",
@@ -52,19 +46,16 @@
   "thisVideo": "この動画",
   "share": "共有",
   "expand": "拡大",
-
   "photoLibraryAccess": "写真ライブラリへのアクセス",
   "limitedAccessMessage": "現在、選択した一部の動画のみを共有しています。",
   "selectMoreVideos": "さらに動画を選択",
   "allowFullAccess": "フルアクセスを許可",
   "managingCount": "{count} 本の動画を管理中",
-
   "infoDate": "日付",
   "infoDuration": "長さ",
   "infoResolution": "解像度",
   "infoFileSize": "ファイルサイズ",
   "infoFormat": "フォーマット",
-
   "feed": "フィード",
   "searchVideos": "動画を検索…",
   "videosTitle": "動画",
@@ -77,7 +68,6 @@
   "tryDifferentFilter": "別のフィルタをお試しください。",
   "clearSearch": "検索をクリア",
   "clearFilters": "フィルタをクリア",
-
   "filter": "フィルタ",
   "reset": "リセット",
   "timePeriod": "期間",
@@ -94,7 +84,6 @@
   "shortestFirst": "短い順",
   "longestFirst": "長い順",
   "applyFilters": "フィルタを適用",
-
   "onThisDay": "過去のこの日",
   "onThisDaySubtitleOne": "{years} の思い出 1 件",
   "onThisDaySubtitleMany": "過去の思い出 {count} 件",
@@ -104,7 +93,6 @@
   "positionCounter": "{total} 件中 {current} 件目",
   "couldNotLoadMemories": "思い出を読み込めませんでした：{error}",
   "couldNotLoadVideos": "動画を読み込めませんでした：{error}",
-
   "settings": "設定",
   "playbackSection": "再生",
   "loopShortVideos": "ショート動画をループ再生",
@@ -116,8 +104,6 @@
   "showDurationBadges": "再生時間バッジを表示",
   "privacySection": "プライバシー",
   "privacyVault": "プライバシー金庫",
-  "setUp": "設定する",
-  "appLockFaceId": "アプリロック（Face ID）",
   "proBadge": "Pro",
   "aboutSection": "情報",
   "privacyPolicy": "プライバシーポリシー",
@@ -127,7 +113,6 @@
   "version": "バージョン",
   "proCardSubtitle": "広告なし · 金庫 · 倍速 · コレクション",
   "shareAppMessage": "RollReel をチェック！カメラロールの動画をフィード感覚でスワイプ、100% オフライン！",
-
   "vaultTitle": "プライベート金庫",
   "vaultLocked": "金庫はロック中",
   "vaultLockedSubtitle": "プライベートな動画はここで安全に保管",
@@ -140,7 +125,6 @@
   "vaultEmptyHint": "動画の ••• をタップして追加できます",
   "removeFromVaultTitle": "金庫から出しますか？",
   "removeFromVaultBody": "この動画はメインライブラリに戻ります。",
-
   "paywallTitle": "RollReel Pro",
   "paywallTagline": "もっと見る。もっと安心。",
   "featureAdFree": "広告なし体験",

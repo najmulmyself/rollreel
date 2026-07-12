@@ -217,14 +217,6 @@ class SettingsScreen extends ConsumerWidget {
                           color: Color(0xFF4A2A8B),
                           icon: CupertinoIcons.lock_fill),
                       label: l10n.privacyVault,
-                      trailingText: l10n.setUp,
-                      onTap: onOpenVault,
-                    ),
-                    _NavRow(
-                      icon: const _SettingIcon(
-                          color: Color(0xFF1A5A6B),
-                          icon: Icons.face_retouching_natural),
-                      label: l10n.appLockFaceId,
                       trailingText: isPro ? null : l10n.proBadge,
                       onTap: isPro ? onOpenVault : onOpenPaywall,
                     ),
