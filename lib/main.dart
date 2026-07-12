@@ -8,8 +8,14 @@ import 'navigation/app_router.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  MobileAds.instance.initialize();
   runApp(const ProviderScope(child: MyApp()));
+  // AdMob SDK init spins up network calls and mediation adapters — kicking it
+  // off after the first frame keeps it off the launch critical path. The
+  // first interstitial isn't requested until several swipes in, so nothing
+  // downstream is waiting on this.
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    MobileAds.instance.initialize();
+  });
 }
 
 class MyApp extends StatelessWidget {

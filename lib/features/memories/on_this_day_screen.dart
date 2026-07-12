@@ -60,6 +60,7 @@ class _OnThisDayScreenState extends ConsumerState<OnThisDayScreen> {
               PageView.builder(
                 controller: _pageController,
                 scrollDirection: Axis.vertical,
+                allowImplicitScrolling: true,
                 itemCount: videos.length,
                 onPageChanged: (i) => setState(() => _currentIndex = i),
                 itemBuilder: (context, index) => VideoFeedItem(

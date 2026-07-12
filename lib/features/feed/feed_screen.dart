@@ -305,6 +305,10 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           PageView.builder(
             controller: _pageController,
             scrollDirection: Axis.vertical,
+            // Pre-builds the adjacent page so the next video's controller is
+            // already initializing before the swipe lands — removes the
+            // black-frame gap between pages.
+            allowImplicitScrolling: true,
             itemCount: videos.length,
             onPageChanged: (i) => _onPageChanged(i, videos),
             itemBuilder: (context, index) => VideoFeedItem(

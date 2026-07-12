@@ -62,6 +62,7 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
   bool _fastForward = false;
 
   // Volume / brightness gesture state
+  bool _brightnessTouched = false;
   _DragType _dragType = _DragType.none;
   double _dragValue = 0.0; // 0.0 – 1.0
   bool _showDragOverlay = false;
@@ -168,8 +169,12 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
     _controlsHideTimer?.cancel();
     _seekFlashTimer?.cancel();
     _controller?.dispose();
-    // Restore screen brightness when leaving
-    ScreenBrightness().resetScreenBrightness();
+    // Only touch the system brightness API if this item actually changed it —
+    // an unconditional reset here fires a platform-channel call on every page
+    // disposal during fast swiping.
+    if (_brightnessTouched) {
+      ScreenBrightness().resetScreenBrightness();
+    }
     super.dispose();
   }
 
@@ -248,6 +253,7 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
     } else {
       try {
         await ScreenBrightness().setScreenBrightness(newValue);
+        _brightnessTouched = true;
       } catch (_) {}
     }
   }
@@ -326,7 +332,10 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
   @override
   Widget build(BuildContext context) {
     final safeBottom = MediaQuery.paddingOf(context).bottom;
-    final isFavorited = ref.watch(favoritesIdsProvider).contains(widget.asset.id);
+    // select() so this item only rebuilds when ITS OWN favorite flag flips,
+    // not on every change to the favorites set.
+    final isFavorited = ref.watch(
+        favoritesIdsProvider.select((ids) => ids.contains(widget.asset.id)));
 
     return DynamicBackground(
       thumbnailBytes: _thumbnail,
