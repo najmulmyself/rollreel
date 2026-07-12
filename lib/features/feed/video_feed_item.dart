@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_volume_controller/flutter_volume_controller.dart';
+import 'package:intl/intl.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:screen_brightness/screen_brightness.dart';
 import 'package:share_plus/share_plus.dart';
@@ -15,6 +16,7 @@ import '../../core/settings/settings_provider.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
 import '../../core/vault/vault_provider.dart';
+import '../../l10n/app_localizations.dart';
 import 'dynamic_bg.dart';
 
 // ─── Gesture drag type ────────────────────────────────────────────────────────
@@ -288,6 +290,7 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
 
   Future<void> _showOptions(BuildContext context) async {
     final inVault = ref.read(vaultIdsProvider).contains(widget.asset.id);
+    final l10n = AppLocalizations.of(context)!;
     await showCupertinoModalPopup<void>(
       context: context,
       builder: (_) => CupertinoActionSheet(
@@ -302,14 +305,14 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
                 builder: (_) => VideoInfoSheet(asset: widget.asset),
               );
             },
-            child: const Text('Get Info'),
+            child: Text(l10n.getInfo),
           ),
           CupertinoActionSheetAction(
             onPressed: () {
               Navigator.pop(context);
               ref.read(vaultIdsProvider.notifier).toggle(widget.asset.id);
             },
-            child: Text(inVault ? 'Remove from Vault' : 'Add to Vault'),
+            child: Text(inVault ? l10n.removeFromVault : l10n.addToVault),
           ),
           CupertinoActionSheetAction(
             isDestructiveAction: true,
@@ -317,13 +320,13 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
               Navigator.pop(context);
               widget.onDelete?.call();
             },
-            child: const Text('Delete Video'),
+            child: Text(l10n.deleteVideo),
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
           isDefaultAction: true,
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(l10n.cancel),
         ),
       ),
     );
@@ -700,6 +703,7 @@ class _Sidebar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -714,14 +718,14 @@ class _Sidebar extends StatelessWidget {
         Builder(
           builder: (btnContext) => _SideBtn(
             icon: CupertinoIcons.share,
-            label: 'Share',
+            label: l10n.share,
             onTap: () => _share(btnContext),
           ),
         ),
         const SizedBox(height: 22),
         _SideBtn(
           icon: Icons.fullscreen_rounded,
-          label: 'Expand',
+          label: l10n.expand,
           onTap: onFullscreen,
         ),
         const SizedBox(height: 22),
@@ -806,27 +810,26 @@ class _InfoCard extends StatelessWidget {
     return '$m:$s';
   }
 
-  String _fmtDay(DateTime dt) {
+  String _fmtDay(BuildContext context, DateTime dt) {
+    final l10n = AppLocalizations.of(context)!;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final d = DateTime(dt.year, dt.month, dt.day);
-    if (d == today) return 'Today';
-    if (d == today.subtract(const Duration(days: 1))) return 'Yesterday';
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-    ];
-    if (dt.year == now.year) return '${months[dt.month - 1]} ${dt.day}';
-    return '${months[dt.month - 1]} ${dt.day}, ${dt.year}';
+    if (d == today) return l10n.today;
+    if (d == today.subtract(const Duration(days: 1))) return l10n.yesterday;
+    final locale = Localizations.localeOf(context).toString();
+    if (dt.year == now.year) return DateFormat.MMMd(locale).format(dt);
+    return DateFormat.yMMMd(locale).format(dt);
   }
 
   @override
   Widget build(BuildContext context) {
-    final tag = asset.duration < 60 ? 'Shorts' : 'Long';
+    final l10n = AppLocalizations.of(context)!;
+    final tag = asset.duration < 60 ? l10n.filterShorts : l10n.filterLong;
     final resolvedTitle = title ??
         (asset.title != null && asset.title!.isNotEmpty
             ? asset.title!
-            : 'Video');
+            : l10n.videoFallbackTitle);
 
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
@@ -873,7 +876,7 @@ class _InfoCard extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            '${_fmtDay(asset.createDateTime)} · ${_fmtDuration(asset.duration > 0 ? Duration(seconds: asset.duration) : Duration.zero)}',
+            '${_fmtDay(context, asset.createDateTime)} · ${_fmtDuration(asset.duration > 0 ? Duration(seconds: asset.duration) : Duration.zero)}',
             style: const TextStyle(color: Colors.white60, fontSize: 13),
           ),
           const SizedBox(height: 14),
@@ -1292,19 +1295,14 @@ class VideoInfoSheetState extends State<VideoInfoSheet> {
     return '$m:${s.toString().padLeft(2, '0')}';
   }
 
-  String _fmtDate(DateTime dt) {
-    const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December',
-    ];
-    final hour = dt.hour % 12 == 0 ? 12 : dt.hour % 12;
-    final min = dt.minute.toString().padLeft(2, '0');
-    final ampm = dt.hour < 12 ? 'AM' : 'PM';
-    return '${months[dt.month - 1]} ${dt.day}, ${dt.year}  $hour:$min $ampm';
+  String _fmtDate(BuildContext context, DateTime dt) {
+    final locale = Localizations.localeOf(context).toString();
+    return '${DateFormat.yMMMMd(locale).format(dt)}  ${DateFormat.jm(locale).format(dt)}';
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final asset = widget.asset;
     final safeBottom = MediaQuery.paddingOf(context).bottom;
 
@@ -1329,7 +1327,7 @@ class VideoInfoSheetState extends State<VideoInfoSheet> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Text(
-              asset.title ?? 'Video',
+              asset.title ?? l10n.videoFallbackTitle,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 17,
@@ -1342,22 +1340,24 @@ class VideoInfoSheetState extends State<VideoInfoSheet> {
           ),
           const SizedBox(height: 8),
           const Divider(color: Colors.white12, height: 24),
-          _InfoRow(label: 'Date', value: _fmtDate(asset.createDateTime)),
+          _InfoRow(
+              label: l10n.infoDate,
+              value: _fmtDate(context, asset.createDateTime)),
           const Divider(color: Colors.white12, height: 1),
-          _InfoRow(label: 'Duration', value: _fmtDuration(asset.duration)),
+          _InfoRow(label: l10n.infoDuration, value: _fmtDuration(asset.duration)),
           const Divider(color: Colors.white12, height: 1),
           _InfoRow(
-            label: 'Resolution',
+            label: l10n.infoResolution,
             value: '${asset.width} × ${asset.height}',
           ),
           const Divider(color: Colors.white12, height: 1),
           _InfoRow(
-            label: 'File Size',
+            label: l10n.infoFileSize,
             value: _fileSizeBytes != null ? _fmtSize(_fileSizeBytes!) : '—',
           ),
           if (asset.mimeType != null) ...[
             const Divider(color: Colors.white12, height: 1),
-            _InfoRow(label: 'Format', value: asset.mimeType!),
+            _InfoRow(label: l10n.infoFormat, value: asset.mimeType!),
           ],
         ],
       ),

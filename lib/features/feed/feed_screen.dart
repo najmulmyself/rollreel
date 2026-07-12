@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:video_player/video_player.dart';
 
@@ -13,6 +14,7 @@ import '../../core/review/review_prompt_provider.dart';
 import '../../core/settings/settings_provider.dart';
 import '../../core/theme/colors.dart';
 import '../../core/video/video_library_provider.dart';
+import '../../l10n/app_localizations.dart';
 import '../states/loading_state.dart';
 import '../states/no_videos_state.dart';
 import '../../shared/widgets/date_label.dart';
@@ -79,6 +81,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     if (_currentIndex >= videos.length) return;
     final asset = videos[_currentIndex];
     final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context)!;
     final deleted = await PhotoManager.editor.deleteWithIds([asset.id]);
     if (!mounted) return;
     if (deleted.contains(asset.id)) {
@@ -86,7 +89,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       ref.invalidate(videoLibraryProvider);
       messenger.showSnackBar(
         SnackBar(
-          content: const Text('Video deleted'),
+          content: Text(l10n.videoDeleted),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           duration: const Duration(seconds: 2),
@@ -171,15 +174,15 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   }
 
   String _fmtDateLabel(DateTime dt) {
+    final l10n = AppLocalizations.of(context)!;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final d = DateTime(dt.year, dt.month, dt.day);
-    if (d == today) return 'Today';
-    if (d == today.subtract(const Duration(days: 1))) return 'Yesterday';
-    const m = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    if (d.year == today.year) return '${m[dt.month - 1]} ${dt.day}';
-    return '${m[dt.month - 1]} ${dt.day}, ${dt.year}';
+    if (d == today) return l10n.today;
+    if (d == today.subtract(const Duration(days: 1))) return l10n.yesterday;
+    final locale = Localizations.localeOf(context).toString();
+    if (d.year == today.year) return DateFormat.MMMd(locale).format(dt);
+    return DateFormat.yMMMd(locale).format(dt);
   }
 
   @override
@@ -237,7 +240,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
         return Scaffold(
           backgroundColor: Colors.black,
           body: Center(
-            child: Text('Could not load videos: ${videosAsync.error}',
+            child: Text(
+                AppLocalizations.of(context)!
+                    .couldNotLoadVideos('${videosAsync.error}'),
                 style: const TextStyle(color: Colors.white)),
           ),
         );
@@ -393,26 +398,26 @@ class _LimitedAccessBanner extends ConsumerWidget {
   final int accessibleCount;
 
   Future<void> _manage(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
     final choice = await showCupertinoModalPopup<String>(
       context: context,
       builder: (ctx) => CupertinoActionSheet(
-        title: const Text('Photo Library Access'),
-        message: const Text(
-            'You\'re currently sharing a limited selection of videos.'),
+        title: Text(l10n.photoLibraryAccess),
+        message: Text(l10n.limitedAccessMessage),
         actions: [
           CupertinoActionSheetAction(
             onPressed: () => Navigator.pop(ctx, 'select'),
-            child: const Text('Select More Videos'),
+            child: Text(l10n.selectMoreVideos),
           ),
           CupertinoActionSheetAction(
             onPressed: () => Navigator.pop(ctx, 'settings'),
-            child: const Text('Allow Full Access'),
+            child: Text(l10n.allowFullAccess),
           ),
         ],
         cancelButton: CupertinoActionSheetAction(
           isDefaultAction: true,
           onPressed: () => Navigator.pop(ctx),
-          child: const Text('Cancel'),
+          child: Text(l10n.cancel),
         ),
       ),
     );
@@ -434,6 +439,7 @@ class _LimitedAccessBanner extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: GestureDetector(
@@ -451,7 +457,7 @@ class _LimitedAccessBanner extends ConsumerWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Managing $accessibleCount of your videos',
+                  l10n.managingCount(accessibleCount),
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 13,
@@ -461,9 +467,9 @@ class _LimitedAccessBanner extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              const Text(
-                'Manage',
-                style: TextStyle(
+              Text(
+                l10n.manage,
+                style: const TextStyle(
                   color: RRColors.accentCyan,
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
@@ -491,8 +497,16 @@ class _FilterTabs extends StatelessWidget {
   final void Function(FeedFilter) onFilterChanged;
   final VoidCallback? onSearchTap;
 
+  String _filterLabel(FeedFilter f, AppLocalizations l10n) => switch (f) {
+        FeedFilter.all => l10n.filterAll,
+        FeedFilter.today => l10n.filterToday,
+        FeedFilter.shorts => l10n.filterShorts,
+        FeedFilter.long => l10n.filterLong,
+      };
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
@@ -522,7 +536,7 @@ class _FilterTabs extends StatelessWidget {
                             : null,
                       ),
                       child: Text(
-                        f.label,
+                        _filterLabel(f, l10n),
                         style: TextStyle(
                           color: isActive ? Colors.white : Colors.white60,
                           fontSize: 13,
