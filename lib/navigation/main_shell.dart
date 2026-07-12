@@ -82,6 +82,7 @@ class _MainShellState extends ConsumerState<MainShell> {
           ),
           BrowseScreen(
             onBack: () => _setTab(0),
+            onOpenPaywall: widget.onOpenPaywall,
             onPlayAt: (assetId) {
               ref.read(feedJumpToAssetProvider.notifier).state = assetId;
               _setTab(0);

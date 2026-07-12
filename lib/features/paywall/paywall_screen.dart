@@ -58,6 +58,13 @@ const List<_FeatureData> _kFeatures = [
     subtitle: '2× fast-forward on long-press',
     tier: _Tier.pro,
   ),
+  _FeatureData(
+    icon: CupertinoIcons.calendar_today,
+    iconColor: Color(0xFF8B5CF6),
+    title: 'On This Day',
+    subtitle: 'Relive videos from past years',
+    tier: _Tier.pro,
+  ),
 ];
 
 // ─── Plan enum ────────────────────────────────────────────────────────────────

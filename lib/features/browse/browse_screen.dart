@@ -5,9 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_manager/photo_manager.dart';
 
+import '../../core/iap/iap_provider.dart';
+import '../../core/memories/on_this_day_provider.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
 import '../../core/video/video_library_provider.dart';
+import '../memories/on_this_day_screen.dart';
 import '../../shared/widgets/local_badge.dart';
 import '../feed/video_feed_item.dart' show VideoInfoSheet;
 import '../states/empty_state.dart';
@@ -25,12 +28,14 @@ class BrowseScreen extends ConsumerStatefulWidget {
     this.onPlayAt,
     this.initialScrollOffset = 0.0,
     this.onScrollChanged,
+    this.onOpenPaywall,
   });
 
   final VoidCallback? onBack;
   final void Function(String assetId)? onPlayAt;
   final double initialScrollOffset;
   final void Function(double offset)? onScrollChanged;
+  final VoidCallback? onOpenPaywall;
 
   @override
   ConsumerState<BrowseScreen> createState() => _BrowseScreenState();
@@ -407,6 +412,9 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
               ),
             ),
 
+            // ── On This Day memories card ──────────────────────────────────
+            _OnThisDayCard(onOpenPaywall: widget.onOpenPaywall),
+
             // ── Quick filter chips ─────────────────────────────────────────
             SizedBox(
               height: 44,
@@ -505,6 +513,104 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// _OnThisDayCard — memories entry point (Pro perk; teaser shown to everyone)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _OnThisDayCard extends ConsumerWidget {
+  const _OnThisDayCard({this.onOpenPaywall});
+
+  final VoidCallback? onOpenPaywall;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final memories = ref.watch(onThisDayProvider).valueOrNull ?? const [];
+    if (memories.isEmpty) return const SizedBox.shrink();
+
+    final isPro = ref.watch(isProProvider);
+    final years = DateTime.now().year - memories.first.createDateTime.year;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+          RRSpace.sp16, 0, RRSpace.sp16, RRSpace.sp12),
+      child: GestureDetector(
+        onTap: () {
+          if (isPro) {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                  builder: (_) => const OnThisDayScreen()),
+            );
+          } else {
+            onOpenPaywall?.call();
+          }
+        },
+        child: Container(
+          padding: const EdgeInsets.all(RRSpace.sp12),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                const Color(0xFF8B5CF6).withValues(alpha: 0.25),
+                const Color(0xFF00D4FF).withValues(alpha: 0.18),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(RRSpace.radiusLg),
+            border: Border.all(
+                color: Colors.white.withValues(alpha: 0.12)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF8B5CF6),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                alignment: Alignment.center,
+                child: const Icon(CupertinoIcons.calendar_today,
+                    color: Colors.white, size: 20),
+              ),
+              const SizedBox(width: RRSpace.sp12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'On This Day',
+                      style: TextStyle(
+                        color: RRColors.textPrimary,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      memories.length == 1
+                          ? '1 memory from $years ${years == 1 ? 'year' : 'years'} ago'
+                          : '${memories.length} memories from past years',
+                      style: TextStyle(
+                        color: RRColors.textSecond,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                isPro ? CupertinoIcons.chevron_right : CupertinoIcons.lock_fill,
+                color: isPro ? RRColors.textDisabled : RRColors.accentAmber,
+                size: 16,
+              ),
+            ],
+          ),
         ),
       ),
     );
