@@ -2,14 +2,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../ads/system_prompt_coordinator.dart';
+
 /// Tracks "completed swipe sessions" and install date so an App Store
 /// review prompt can be auto-triggered per PRD §13: after 3 completed
 /// swipe sessions AND at least 24h post-install.
 final reviewPromptProvider = Provider<ReviewPromptController>((ref) {
-  return ReviewPromptController();
+  return ReviewPromptController(ref);
 });
 
 class ReviewPromptController {
+  ReviewPromptController(this._ref);
+
+  final Ref _ref;
+
   static const _kInstallDate = 'review_install_date';
   static const _kSessionCount = 'review_swipe_sessions';
   static const _kRequested = 'review_requested';
@@ -57,7 +63,12 @@ class ReviewPromptController {
     final review = InAppReview.instance;
     if (await review.isAvailable()) {
       await prefs.setBool(_kRequested, true);
-      review.requestReview();
+      _ref.read(isSystemPromptActiveProvider.notifier).state = true;
+      try {
+        await review.requestReview();
+      } finally {
+        _ref.read(isSystemPromptActiveProvider.notifier).state = false;
+      }
     }
   }
 }

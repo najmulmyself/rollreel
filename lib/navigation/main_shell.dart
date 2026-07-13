@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/ads/system_prompt_coordinator.dart';
 import '../core/video/video_library_provider.dart';
 import '../features/browse/browse_screen.dart';
 import '../features/feed/feed_screen.dart';
@@ -49,10 +50,13 @@ class _MainShellState extends ConsumerState<MainShell> {
     try {
       final status = await AppTrackingTransparency.trackingAuthorizationStatus;
       if (status == TrackingStatus.notDetermined) {
+        ref.read(isSystemPromptActiveProvider.notifier).state = true;
         await AppTrackingTransparency.requestTrackingAuthorization();
       }
     } catch (_) {
       // Platform without ATT support — no-op.
+    } finally {
+      ref.read(isSystemPromptActiveProvider.notifier).state = false;
     }
   }
 
