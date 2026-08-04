@@ -259,6 +259,16 @@ class SettingsScreen extends ConsumerWidget {
                       showChevron: false,
                     ),
                   ]),
+                  const SizedBox(height: RRSpace.sp24),
+                  Center(
+                    child: Text(
+                      'RollReel v$_version',
+                      style: TextStyle(
+                        color: RRColors.textDisabled,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -289,14 +299,14 @@ class SettingsScreen extends ConsumerWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   const Icon(CupertinoIcons.chevron_left,
-                      color: RRColors.accentCyan, size: 18),
+                      color: RRColors.accentViolet, size: 18),
                   const SizedBox(width: 2),
                   Text(
                     l10n.back,
                     style: const TextStyle(
-                      color: RRColors.accentCyan,
+                      color: RRColors.accentViolet,
                       fontSize: 16,
-                      fontWeight: FontWeight.w400,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
@@ -320,63 +330,122 @@ class SettingsScreen extends ConsumerWidget {
 
   Widget _buildProBanner(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final features = l10n.proCardSubtitle.split(' · ');
+    const featureIcons = [
+      CupertinoIcons.eye_slash,
+      CupertinoIcons.lock_fill,
+      CupertinoIcons.bolt_fill,
+      CupertinoIcons.folder_fill,
+    ];
+
     return GestureDetector(
       onTap: onOpenPaywall,
       child: Container(
-        padding: const EdgeInsets.symmetric(
-            horizontal: RRSpace.sp16, vertical: RRSpace.sp16),
+        padding: const EdgeInsets.all(RRSpace.sp16),
         decoration: BoxDecoration(
           gradient: RRColors.gradPro,
           borderRadius: BorderRadius.circular(RRSpace.radiusLg),
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(RRSpace.radiusFull),
-              ),
-              child: Text(
-                l10n.pro,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.5,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Column(
+                  children: [
+                    Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.16),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      alignment: Alignment.center,
+                      child: const Icon(
+                        Icons.workspace_premium_rounded,
+                        color: Color(0xFFFFB347),
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      l10n.pro,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.6,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
+                const SizedBox(width: RRSpace.sp12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.paywallTitle,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        l10n.proCardTagline,
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.85),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  width: 32,
+                  height: 32,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.16),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    CupertinoIcons.chevron_right,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(width: RRSpace.sp12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+            const SizedBox(height: RRSpace.sp12),
+            Divider(height: 1, color: Colors.white.withValues(alpha: 0.18)),
+            const SizedBox(height: RRSpace.sp12),
+            Row(
+              children: [
+                for (var i = 0; i < features.length; i++) ...[
+                  Icon(featureIcons[i % featureIcons.length],
+                      color: Colors.white.withValues(alpha: 0.85), size: 13),
+                  const SizedBox(width: 5),
                   Text(
-                    l10n.paywallTitle,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
+                    features[i],
+                    style: TextStyle(
+                      color: Colors.white.withValues(alpha: 0.85),
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    l10n.proCardSubtitle,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
+                  if (i < features.length - 1) ...[
+                    const SizedBox(width: 8),
+                    Text('·',
+                        style:
+                            TextStyle(color: Colors.white.withValues(alpha: 0.4))),
+                    const SizedBox(width: 8),
+                  ],
                 ],
-              ),
-            ),
-            const Icon(
-              CupertinoIcons.chevron_right,
-              color: Colors.white,
-              size: 18,
+              ],
             ),
           ],
         ),
@@ -495,7 +564,7 @@ class _ToggleRow extends StatelessWidget {
           CupertinoSwitch(
             value: value,
             onChanged: onChanged,
-            activeTrackColor: RRColors.accentCoral,
+            activeTrackColor: RRColors.accentViolet,
           ),
         ],
       ),
