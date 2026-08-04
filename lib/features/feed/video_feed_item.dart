@@ -158,6 +158,14 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
     });
   }
 
+  void _seekBy(Duration offset) {
+    if (_controller == null) return;
+    HapticFeedback.lightImpact();
+    final next = _controller!.value.position + offset;
+    _controller!.seekTo(next.isNegative ? Duration.zero : next);
+    _flashSeek(!offset.isNegative);
+  }
+
   void _flashSeek(bool isForward) {
     _seekFlashTimer?.cancel();
     setState(() {
@@ -548,7 +556,7 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
               Positioned(
                 left: RRSpace.sp16,
                 right: RRSpace.sp16,
-                bottom: safeBottom + 16,
+                bottom: safeBottom + 8,
                 child: IgnorePointer(
                   ignoring: !_controlsVisible,
                   child: AnimatedSlide(
@@ -565,6 +573,8 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
                         controller: _controller,
                         isPlaying: _controller?.value.isPlaying ?? false,
                         onTogglePlay: _togglePlay,
+                        onSeekPrev: () => _seekBy(const Duration(seconds: -10)),
+                        onSeekNext: () => _seekBy(const Duration(seconds: 10)),
                         onOpenLibrary: widget.onOpenLibrary,
                         onOpenSettings: widget.onOpenSettings,
                       ),
@@ -718,7 +728,11 @@ class _Sidebar extends StatelessWidget {
           icon: isFavorited
               ? CupertinoIcons.heart_fill
               : CupertinoIcons.heart,
-          color: isFavorited ? RRColors.accentCoral : Colors.white,
+          color: Colors.white,
+          bgColor: isFavorited
+              ? RRColors.accentViolet
+              : Colors.black.withValues(alpha: 0.32),
+          label: l10n.like,
           onTap: onFavorite,
         ),
         const SizedBox(height: 22),
@@ -748,11 +762,13 @@ class _SideBtn extends StatelessWidget {
     required this.icon,
     required this.onTap,
     this.color = Colors.white,
+    this.bgColor,
     this.label,
   });
   final IconData icon;
   final VoidCallback onTap;
   final Color color;
+  final Color? bgColor;
   final String? label;
 
   @override
@@ -767,7 +783,7 @@ class _SideBtn extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: Colors.black.withValues(alpha: 0.32),
+              color: bgColor ?? Colors.black.withValues(alpha: 0.32),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: color, size: 22),
@@ -798,6 +814,8 @@ class _InfoCard extends StatelessWidget {
     required this.controller,
     required this.isPlaying,
     required this.onTogglePlay,
+    required this.onSeekPrev,
+    required this.onSeekNext,
     this.title,
     this.onOpenLibrary,
     this.onOpenSettings,
@@ -808,14 +826,10 @@ class _InfoCard extends StatelessWidget {
   final VideoPlayerController? controller;
   final bool isPlaying;
   final VoidCallback onTogglePlay;
+  final VoidCallback onSeekPrev;
+  final VoidCallback onSeekNext;
   final VoidCallback? onOpenLibrary;
   final VoidCallback? onOpenSettings;
-
-  String _fmtDuration(Duration d) {
-    final m = d.inMinutes.remainder(60);
-    final s = d.inSeconds.remainder(60).toString().padLeft(2, '0');
-    return '$m:$s';
-  }
 
   String _fmtDay(BuildContext context, DateTime dt) {
     final l10n = AppLocalizations.of(context)!;
@@ -838,106 +852,189 @@ class _InfoCard extends StatelessWidget {
             ? asset.title!
             : l10n.videoFallbackTitle);
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
-      decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.45),
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          resolvedTitle,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 17,
+            fontWeight: FontWeight.w700,
+            shadows: [Shadow(blurRadius: 8, color: Colors.black54)],
+          ),
+        ),
+        const SizedBox(height: 6),
+        Row(
+          children: [
+            const Icon(CupertinoIcons.calendar,
+                color: Colors.white60, size: 14),
+            const SizedBox(width: 6),
+            Text(
+              _fmtDay(context, asset.createDateTime),
+              style: const TextStyle(color: Colors.white60, fontSize: 13),
+            ),
+            const SizedBox(width: 8),
+            Text('·', style: TextStyle(color: Colors.white.withValues(alpha: 0.4))),
+            const SizedBox(width: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+              decoration: BoxDecoration(
+                color: RRColors.accentViolet.withValues(alpha: 0.22),
+                borderRadius: BorderRadius.circular(100),
+              ),
+              child: Text(
+                tag,
+                style: const TextStyle(
+                  color: RRColors.accentViolet,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        if (controller != null)
+          _VideoSeekBar(
+            controller: controller!,
+            accentColor: RRColors.accentViolet,
+            showThumb: true,
+          )
+        else
+          const SizedBox(height: 20),
+        const SizedBox(height: 16),
+        controller != null
+            ? ValueListenableBuilder<VideoPlayerValue>(
+                valueListenable: controller!,
+                builder: (context, value, _) => _ControlsRow(
+                  controller: controller,
+                  isPlaying: value.isPlaying,
+                  playbackSpeed: value.playbackSpeed,
+                  onTogglePlay: onTogglePlay,
+                  onSeekPrev: onSeekPrev,
+                  onSeekNext: onSeekNext,
+                ),
+              )
+            : _ControlsRow(
+                controller: controller,
+                isPlaying: isPlaying,
+                playbackSpeed: 1.0,
+                onTogglePlay: onTogglePlay,
+                onSeekPrev: onSeekPrev,
+                onSeekNext: onSeekNext,
+              ),
+        const SizedBox(height: 18),
+        _BottomNav(
+          asset: asset,
+          onOpenLibrary: onOpenLibrary,
+          onOpenSettings: onOpenSettings,
+        ),
+      ],
+    );
+  }
+}
+
+class _ControlsRow extends StatelessWidget {
+  const _ControlsRow({
+    required this.controller,
+    required this.isPlaying,
+    required this.playbackSpeed,
+    required this.onTogglePlay,
+    required this.onSeekPrev,
+    required this.onSeekNext,
+  });
+
+  final VideoPlayerController? controller;
+  final bool isPlaying;
+  final double playbackSpeed;
+  final VoidCallback onTogglePlay;
+  final VoidCallback onSeekPrev;
+  final VoidCallback onSeekNext;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        _SpeedBtn(
+          label: '0.5x',
+          active: playbackSpeed == 0.5,
+          onTap: () => controller
+              ?.setPlaybackSpeed(playbackSpeed == 0.5 ? 1.0 : 0.5),
+        ),
+        _CardIconBtn(
+          icon: CupertinoIcons.backward_end_fill,
+          onTap: onSeekPrev,
+          size: 40,
+          iconSize: 18,
+        ),
+        GestureDetector(
+          onTap: onTogglePlay,
+          behavior: HitTestBehavior.opaque,
+          child: Container(
+            width: 60,
+            height: 60,
+            decoration: const BoxDecoration(
+              color: RRColors.accentViolet,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              isPlaying ? CupertinoIcons.pause_fill : CupertinoIcons.play_fill,
+              color: Colors.white,
+              size: 26,
+            ),
+          ),
+        ),
+        _CardIconBtn(
+          icon: CupertinoIcons.forward_end_fill,
+          onTap: onSeekNext,
+          size: 40,
+          iconSize: 18,
+        ),
+        _SpeedBtn(
+          label: '1.0x',
+          active: playbackSpeed == 1.0,
+          onTap: () => controller?.setPlaybackSpeed(1.0),
+        ),
+      ],
+    );
+  }
+}
+
+class _SpeedBtn extends StatelessWidget {
+  const _SpeedBtn({required this.label, required this.active, this.onTap});
+  final String label;
+  final bool active;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  resolvedTitle,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: RRColors.accentAmber.withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(100),
-                ),
-                child: Text(
-                  tag,
-                  style: const TextStyle(
-                    color: RRColors.accentAmber,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
           Text(
-            '${_fmtDay(context, asset.createDateTime)} · ${_fmtDuration(asset.duration > 0 ? Duration(seconds: asset.duration) : Duration.zero)}',
-            style: const TextStyle(color: Colors.white60, fontSize: 13),
+            label,
+            style: TextStyle(
+              color: active ? RRColors.accentViolet : Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+            ),
           ),
-          const SizedBox(height: 14),
-          if (controller != null)
-            _VideoSeekBar(
-              controller: controller!,
-              accentColor: RRColors.accentAmber,
-              showThumb: true,
-            )
-          else
-            const SizedBox(height: 20),
-          const SizedBox(height: 14),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _CardIconBtn(
-                icon: CupertinoIcons.square_grid_2x2,
-                onTap: onOpenLibrary,
-              ),
-              GestureDetector(
-                onTap: onTogglePlay,
-                behavior: HitTestBehavior.opaque,
-                child: Container(
-                  width: 56,
-                  height: 56,
-                  decoration: const BoxDecoration(
-                    color: RRColors.accentAmber,
-                    shape: BoxShape.circle,
-                  ),
-                  child: controller != null
-                      ? ValueListenableBuilder<VideoPlayerValue>(
-                          valueListenable: controller!,
-                          builder: (context, value, _) => Icon(
-                            value.isPlaying
-                                ? CupertinoIcons.pause_fill
-                                : CupertinoIcons.play_fill,
-                            color: Colors.black,
-                            size: 24,
-                          ),
-                        )
-                      : Icon(
-                          isPlaying
-                              ? CupertinoIcons.pause_fill
-                              : CupertinoIcons.play_fill,
-                          color: Colors.black,
-                          size: 24,
-                        ),
-                ),
-              ),
-              _CardIconBtn(
-                icon: CupertinoIcons.gear_alt,
-                onTap: onOpenSettings,
-              ),
-            ],
+          const SizedBox(height: 2),
+          Text(
+            'Speed',
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.5),
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ],
       ),
@@ -946,9 +1043,16 @@ class _InfoCard extends StatelessWidget {
 }
 
 class _CardIconBtn extends StatelessWidget {
-  const _CardIconBtn({required this.icon, this.onTap});
+  const _CardIconBtn({
+    required this.icon,
+    this.onTap,
+    this.size = 44,
+    this.iconSize = 20,
+  });
   final IconData icon;
   final VoidCallback? onTap;
+  final double size;
+  final double iconSize;
 
   @override
   Widget build(BuildContext context) {
@@ -956,13 +1060,105 @@ class _CardIconBtn extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Container(
-        width: 44,
-        height: 44,
+        width: size,
+        height: size,
         decoration: BoxDecoration(
           color: Colors.white.withValues(alpha: 0.08),
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, color: Colors.white, size: 20),
+        child: Icon(icon, color: Colors.white, size: iconSize),
+      ),
+    );
+  }
+}
+
+// ─── Bottom Library / Info / Settings nav ────────────────────────────────────
+
+class _BottomNav extends StatelessWidget {
+  const _BottomNav({required this.asset, this.onOpenLibrary, this.onOpenSettings});
+  final AssetEntity asset;
+  final VoidCallback? onOpenLibrary;
+  final VoidCallback? onOpenSettings;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.35),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _NavItem(
+              icon: CupertinoIcons.square_grid_2x2_fill,
+              label: 'Library',
+              active: true,
+              onTap: onOpenLibrary,
+            ),
+          ),
+          Expanded(
+            child: _NavItem(
+              icon: CupertinoIcons.info_circle,
+              label: 'Info',
+              active: false,
+              onTap: () => showModalBottomSheet<void>(
+                context: context,
+                backgroundColor: Colors.transparent,
+                isScrollControlled: true,
+                builder: (_) => VideoInfoSheet(asset: asset),
+              ),
+            ),
+          ),
+          Expanded(
+            child: _NavItem(
+              icon: CupertinoIcons.gear_alt,
+              label: l10n.settings,
+              active: false,
+              onTap: onOpenSettings,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _NavItem extends StatelessWidget {
+  const _NavItem({
+    required this.icon,
+    required this.label,
+    required this.active,
+    this.onTap,
+  });
+  final IconData icon;
+  final String label;
+  final bool active;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = active ? RRColors.accentViolet : Colors.white70;
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: color, size: 20),
+          const SizedBox(height: 3),
+          Text(
+            label,
+            style: TextStyle(
+              color: color,
+              fontSize: 11,
+              fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -45,6 +45,7 @@
   "deleteVideoWarning": "This will permanently delete the video from your library.",
   "thisVideo": "This video",
   "share": "Share",
+  "like": "Like",
   "expand": "Expand",
   "photoLibraryAccess": "Photo Library Access",
   "limitedAccessMessage": "You're currently sharing a limited selection of videos.",

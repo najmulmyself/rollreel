@@ -272,6 +272,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
               right: 0,
               child: _FilterTabs(
                 activeFilter: activeFilter,
+                onBackTap: widget.onOpenBrowse,
                 onFilterChanged: (f) {
                   ref.read(feedFilterProvider.notifier).state = f;
                   setState(() {
@@ -343,6 +344,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                 child: _FilterTabs(
                   activeFilter: activeFilter,
                   onSearchTap: widget.onOpenBrowse,
+                  onBackTap: widget.onOpenBrowse,
                   onFilterChanged: (f) {
                     ref.read(feedFilterProvider.notifier).state = f;
                     setState(() {
@@ -494,11 +496,13 @@ class _FilterTabs extends StatelessWidget {
     required this.activeFilter,
     required this.onFilterChanged,
     this.onSearchTap,
+    this.onBackTap,
   });
 
   final FeedFilter activeFilter;
   final void Function(FeedFilter) onFilterChanged;
   final VoidCallback? onSearchTap;
+  final VoidCallback? onBackTap;
 
   String _filterLabel(FeedFilter f, AppLocalizations l10n) => switch (f) {
         FeedFilter.all => l10n.filterAll,
@@ -514,6 +518,21 @@ class _FilterTabs extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Row(
         children: [
+          GestureDetector(
+            onTap: onBackTap,
+            behavior: HitTestBehavior.opaque,
+            child: Container(
+              width: 36,
+              height: 36,
+              margin: const EdgeInsets.only(right: 8),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.35),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(CupertinoIcons.chevron_left,
+                  color: Colors.white, size: 18),
+            ),
+          ),
           Expanded(
             child: SizedBox(
               height: 36,
@@ -529,12 +548,13 @@ class _FilterTabs extends StatelessWidget {
                           horizontal: 14, vertical: 6),
                       decoration: BoxDecoration(
                         color: isActive
-                            ? Colors.white.withValues(alpha: 0.2)
+                            ? RRColors.accentViolet.withValues(alpha: 0.85)
                             : Colors.black.withValues(alpha: 0.35),
                         borderRadius: BorderRadius.circular(100),
                         border: isActive
                             ? Border.all(
-                                color: Colors.white.withValues(alpha: 0.6),
+                                color:
+                                    RRColors.accentViolet.withValues(alpha: 0.9),
                                 width: 1)
                             : null,
                       ),
