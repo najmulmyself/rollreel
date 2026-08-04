@@ -18,6 +18,7 @@ import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
 import '../../core/vault/vault_provider.dart';
 import '../../l10n/app_localizations.dart';
+import '../../shared/widgets/app_bottom_nav.dart';
 import 'dynamic_bg.dart';
 
 // ─── Gesture drag type ────────────────────────────────────────────────────────
@@ -928,10 +929,16 @@ class _InfoCard extends StatelessWidget {
                 onSeekNext: onSeekNext,
               ),
         const SizedBox(height: 18),
-        _BottomNav(
-          asset: asset,
-          onOpenLibrary: onOpenLibrary,
-          onOpenSettings: onOpenSettings,
+        AppBottomNav(
+          active: AppBottomTab.library,
+          onLibrary: onOpenLibrary,
+          onInfo: () => showModalBottomSheet<void>(
+            context: context,
+            backgroundColor: Colors.transparent,
+            isScrollControlled: true,
+            builder: (_) => VideoInfoSheet(asset: asset),
+          ),
+          onSettings: onOpenSettings,
         ),
       ],
     );
@@ -1067,98 +1074,6 @@ class _CardIconBtn extends StatelessWidget {
           shape: BoxShape.circle,
         ),
         child: Icon(icon, color: Colors.white, size: iconSize),
-      ),
-    );
-  }
-}
-
-// ─── Bottom Library / Info / Settings nav ────────────────────────────────────
-
-class _BottomNav extends StatelessWidget {
-  const _BottomNav({required this.asset, this.onOpenLibrary, this.onOpenSettings});
-  final AssetEntity asset;
-  final VoidCallback? onOpenLibrary;
-  final VoidCallback? onOpenSettings;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.35),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: _NavItem(
-              icon: CupertinoIcons.square_grid_2x2_fill,
-              label: 'Library',
-              active: true,
-              onTap: onOpenLibrary,
-            ),
-          ),
-          Expanded(
-            child: _NavItem(
-              icon: CupertinoIcons.info_circle,
-              label: 'Info',
-              active: false,
-              onTap: () => showModalBottomSheet<void>(
-                context: context,
-                backgroundColor: Colors.transparent,
-                isScrollControlled: true,
-                builder: (_) => VideoInfoSheet(asset: asset),
-              ),
-            ),
-          ),
-          Expanded(
-            child: _NavItem(
-              icon: CupertinoIcons.gear_alt,
-              label: l10n.settings,
-              active: false,
-              onTap: onOpenSettings,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _NavItem extends StatelessWidget {
-  const _NavItem({
-    required this.icon,
-    required this.label,
-    required this.active,
-    this.onTap,
-  });
-  final IconData icon;
-  final String label;
-  final bool active;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = active ? RRColors.accentViolet : Colors.white70;
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: color, size: 20),
-          const SizedBox(height: 3),
-          Text(
-            label,
-            style: TextStyle(
-              color: color,
-              fontSize: 11,
-              fontWeight: active ? FontWeight.w700 : FontWeight.w500,
-            ),
-          ),
-        ],
       ),
     );
   }

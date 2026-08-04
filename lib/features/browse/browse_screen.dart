@@ -16,6 +16,7 @@ import '../../core/theme/spacing.dart';
 import '../../core/vault/vault_provider.dart';
 import '../../core/video/video_library_provider.dart';
 import '../memories/on_this_day_screen.dart';
+import '../../shared/widgets/app_bottom_nav.dart';
 import '../../shared/widgets/local_badge.dart';
 import '../feed/video_feed_item.dart' show VideoInfoSheet;
 import '../states/empty_state.dart';
@@ -34,6 +35,7 @@ class BrowseScreen extends ConsumerStatefulWidget {
     this.initialScrollOffset = 0.0,
     this.onScrollChanged,
     this.onOpenPaywall,
+    this.onOpenSettings,
   });
 
   final VoidCallback? onBack;
@@ -41,6 +43,7 @@ class BrowseScreen extends ConsumerStatefulWidget {
   final double initialScrollOffset;
   final void Function(double offset)? onScrollChanged;
   final VoidCallback? onOpenPaywall;
+  final VoidCallback? onOpenSettings;
 
   @override
   ConsumerState<BrowseScreen> createState() => _BrowseScreenState();
@@ -252,6 +255,27 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
     );
   }
 
+  // ── Title styling: colors the count substring violet, rest white ──────────
+
+  List<TextSpan> _splitCountTitle(String title, String count) {
+    const baseStyle = TextStyle(
+      fontSize: 34,
+      fontWeight: FontWeight.w800,
+      color: Colors.white,
+      letterSpacing: -0.5,
+    );
+    final idx = title.indexOf(count);
+    if (idx < 0) return [TextSpan(text: title, style: baseStyle)];
+    return [
+      TextSpan(text: title.substring(0, idx), style: baseStyle),
+      TextSpan(
+        text: count,
+        style: baseStyle.copyWith(color: RRColors.accentViolet),
+      ),
+      TextSpan(text: title.substring(idx + count.length), style: baseStyle),
+    ];
+  }
+
   // ── Date grouping helpers ─────────────────────────────────────────────────
 
   String _groupLabel(BuildContext context, DateTime dt, DateTime now) {
@@ -314,14 +338,14 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                     icon: const Icon(
                       CupertinoIcons.chevron_left,
                       size: 16,
-                      color: RRColors.accentCyan,
+                      color: RRColors.accentViolet,
                     ),
                     label: Text(
                       l10n.feed,
                       style: const TextStyle(
-                        color: RRColors.accentCyan,
+                        color: RRColors.accentViolet,
                         fontSize: 16,
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
                     style: TextButton.styleFrom(
@@ -332,8 +356,13 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                   const Spacer(),
                   GestureDetector(
                     onTap: _toggleSearch,
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: RRSpace.sp12),
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: RRColors.bgElevated,
+                        shape: BoxShape.circle,
+                      ),
                       child: Icon(
                         _searchActive
                             ? CupertinoIcons.xmark_circle_fill
@@ -341,6 +370,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                         color: _searchActive
                             ? RRColors.accentCoral
                             : RRColors.textPrimary,
+                        size: 18,
                       ),
                     ),
                   ),
@@ -406,13 +436,10 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                               letterSpacing: -0.5,
                             ),
                           ),
-                          data: (all) => Text(
-                            l10n.videosCount(all.length),
-                            style: TextStyle(
-                              fontSize: 34,
-                              fontWeight: FontWeight.w800,
-                              color: RRColors.textPrimary,
-                              letterSpacing: -0.5,
+                          data: (all) => RichText(
+                            text: TextSpan(
+                              children: _splitCountTitle(
+                                  l10n.videosCount(all.length), '${all.length}'),
                             ),
                           ),
                         ),
@@ -541,6 +568,14 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
               ),
             ),
             const Center(child: BannerAdWidget()),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                  RRSpace.sp16, RRSpace.sp8, RRSpace.sp16, RRSpace.sp8),
+              child: AppBottomNav(
+                active: AppBottomTab.library,
+                onSettings: widget.onOpenSettings,
+              ),
+            ),
           ],
         ),
       ),
@@ -728,7 +763,7 @@ class _QuickChipTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(
             horizontal: RRSpace.sp16, vertical: RRSpace.sp8),
         decoration: BoxDecoration(
-          gradient: active ? RRColors.gradBrand : null,
+          gradient: active ? RRColors.gradPro : null,
           color: active ? null : RRColors.bgElevated,
           borderRadius: BorderRadius.circular(RRSpace.radiusFull),
         ),
@@ -766,14 +801,25 @@ class _SectionHeader extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
           RRSpace.sp16, 20, RRSpace.sp16, RRSpace.sp8),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: RRColors.textDisabled,
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.8,
-        ),
+      child: Row(
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              color: RRColors.accentViolet,
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.8,
+            ),
+          ),
+          const SizedBox(width: RRSpace.sp8),
+          Expanded(
+            child: Divider(
+              height: 1,
+              color: RRColors.accentViolet.withValues(alpha: 0.25),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -851,53 +897,79 @@ class _VideoRowState extends State<_VideoRow> {
         _relativeDate(context, widget.asset.createDateTime);
     final durationStr = _formatDuration(widget.asset.duration);
     final dateStr = _relativeDate(context, widget.asset.createDateTime);
-    final subtitle = '$durationStr · $dateStr';
 
-    return InkWell(
-      onTap: widget.onTap,
-      onLongPress: widget.onLongPress,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-            horizontal: RRSpace.sp16, vertical: RRSpace.sp12),
-        child: Row(
-          children: [
-            _BrowseThumbnail(
-              bytes: _thumb,
-              durationSeconds: widget.asset.duration,
-            ),
-            const SizedBox(width: RRSpace.sp12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: RRColors.textPrimary,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                    ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+          horizontal: RRSpace.sp16, vertical: RRSpace.sp4),
+      child: Material(
+        color: RRColors.accentViolet.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(RRSpace.radiusLg),
+        child: InkWell(
+          onTap: widget.onTap,
+          onLongPress: widget.onLongPress,
+          borderRadius: BorderRadius.circular(RRSpace.radiusLg),
+          child: Padding(
+            padding: const EdgeInsets.all(RRSpace.sp12),
+            child: Row(
+              children: [
+                _BrowseThumbnail(
+                  bytes: _thumb,
+                  durationSeconds: widget.asset.duration,
+                ),
+                const SizedBox(width: RRSpace.sp12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: RRColors.textPrimary,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(CupertinoIcons.calendar,
+                              size: 12, color: RRColors.textSecond),
+                          const SizedBox(width: 4),
+                          Text(
+                            '$dateStr · $durationStr',
+                            style: TextStyle(
+                              color: RRColors.textSecond,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
+                ),
+                const SizedBox(width: RRSpace.sp8),
+                GestureDetector(
+                  onTap: widget.onLongPress,
+                  behavior: HitTestBehavior.opaque,
+                  child: Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: RRColors.bgElevated,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      CupertinoIcons.ellipsis_vertical,
                       color: RRColors.textSecond,
-                      fontSize: 13,
+                      size: 16,
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-            const SizedBox(width: RRSpace.sp8),
-            Icon(
-              CupertinoIcons.chevron_right,
-              color: RRColors.textDisabled,
-              size: 16,
-            ),
-          ],
+          ),
         ),
       ),
     );

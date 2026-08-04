@@ -65,6 +65,8 @@
   "infoFileSize": "File Size",
   "infoFormat": "Format",
   "feed": "Feed",
+  "library": "Library",
+  "infoTab": "Info",
   "searchVideos": "Search videos…",
   "videosTitle": "Videos",
   "videosCount": "{count} Videos",
