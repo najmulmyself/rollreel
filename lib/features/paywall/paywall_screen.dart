@@ -134,11 +134,27 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // ── Feature list ─────────────────────────────────────────
-                  ..._kFeatures.map((f) => _FeatureRow(
-                        data: f,
-                        included: f.tier == _Tier.pro ||
-                            _selected == _Plan.monthly,
-                      )),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: RRColors.bgElevated,
+                      borderRadius: BorderRadius.circular(RRSpace.radiusLg),
+                    ),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: RRSpace.sp16),
+                    child: Column(
+                      children: [
+                        for (var i = 0; i < _kFeatures.length; i++) ...[
+                          _FeatureRow(
+                            data: _kFeatures[i],
+                            included: _kFeatures[i].tier == _Tier.pro ||
+                                _selected == _Plan.monthly,
+                          ),
+                          if (i < _kFeatures.length - 1)
+                            Divider(height: 1, color: RRColors.divider),
+                        ],
+                      ],
+                    ),
+                  ),
                   const SizedBox(height: RRSpace.sp20),
 
                   // ── Pricing cards ────────────────────────────────────────
@@ -184,40 +200,61 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                       child: iap.loading
                           ? const CupertinoActivityIndicator(
                               color: Colors.white)
-                          : Text(
-                              isPro ? l10n.youArePro : l10n.unlockPro,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 17,
-                                fontWeight: FontWeight.w700,
-                              ),
+                          : Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  isPro
+                                      ? Icons.workspace_premium_rounded
+                                      : CupertinoIcons.lock_open_fill,
+                                  color: Colors.white,
+                                  size: 18,
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  isPro ? l10n.youArePro : l10n.unlockPro,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
                             ),
                     ),
                   ),
                   const SizedBox(height: RRSpace.sp12),
 
                   // ── Footer ───────────────────────────────────────────────
-                  Text(
-                    _selected == _Plan.lifetime
-                        ? l10n.lifetimeFooter
-                        : l10n.monthlyFooter,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: RRColors.textDisabled,
-                      fontSize: 13,
-                    ),
-                  ),
+                  _selected == _Plan.lifetime
+                      ? _LifetimeFooterBadges(text: l10n.lifetimeFooter)
+                      : Text(
+                          l10n.monthlyFooter,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: RRColors.textDisabled,
+                            fontSize: 13,
+                          ),
+                        ),
                   const SizedBox(height: RRSpace.sp16),
                   GestureDetector(
                     onTap: iap.loading ? null : _restore,
-                    child: Text(
-                      l10n.restorePurchases,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: RRColors.textSecond,
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                      ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(CupertinoIcons.arrow_counterclockwise,
+                            color: RRColors.accentViolet, size: 15),
+                        const SizedBox(width: 6),
+                        Text(
+                          l10n.restorePurchases,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: RRColors.accentViolet,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: RRSpace.sp12),
@@ -270,7 +307,36 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     );
   }
 
-  // ── Header (gradient, extends behind status bar) ────────────────────────────
+  static const TextStyle _titleBaseStyle = TextStyle(
+    fontSize: 38,
+    fontWeight: FontWeight.w800,
+    letterSpacing: -0.5,
+  );
+
+  // Colors the last word (typically "Pro") in violet-pink; falls back to a
+  // solid-white title when the string has no separate last word to split.
+  List<TextSpan> _titleSpans(String title) {
+    final lastSpace = title.lastIndexOf(' ');
+    if (lastSpace < 0) {
+      return [
+        TextSpan(
+            text: title,
+            style: _titleBaseStyle.copyWith(color: RRColors.textPrimary)),
+      ];
+    }
+    return [
+      TextSpan(
+        text: '${title.substring(0, lastSpace)} ',
+        style: _titleBaseStyle.copyWith(color: RRColors.textPrimary),
+      ),
+      TextSpan(
+        text: title.substring(lastSpace + 1),
+        style: _titleBaseStyle.copyWith(color: const Color(0xFFC77DFF)),
+      ),
+    ];
+  }
+
+  // ── Header (dark, badge + gradient title + hero icon) ───────────────────────
 
   Widget _buildHeader(BuildContext context, bool isPro) {
     final l10n = AppLocalizations.of(context)!;
@@ -278,79 +344,144 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
     return Container(
       width: double.infinity,
       padding:
-          EdgeInsets.fromLTRB(RRSpace.sp16, topPad + 12, RRSpace.sp16, 28),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFF8B5CF6), Color(0xFF00D4FF)],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
+          EdgeInsets.fromLTRB(RRSpace.sp16, topPad + 12, RRSpace.sp16, RRSpace.sp16),
+      color: RRColors.bgDeep,
       child: Column(
         children: [
-          // PRO badge + close button
+          // PRO/ACTIVE badge + close button
           Row(
             children: [
-              const Spacer(),
+              const Expanded(child: SizedBox.shrink()),
               Container(
                 padding: const EdgeInsets.symmetric(
-                    horizontal: RRSpace.sp16, vertical: RRSpace.sp4),
+                    horizontal: RRSpace.sp16, vertical: RRSpace.sp8),
                 decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.22),
+                  color: RRColors.bgElevated,
                   borderRadius: BorderRadius.circular(RRSpace.radiusFull),
+                  border: Border.all(
+                      color: RRColors.accentViolet.withValues(alpha: 0.55)),
                 ),
-                child: Text(
-                  isPro ? l10n.active : l10n.pro,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 0.8,
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.workspace_premium_rounded,
+                        color: Color(0xFFFFB347), size: 15),
+                    const SizedBox(width: 6),
+                    Text(
+                      isPro ? l10n.active : l10n.pro,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.8,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const Spacer(),
-              GestureDetector(
-                onTap: widget.onClose,
-                child: Container(
-                  width: 34,
-                  height: 34,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.15),
-                    shape: BoxShape.circle,
-                  ),
-                  alignment: Alignment.center,
-                  child: const Icon(
-                    CupertinoIcons.xmark,
-                    color: Colors.white,
-                    size: 15,
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: GestureDetector(
+                    onTap: widget.onClose,
+                    child: Container(
+                      width: 34,
+                      height: 34,
+                      decoration: BoxDecoration(
+                        color: RRColors.bgElevated,
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.15)),
+                      ),
+                      alignment: Alignment.center,
+                      child: Icon(
+                        CupertinoIcons.xmark,
+                        color: RRColors.textSecond,
+                        size: 15,
+                      ),
+                    ),
                   ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: RRSpace.sp20),
-          Text(
-            l10n.paywallTitle,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 38,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.5,
-            ),
+          RichText(
+            textAlign: TextAlign.center,
+            text: TextSpan(children: _titleSpans(l10n.paywallTitle)),
           ),
           const SizedBox(height: RRSpace.sp8),
           Text(
             l10n.paywallTagline,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: RRColors.textSecond,
               fontSize: 16,
               fontWeight: FontWeight.w400,
             ),
           ),
-          const SizedBox(height: RRSpace.sp8),
+          const SizedBox(height: RRSpace.sp24),
+          Container(
+            width: 92,
+            height: 92,
+            decoration: BoxDecoration(
+              gradient: RRColors.gradPro,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: RRColors.accentViolet.withValues(alpha: 0.45),
+                  blurRadius: 40,
+                  spreadRadius: 4,
+                ),
+              ],
+            ),
+            alignment: Alignment.center,
+            child: const Icon(
+              CupertinoIcons.play_fill,
+              color: Colors.white,
+              size: 34,
+            ),
+          ),
         ],
       ),
+    );
+  }
+}
+
+// ─── Lifetime footer badges (icon + label per "·"-separated segment) ─────────
+
+class _LifetimeFooterBadges extends StatelessWidget {
+  const _LifetimeFooterBadges({required this.text});
+
+  final String text;
+
+  static const _icons = [
+    CupertinoIcons.checkmark_shield_fill,
+    CupertinoIcons.star_fill,
+    CupertinoIcons.arrow_2_circlepath,
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final segments = text.split(' · ');
+    return Wrap(
+      alignment: WrapAlignment.center,
+      spacing: RRSpace.sp16,
+      runSpacing: RRSpace.sp8,
+      children: [
+        for (var i = 0; i < segments.length; i++)
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(_icons[i % _icons.length],
+                  color: RRColors.accentViolet, size: 13),
+              const SizedBox(width: 5),
+              Text(
+                segments[i],
+                style: TextStyle(color: RRColors.textDisabled, fontSize: 13),
+              ),
+            ],
+          ),
+      ],
     );
   }
 }
@@ -459,15 +590,20 @@ class _FeatureRow extends StatelessWidget {
               ),
             ),
             const SizedBox(width: RRSpace.sp12),
-            Icon(
-              included
-                  ? CupertinoIcons.check_mark_circled_solid
-                  : CupertinoIcons.lock_fill,
-              color: included
-                  ? RRColors.accentGreen
-                  : RRColors.textDisabled,
-              size: included ? 24 : 20,
-            ),
+            included
+                ? Container(
+                    width: 28,
+                    height: 28,
+                    decoration: const BoxDecoration(
+                      color: RRColors.accentViolet,
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: const Icon(CupertinoIcons.check_mark,
+                        color: Colors.white, size: 15),
+                  )
+                : Icon(CupertinoIcons.lock_fill,
+                    color: RRColors.textDisabled, size: 20),
           ],
         ),
       ),
@@ -506,7 +642,8 @@ class _PricingCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(RRSpace.sp16),
+      padding: const EdgeInsets.fromLTRB(
+          RRSpace.sp16, RRSpace.sp12, RRSpace.sp16, RRSpace.sp16),
       decoration: BoxDecoration(
         color: RRColors.bgElevated,
         borderRadius: BorderRadius.circular(
@@ -516,43 +653,95 @@ class _PricingCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Badge
-          Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: _isLifetime
-                  ? RRColors.accentAmber.withValues(alpha: 0.2)
-                  : RRColors.accentCyan.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(RRSpace.radiusFull),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              if (_isLifetime)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    gradient: RRColors.gradBrand,
+                    borderRadius: BorderRadius.circular(RRSpace.radiusFull),
+                  ),
+                  child: Text(
+                    l10n.bestValue,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                )
+              else
+                const SizedBox.shrink(),
+              if (selected)
+                Container(
+                  width: 22,
+                  height: 22,
+                  decoration: const BoxDecoration(
+                    color: RRColors.accentViolet,
+                    shape: BoxShape.circle,
+                  ),
+                  alignment: Alignment.center,
+                  child: const Icon(CupertinoIcons.check_mark,
+                      color: Colors.white, size: 13),
+                ),
+            ],
+          ),
+          const SizedBox(height: RRSpace.sp8),
+          Center(
+            child: Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: (_isLifetime
+                        ? RRColors.accentCoral
+                        : RRColors.accentCyan)
+                    .withValues(alpha: 0.16),
+                shape: BoxShape.circle,
+              ),
+              alignment: Alignment.center,
+              child: Icon(
+                _isLifetime
+                    ? CupertinoIcons.money_dollar_circle_fill
+                    : CupertinoIcons.star_fill,
+                color: _isLifetime ? RRColors.accentCoral : RRColors.accentCyan,
+                size: 20,
+              ),
             ),
+          ),
+          const SizedBox(height: RRSpace.sp8),
+          Center(
             child: Text(
               _isLifetime ? 'RollReel Pro' : 'RollReel Plus',
               style: TextStyle(
-                color: _isLifetime
-                    ? RRColors.accentAmber
-                    : RRColors.accentCyan,
-                fontSize: 11,
+                color: RRColors.textPrimary,
+                fontSize: 15,
                 fontWeight: FontWeight.w700,
               ),
             ),
           ),
-          const SizedBox(height: RRSpace.sp12),
-          Text(
-            _displayPrice,
-            maxLines: 1,
-            style: TextStyle(
-              color: RRColors.textPrimary,
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
+          const SizedBox(height: 4),
+          Center(
+            child: Text(
+              _displayPrice,
+              maxLines: 1,
+              style: TextStyle(
+                color: _isLifetime ? RRColors.accentCoral : RRColors.accentCyan,
+                fontSize: 26,
+                fontWeight: FontWeight.w800,
+              ),
             ),
           ),
           const SizedBox(height: 2),
-          Text(
-            _subLabel(l10n),
-            style: TextStyle(
-              color: RRColors.textSecond,
-              fontSize: 13,
+          Center(
+            child: Text(
+              _subLabel(l10n),
+              style: TextStyle(
+                color: RRColors.textSecond,
+                fontSize: 13,
+              ),
             ),
           ),
         ],
@@ -568,11 +757,13 @@ class _PricingCard extends StatelessWidget {
           ? Container(
               padding: const EdgeInsets.all(2),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [RRColors.accentCyan, RRColors.accentViolet],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+                gradient: _isLifetime
+                    ? RRColors.gradBrand
+                    : const LinearGradient(
+                        colors: [RRColors.accentCyan, RRColors.accentViolet],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
                 borderRadius:
                     BorderRadius.circular(RRSpace.radiusLg + 1),
               ),
