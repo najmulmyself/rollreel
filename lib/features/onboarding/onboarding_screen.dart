@@ -539,7 +539,7 @@ class _PhotoAccessVisual extends StatelessWidget {
                 Expanded(
                   child: Text(
                     l10n.onboardingPermissionNote,
-                    style: const TextStyle(
+                    style: TextStyle(
                         color: RRColors.textSecond, fontSize: 13, height: 1.4),
                   ),
                 ),

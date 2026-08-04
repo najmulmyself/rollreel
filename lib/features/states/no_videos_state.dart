@@ -40,7 +40,7 @@ class NoVideosState extends StatelessWidget {
               const SizedBox(height: RRSpace.sp12),
               Text(
                 l10n.noVideosYetBody,
-                style: const TextStyle(
+                style: TextStyle(
                   color: RRColors.textSecond,
                   fontSize: 15,
                   height: 1.5,

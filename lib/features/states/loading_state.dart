@@ -131,7 +131,7 @@ class _LoadingStateState extends State<LoadingState>
                     const SizedBox(width: 10),
                     Text(
                       AppLocalizations.of(context)!.loadingLibrary,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: RRColors.textSecond,
                         fontSize: 14,
                       ),
