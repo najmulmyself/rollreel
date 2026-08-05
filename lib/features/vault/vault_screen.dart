@@ -121,7 +121,7 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
                 const SizedBox(width: 4),
                 Text(
                   AppLocalizations.of(context)!.back,
-                  style: const TextStyle(
+                  style: TextStyle(
                       color: RRColors.textPrimary,
                       fontSize: 17,
                       fontWeight: FontWeight.w500),
