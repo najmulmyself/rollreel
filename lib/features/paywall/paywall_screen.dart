@@ -123,16 +123,29 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
 
     return Scaffold(
       backgroundColor: RRColors.bgDeep,
-      body: Column(
+      body: Stack(
+        fit: StackFit.expand,
         children: [
-          _buildHeader(context, isPro),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(
-                  RRSpace.sp16, RRSpace.sp8, RRSpace.sp16, 48),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
+          // Background artwork — its own dark-to-black gradient blends
+          // straight into bgDeep, so no extra scrim is needed underneath
+          // the scrollable content below the hero area.
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/paywall_hero.webp',
+              fit: BoxFit.cover,
+              alignment: Alignment.topCenter,
+            ),
+          ),
+          Column(
+            children: [
+              _buildHeader(context, isPro),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(
+                      RRSpace.sp16, RRSpace.sp8, RRSpace.sp16, 48),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
                   // ── Feature list ─────────────────────────────────────────
                   Container(
                     decoration: BoxDecoration(
@@ -304,6 +317,8 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
           ),
         ],
       ),
+        ],
+      ),
     );
   }
 
@@ -345,7 +360,6 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       width: double.infinity,
       padding:
           EdgeInsets.fromLTRB(RRSpace.sp16, topPad + 12, RRSpace.sp16, RRSpace.sp16),
-      color: RRColors.bgDeep,
       child: Column(
         children: [
           // PRO/ACTIVE badge + close button
@@ -419,28 +433,10 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
               fontWeight: FontWeight.w400,
             ),
           ),
-          const SizedBox(height: RRSpace.sp24),
-          Container(
-            width: 92,
-            height: 92,
-            decoration: BoxDecoration(
-              gradient: RRColors.gradPro,
-              borderRadius: BorderRadius.circular(24),
-              boxShadow: [
-                BoxShadow(
-                  color: RRColors.accentViolet.withValues(alpha: 0.45),
-                  blurRadius: 40,
-                  spreadRadius: 4,
-                ),
-              ],
-            ),
-            alignment: Alignment.center,
-            child: const Icon(
-              CupertinoIcons.play_fill,
-              color: Colors.white,
-              size: 34,
-            ),
-          ),
+          // The podium/play-button artwork lives in the background image
+          // behind this header — reserve space for it instead of drawing
+          // a placeholder tile over it.
+          const SizedBox(height: 180),
         ],
       ),
     );
