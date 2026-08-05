@@ -88,15 +88,31 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: RRColors.bgDeep,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildNav(),
-            Expanded(
-              child: _unlocked ? _buildUnlocked() : _buildLocked(),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Background artwork for the locked state only — its own
+          // dark-to-black gradient blends into bgDeep, so the unlocked
+          // video grid (a different visual context) stays clean.
+          if (!_unlocked)
+            Positioned.fill(
+              child: Image.asset(
+                'assets/images/vault_hero.webp',
+                fit: BoxFit.cover,
+                alignment: Alignment.topCenter,
+              ),
             ),
-          ],
-        ),
+          SafeArea(
+            child: Column(
+              children: [
+                _buildNav(),
+                Expanded(
+                  child: _unlocked ? _buildUnlocked() : _buildLocked(),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -180,8 +196,10 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const SizedBox(height: RRSpace.sp20),
-          const _VaultLockHero(),
+          // The lock/photos hero artwork lives in the background image
+          // behind this screen — reserve space for it instead of drawing
+          // a placeholder tile over it.
+          const SizedBox(height: 260),
           const SizedBox(height: RRSpace.sp24),
           RichText(
             textAlign: TextAlign.center,
@@ -371,103 +389,6 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
               _VaultThumb(asset: assets[index]),
         );
       },
-    );
-  }
-}
-
-// ─── Vault lock hero graphic ──────────────────────────────────────────────────
-
-class _VaultLockHero extends StatelessWidget {
-  const _VaultLockHero();
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 260,
-      height: 220,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // Ambient glow
-          Container(
-            width: 220,
-            height: 220,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  RRColors.accentViolet.withValues(alpha: 0.28),
-                  Colors.transparent,
-                ],
-              ),
-            ),
-          ),
-          // Floating photo/video icons
-          Positioned(
-            top: 10,
-            right: 20,
-            child: _FloatIcon(icon: CupertinoIcons.photo_fill),
-          ),
-          Positioned(
-            bottom: 30,
-            left: 10,
-            child: _FloatIcon(icon: CupertinoIcons.videocam_fill),
-          ),
-          const Positioned(
-            top: 30,
-            left: 30,
-            child: Icon(CupertinoIcons.sparkles,
-                color: RRColors.accentViolet, size: 16),
-          ),
-          const Positioned(
-            bottom: 60,
-            right: 30,
-            child: Icon(CupertinoIcons.sparkles,
-                color: RRColors.accentCoral, size: 14),
-          ),
-          // Lock icon
-          Container(
-            width: 96,
-            height: 96,
-            decoration: BoxDecoration(
-              gradient: RRColors.gradPro,
-              borderRadius: BorderRadius.circular(26),
-              boxShadow: [
-                BoxShadow(
-                  color: RRColors.accentViolet.withValues(alpha: 0.5),
-                  blurRadius: 30,
-                  spreadRadius: 2,
-                ),
-              ],
-            ),
-            alignment: Alignment.center,
-            child: const Icon(
-              CupertinoIcons.lock_fill,
-              color: Colors.white,
-              size: 42,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _FloatIcon extends StatelessWidget {
-  const _FloatIcon({required this.icon});
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        color: RRColors.bgElevated,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      alignment: Alignment.center,
-      child: Icon(icon, color: RRColors.textDisabled, size: 18),
     );
   }
 }
