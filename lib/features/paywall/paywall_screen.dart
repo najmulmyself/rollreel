@@ -136,13 +136,14 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
               alignment: Alignment.topCenter,
             ),
           ),
-          Column(
-            children: [
-              _buildHeader(context, isPro),
-              Expanded(
-                child: SingleChildScrollView(
+          SingleChildScrollView(
+            padding: const EdgeInsets.only(bottom: 48),
+            child: Column(
+              children: [
+                _buildHeader(context, isPro),
+                Padding(
                   padding: const EdgeInsets.fromLTRB(
-                      RRSpace.sp16, RRSpace.sp8, RRSpace.sp16, 48),
+                      RRSpace.sp16, RRSpace.sp8, RRSpace.sp16, 0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -313,10 +314,10 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                   ),
                 ],
               ),
-            ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
         ],
       ),
     );
