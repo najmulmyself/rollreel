@@ -123,26 +123,13 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
 
     return Scaffold(
       backgroundColor: RRColors.bgDeep,
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          // Background artwork — its own dark-to-black gradient blends
-          // straight into bgDeep, so no extra scrim is needed underneath
-          // the scrollable content below the hero area.
-          Positioned.fill(
-            child: Image.asset(
-              'assets/images/paywall_hero.webp',
-              fit: BoxFit.cover,
-              alignment: Alignment.topCenter,
-            ),
-          ),
-          SingleChildScrollView(
-            padding: const EdgeInsets.only(bottom: 48),
-            child: Column(
-              children: [
-                _buildHeader(context, isPro),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.only(bottom: 48),
+        child: Column(
+          children: [
+            _buildHeader(context, isPro),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
                       RRSpace.sp16, RRSpace.sp8, RRSpace.sp16, 0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -314,11 +301,9 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
                   ),
                 ],
               ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
-        ],
       ),
     );
   }
@@ -434,10 +419,13 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
               fontWeight: FontWeight.w400,
             ),
           ),
-          // The podium/play-button artwork lives in the background image
-          // behind this header — reserve space for it instead of drawing
-          // a placeholder tile over it.
-          const SizedBox(height: 180),
+          const SizedBox(height: RRSpace.sp12),
+          Image.asset(
+            'assets/images/paywall_hero.webp',
+            width: double.infinity,
+            height: 220,
+            fit: BoxFit.contain,
+          ),
         ],
       ),
     );

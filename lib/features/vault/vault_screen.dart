@@ -88,31 +88,15 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: RRColors.bgDeep,
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          // Background artwork for the locked state only — its own
-          // dark-to-black gradient blends into bgDeep, so the unlocked
-          // video grid (a different visual context) stays clean.
-          if (!_unlocked)
-            Positioned.fill(
-              child: Image.asset(
-                'assets/images/vault_hero.webp',
-                fit: BoxFit.cover,
-                alignment: Alignment.topCenter,
-              ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildNav(),
+            Expanded(
+              child: _unlocked ? _buildUnlocked() : _buildLocked(),
             ),
-          SafeArea(
-            child: Column(
-              children: [
-                _buildNav(),
-                Expanded(
-                  child: _unlocked ? _buildUnlocked() : _buildLocked(),
-                ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -196,10 +180,13 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // The lock/photos hero artwork lives in the background image
-          // behind this screen — reserve space for it instead of drawing
-          // a placeholder tile over it.
-          const SizedBox(height: 260),
+          const SizedBox(height: RRSpace.sp12),
+          Image.asset(
+            'assets/images/vault_hero.webp',
+            width: double.infinity,
+            height: 260,
+            fit: BoxFit.contain,
+          ),
           const SizedBox(height: RRSpace.sp24),
           RichText(
             textAlign: TextAlign.center,
