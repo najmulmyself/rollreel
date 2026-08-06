@@ -5,11 +5,11 @@ import '../core/theme/colors.dart';
 import '../l10n/app_localizations.dart';
 
 /// Persistent 5-item floating bottom nav: Home / Library / floating center
-/// Play button / Favorites / Settings. Always dark, regardless of the
-/// current screen's own theme — a floating pill that sits on top of any
-/// page background. [currentIndex] addresses the 4 real destinations
-/// (0=Home, 1=Library, 2=Favorites, 3=Settings) — the center button is a
-/// standalone action, not a tab.
+/// Play button / Favorites / Settings. A floating pill that follows the
+/// app's light/dark theme, sitting on top of any page background.
+/// [currentIndex] addresses the 4 real destinations (0=Home, 1=Library,
+/// 2=Favorites, 3=Settings) — the center button is a standalone action,
+/// not a tab.
 class MainNavBar extends StatelessWidget {
   const MainNavBar({
     super.key,
@@ -24,12 +24,12 @@ class MainNavBar extends StatelessWidget {
 
   static const double _barHeight = 68;
   static const double _centerSize = 60;
-  static const Color _barColor = Color(0xF0131320);
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
+    final isDark = RRColors.isDark.value;
     return Padding(
       padding: EdgeInsets.fromLTRB(16, 0, 16, bottomInset > 0 ? bottomInset : 12),
       child: SizedBox(
@@ -41,12 +41,15 @@ class MainNavBar extends StatelessWidget {
             Container(
               height: _barHeight,
               decoration: BoxDecoration(
-                color: _barColor,
+                color: isDark ? const Color(0xF0131320) : Colors.white,
                 borderRadius: BorderRadius.circular(_barHeight / 2),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+                border: Border.all(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.06)
+                        : Colors.black.withValues(alpha: 0.04)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.45),
+                    color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.1),
                     blurRadius: 24,
                     offset: const Offset(0, 10),
                   ),

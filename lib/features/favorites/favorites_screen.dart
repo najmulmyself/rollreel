@@ -11,15 +11,13 @@ import '../../core/theme/spacing.dart';
 import '../../l10n/app_localizations.dart';
 import '../states/loading_state.dart';
 
-// Always dark, like the Vault content view and Feed player — independent
-// of the global light/dark setting.
+// Theme-aware — follows the app's light/dark setting like Home/Library/
+// Settings (both variants confirmed against reference screenshots).
 class FavoritesScreen extends ConsumerWidget {
   const FavoritesScreen({super.key, this.onPlayAt, this.onOpenLibrary});
 
   final void Function(String assetId)? onPlayAt;
   final VoidCallback? onOpenLibrary;
-
-  static const Color _darkBg = Color(0xFF07070C);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -27,7 +25,7 @@ class FavoritesScreen extends ConsumerWidget {
     final assetsAsync = ref.watch(favoriteAssetsProvider);
 
     return Scaffold(
-      backgroundColor: _darkBg,
+      backgroundColor: RRColors.bgTint,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -37,8 +35,8 @@ class FavoritesScreen extends ConsumerWidget {
                   RRSpace.sp16, RRSpace.sp16, RRSpace.sp16, RRSpace.sp8),
               child: Text(
                 l10n.favorites,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: RRColors.textPrimary,
                   fontSize: 34,
                   fontWeight: FontWeight.w800,
                   letterSpacing: -0.5,
@@ -50,7 +48,7 @@ class FavoritesScreen extends ConsumerWidget {
                 loading: () => const LoadingState(),
                 error: (e, _) => Center(
                   child: Text(l10n.couldNotLoadVideos('$e'),
-                      style: const TextStyle(color: Color(0xFFA8A8B8))),
+                      style: TextStyle(color: RRColors.textSecond)),
                 ),
                 data: (assets) {
                   if (assets.isEmpty) {
@@ -89,10 +87,14 @@ class _EmptyFavorites extends StatelessWidget {
   final VoidCallback? onOpenLibrary;
 
   List<TextSpan> _titleSpans(String title) {
-    const baseStyle = TextStyle(fontSize: 30, fontWeight: FontWeight.w800);
+    final baseStyle = TextStyle(fontSize: 30, fontWeight: FontWeight.w800);
     final words = title.split(' ');
     if (words.length < 2) {
-      return [TextSpan(text: title, style: baseStyle.copyWith(color: Colors.white))];
+      return [
+        TextSpan(
+            text: title,
+            style: baseStyle.copyWith(color: RRColors.textPrimary)),
+      ];
     }
     // Colors every word violet except the first and last.
     return [
@@ -101,7 +103,7 @@ class _EmptyFavorites extends StatelessWidget {
           text: words[i],
           style: baseStyle.copyWith(
             color: (i == 0 || i == words.length - 1)
-                ? Colors.white
+                ? RRColors.textPrimary
                 : RRColors.accentViolet,
           ),
         ),
@@ -130,8 +132,8 @@ class _EmptyFavorites extends StatelessWidget {
             Text(
               l10n.favoritesEmptyBody,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                  color: Color(0xFFA8A8B8), fontSize: 15, height: 1.4),
+              style: TextStyle(
+                  color: RRColors.textSecond, fontSize: 15, height: 1.4),
             ),
             const SizedBox(height: RRSpace.sp32),
             GestureDetector(
@@ -229,9 +231,10 @@ class _EmptyFavoritesHero extends StatelessWidget {
               width: 130,
               height: 110,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.05),
+                color: RRColors.accentViolet.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                border: Border.all(
+                    color: RRColors.accentViolet.withValues(alpha: 0.15)),
               ),
             ),
           ),
@@ -241,9 +244,10 @@ class _EmptyFavoritesHero extends StatelessWidget {
               width: 150,
               height: 120,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.05),
+                color: RRColors.accentViolet.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(20),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+                border: Border.all(
+                    color: RRColors.accentViolet.withValues(alpha: 0.15)),
               ),
             ),
           ),
@@ -320,7 +324,7 @@ class _FavoriteThumbState extends State<_FavoriteThumb> {
         borderRadius: BorderRadius.circular(RRSpace.radiusSm),
         child: _thumb != null
             ? Image.memory(_thumb!, fit: BoxFit.cover)
-            : const ColoredBox(color: Color(0xFF15151F)),
+            : ColoredBox(color: RRColors.bgElevated),
       ),
     );
   }

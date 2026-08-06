@@ -101,16 +101,10 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
     );
   }
 
-  // The locked gate uses the app's light theme; the unlocked vault content
-  // is deliberately always-dark (like the Feed player), regardless of the
-  // global dark-mode setting, so its colors are hardcoded rather than read
-  // from the theme-aware RRColors getters.
-  static const Color _darkBg = Color(0xFF0A0A14);
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _unlocked ? _darkBg : RRColors.bgTint,
+      backgroundColor: RRColors.bgTint,
       body: SafeArea(
         child: Column(
           children: [
@@ -127,7 +121,6 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
   // ── Top nav ────────────────────────────────────────────────────────────────
 
   Widget _buildNav() {
-    final backTextColor = _unlocked ? Colors.white : RRColors.textPrimary;
     return Padding(
       padding: const EdgeInsets.symmetric(
           horizontal: RRSpace.sp8, vertical: RRSpace.sp4),
@@ -146,7 +139,7 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
                 Text(
                   AppLocalizations.of(context)!.back,
                   style: TextStyle(
-                      color: backTextColor,
+                      color: RRColors.textPrimary,
                       fontSize: 17,
                       fontWeight: FontWeight.w500),
                 ),
@@ -157,8 +150,8 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
           if (_unlocked) ...[
             Text(
               AppLocalizations.of(context)!.vaultTitle,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: RRColors.textPrimary,
                 fontSize: 17,
                 fontWeight: FontWeight.w600,
               ),
@@ -396,7 +389,7 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
   }
 }
 
-// ─── Empty vault state (dark) ──────────────────────────────────────────────────
+// ─── Empty vault state ──────────────────────────────────────────────────────
 
 class _EmptyVault extends StatelessWidget {
   const _EmptyVault({this.onAddVideos, this.onHowItWorks});
@@ -404,21 +397,20 @@ class _EmptyVault extends StatelessWidget {
   final VoidCallback? onAddVideos;
   final VoidCallback? onHowItWorks;
 
-  static const _darkCard = Color(0xFF15151F);
-  static const _darkTextSecond = Color(0xFFA8A8B8);
-
   List<TextSpan> _titleSpans(String title) {
-    const baseStyle = TextStyle(fontSize: 32, fontWeight: FontWeight.w800);
+    final baseStyle = TextStyle(fontSize: 32, fontWeight: FontWeight.w800);
     final lastSpace = title.lastIndexOf(' ');
     if (lastSpace < 0) {
       return [
-        TextSpan(text: title, style: baseStyle.copyWith(color: Colors.white)),
+        TextSpan(
+            text: title,
+            style: baseStyle.copyWith(color: RRColors.textPrimary)),
       ];
     }
     return [
       TextSpan(
         text: '${title.substring(0, lastSpace)} ',
-        style: baseStyle.copyWith(color: Colors.white),
+        style: baseStyle.copyWith(color: RRColors.textPrimary),
       ),
       TextSpan(
         text: title.substring(lastSpace + 1),
@@ -446,16 +438,22 @@ class _EmptyVault extends StatelessWidget {
           Text(
             l10n.vaultEmptySubtitle,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-                color: _darkTextSecond, fontSize: 15, height: 1.4),
+            style: TextStyle(
+                color: RRColors.textSecond, fontSize: 15, height: 1.4),
           ),
           const SizedBox(height: RRSpace.sp24),
           Container(
             padding: const EdgeInsets.symmetric(
                 horizontal: RRSpace.sp12, vertical: RRSpace.sp16),
             decoration: BoxDecoration(
-              color: _darkCard,
+              color: RRColors.bgElevated,
               borderRadius: BorderRadius.circular(RRSpace.radiusLg),
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.06),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4)),
+              ],
             ),
             child: Row(
               children: [
@@ -464,25 +462,22 @@ class _EmptyVault extends StatelessWidget {
                     icon: CupertinoIcons.lock_fill,
                     title: l10n.vaultBadgeSecureTitle,
                     subtitle: l10n.vaultBadgeSecureSub,
-                    dark: true,
                   ),
                 ),
-                Container(width: 1, height: 60, color: Colors.white12),
+                Container(width: 1, height: 60, color: RRColors.divider),
                 Expanded(
                   child: _VaultBadge(
                     icon: CupertinoIcons.checkmark_shield_fill,
                     title: l10n.vaultBadgeEncryptedTitle,
                     subtitle: l10n.vaultBadgeEncryptedSub,
-                    dark: true,
                   ),
                 ),
-                Container(width: 1, height: 60, color: Colors.white12),
+                Container(width: 1, height: 60, color: RRColors.divider),
                 Expanded(
                   child: _VaultBadge(
                     icon: CupertinoIcons.eye_slash,
                     title: l10n.vaultBadgeHiddenTitle,
                     subtitle: l10n.vaultBadgeHiddenSub,
-                    dark: true,
                   ),
                 ),
               ],
@@ -739,26 +734,21 @@ class _VaultBadge extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.subtitle,
-    this.dark = false,
   });
 
   final IconData icon;
   final String title;
   final String subtitle;
-  final bool dark;
 
   @override
   Widget build(BuildContext context) {
-    final titleColor = dark ? Colors.white : RRColors.textPrimary;
-    final subtitleColor =
-        dark ? const Color(0xFFA8A8B8) : RRColors.textSecond;
     return Column(
       children: [
         Container(
           width: 44,
           height: 44,
           decoration: BoxDecoration(
-            color: RRColors.accentViolet.withValues(alpha: dark ? 0.22 : 0.15),
+            color: RRColors.accentViolet.withValues(alpha: 0.15),
             shape: BoxShape.circle,
           ),
           alignment: Alignment.center,
@@ -769,7 +759,7 @@ class _VaultBadge extends StatelessWidget {
           title,
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: titleColor,
+            color: RRColors.textPrimary,
             fontSize: 13,
             fontWeight: FontWeight.w700,
           ),
@@ -779,7 +769,7 @@ class _VaultBadge extends StatelessWidget {
           subtitle,
           textAlign: TextAlign.center,
           style: TextStyle(
-            color: subtitleColor,
+            color: RRColors.textSecond,
             fontSize: 11,
           ),
         ),
