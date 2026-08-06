@@ -88,6 +88,11 @@ class _MainShellState extends ConsumerState<MainShell> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: RRColors.bgTint,
+      // The nav bar's floating center button overflows above its white
+      // bar into a transparent strip — without extendBody, that strip
+      // shows the Scaffold's flat background instead of the page content
+      // scrolling underneath it.
+      extendBody: true,
       body: IndexedStack(
         index: _tab,
         children: [
