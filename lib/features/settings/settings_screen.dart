@@ -130,7 +130,7 @@ class SettingsScreen extends ConsumerWidget {
     final isPro = ref.watch(isProProvider);
 
     return Scaffold(
-      backgroundColor: RRColors.bgDeep,
+      backgroundColor: RRColors.bgTint,
       body: SafeArea(
         child: Column(
           children: [
