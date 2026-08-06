@@ -68,6 +68,7 @@
   "library": "Library",
   "favoritesEmptyTitle": "No Favorites Yet",
   "favoritesEmptyBody": "Tap the heart on any video to save it here.",
+  "goToLibrary": "Go to Library",
   "infoTab": "Info",
   "searchVideos": "Search videos…",
   "videosTitle": "Videos",

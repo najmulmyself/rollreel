@@ -9,17 +9,17 @@ import '../../core/favorites/favorites_provider.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
 import '../../l10n/app_localizations.dart';
-import '../states/empty_state.dart';
 import '../states/loading_state.dart';
 
-// Placeholder screen — no reference screenshot provided yet, so this keeps
-// the existing favorite/like functionality reachable via the new nav bar
-// with minimal styling. Will be rebuilt to spec once a mockup is provided.
+// Always dark, like the Vault content view and Feed player — independent
+// of the global light/dark setting.
 class FavoritesScreen extends ConsumerWidget {
   const FavoritesScreen({super.key, this.onPlayAt, this.onOpenLibrary});
 
   final void Function(String assetId)? onPlayAt;
   final VoidCallback? onOpenLibrary;
+
+  static const Color _darkBg = Color(0xFF07070C);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -27,20 +27,21 @@ class FavoritesScreen extends ConsumerWidget {
     final assetsAsync = ref.watch(favoriteAssetsProvider);
 
     return Scaffold(
-      backgroundColor: RRColors.bgDeep,
+      backgroundColor: _darkBg,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(
-                  RRSpace.sp16, RRSpace.sp12, RRSpace.sp16, RRSpace.sp8),
+                  RRSpace.sp16, RRSpace.sp16, RRSpace.sp16, RRSpace.sp8),
               child: Text(
                 l10n.favorites,
-                style: TextStyle(
-                  color: RRColors.textPrimary,
-                  fontSize: 20,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 34,
                   fontWeight: FontWeight.w800,
+                  letterSpacing: -0.5,
                 ),
               ),
             ),
@@ -49,17 +50,11 @@ class FavoritesScreen extends ConsumerWidget {
                 loading: () => const LoadingState(),
                 error: (e, _) => Center(
                   child: Text(l10n.couldNotLoadVideos('$e'),
-                      style: TextStyle(color: RRColors.textSecond)),
+                      style: const TextStyle(color: Color(0xFFA8A8B8))),
                 ),
                 data: (assets) {
                   if (assets.isEmpty) {
-                    return EmptyState(
-                      icon: CupertinoIcons.heart,
-                      title: l10n.favoritesEmptyTitle,
-                      body: l10n.favoritesEmptyBody,
-                      buttonLabel: l10n.library,
-                      onPressed: () => onOpenLibrary?.call(),
-                    );
+                    return _EmptyFavorites(onOpenLibrary: onOpenLibrary);
                   }
                   return GridView.builder(
                     padding: const EdgeInsets.all(RRSpace.sp4),
@@ -85,6 +80,213 @@ class FavoritesScreen extends ConsumerWidget {
     );
   }
 }
+
+// ─── Empty state ──────────────────────────────────────────────────────────────
+
+class _EmptyFavorites extends StatelessWidget {
+  const _EmptyFavorites({this.onOpenLibrary});
+
+  final VoidCallback? onOpenLibrary;
+
+  List<TextSpan> _titleSpans(String title) {
+    const baseStyle = TextStyle(fontSize: 30, fontWeight: FontWeight.w800);
+    final words = title.split(' ');
+    if (words.length < 2) {
+      return [TextSpan(text: title, style: baseStyle.copyWith(color: Colors.white))];
+    }
+    // Colors every word violet except the first and last.
+    return [
+      for (var i = 0; i < words.length; i++) ...[
+        TextSpan(
+          text: words[i],
+          style: baseStyle.copyWith(
+            color: (i == 0 || i == words.length - 1)
+                ? Colors.white
+                : RRColors.accentViolet,
+          ),
+        ),
+        if (i < words.length - 1) const TextSpan(text: ' '),
+      ],
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: RRSpace.sp32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const _EmptyFavoritesHero(),
+            const SizedBox(height: RRSpace.sp24),
+            RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                  children: _titleSpans(l10n.favoritesEmptyTitle)),
+            ),
+            const SizedBox(height: RRSpace.sp12),
+            Text(
+              l10n.favoritesEmptyBody,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                  color: Color(0xFFA8A8B8), fontSize: 15, height: 1.4),
+            ),
+            const SizedBox(height: RRSpace.sp32),
+            GestureDetector(
+              onTap: onOpenLibrary,
+              child: Container(
+                height: RRSpace.buttonHeight,
+                padding: const EdgeInsets.symmetric(horizontal: RRSpace.sp32),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [RRColors.accentViolet, Color(0xFF6366F1)],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+                  borderRadius: BorderRadius.circular(RRSpace.radiusFull),
+                  boxShadow: [
+                    BoxShadow(
+                      color: RRColors.accentViolet.withValues(alpha: 0.4),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                alignment: Alignment.center,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(CupertinoIcons.folder_fill,
+                        color: Colors.white, size: 18),
+                    const SizedBox(width: 10),
+                    Text(
+                      l10n.goToLibrary,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyFavoritesHero extends StatelessWidget {
+  const _EmptyFavoritesHero();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 260,
+      height: 230,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            width: 220,
+            height: 220,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: [
+                  RRColors.accentViolet.withValues(alpha: 0.22),
+                  Colors.transparent,
+                ],
+              ),
+            ),
+          ),
+          const Positioned(
+            top: 12,
+            left: 30,
+            child: Icon(CupertinoIcons.sparkles,
+                color: RRColors.accentViolet, size: 14),
+          ),
+          const Positioned(
+            bottom: 40,
+            left: 10,
+            child: Icon(CupertinoIcons.sparkles,
+                color: RRColors.accentViolet, size: 12),
+          ),
+          const Positioned(
+            top: 60,
+            right: 10,
+            child: Icon(CupertinoIcons.sparkles,
+                color: RRColors.accentViolet, size: 13),
+          ),
+          // Stacked cards behind the heart
+          Positioned(
+            top: 30,
+            child: Container(
+              width: 130,
+              height: 110,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 50,
+            child: Container(
+              width: 150,
+              height: 120,
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+              ),
+            ),
+          ),
+          // Outline heart accent, above the solid heart
+          const Positioned(
+            top: 20,
+            child: Icon(CupertinoIcons.heart,
+                color: RRColors.accentViolet, size: 26),
+          ),
+          // Solid gradient heart
+          Positioned(
+            bottom: 30,
+            child: Container(
+              width: 110,
+              height: 110,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: RRColors.accentViolet.withValues(alpha: 0.5),
+                    blurRadius: 30,
+                  ),
+                ],
+              ),
+              alignment: Alignment.center,
+              child: ShaderMask(
+                shaderCallback: (rect) => const LinearGradient(
+                  colors: [Color(0xFFB794F6), RRColors.accentViolet],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ).createShader(rect),
+                child: const Icon(CupertinoIcons.heart_fill,
+                    color: Colors.white, size: 88),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Favorite thumbnail ─────────────────────────────────────────────────────
 
 class _FavoriteThumb extends StatefulWidget {
   const _FavoriteThumb({required this.asset, this.onTap});
@@ -118,7 +320,7 @@ class _FavoriteThumbState extends State<_FavoriteThumb> {
         borderRadius: BorderRadius.circular(RRSpace.radiusSm),
         child: _thumb != null
             ? Image.memory(_thumb!, fit: BoxFit.cover)
-            : ColoredBox(color: RRColors.bgElevated),
+            : const ColoredBox(color: Color(0xFF15151F)),
       ),
     );
   }
