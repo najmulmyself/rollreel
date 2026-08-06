@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/ads/system_prompt_coordinator.dart';
+import '../core/theme/colors.dart';
 import '../features/browse/browse_screen.dart';
 import '../features/favorites/favorites_screen.dart';
 import '../features/feed/feed_screen.dart';
@@ -86,7 +87,7 @@ class _MainShellState extends ConsumerState<MainShell> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF080810),
+      backgroundColor: RRColors.bgTint,
       body: IndexedStack(
         index: _tab,
         children: [
