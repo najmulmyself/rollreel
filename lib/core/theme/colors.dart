@@ -74,4 +74,10 @@ class RRColors {
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
+
+  static const LinearGradient gradVioletPink = LinearGradient(
+    colors: [Color(0xFF7C3AED), accentPink],
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
+  );
 }

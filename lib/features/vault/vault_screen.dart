@@ -87,7 +87,7 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: RRColors.bgDeep,
+      backgroundColor: RRColors.bgTint,
       body: SafeArea(
         child: Column(
           children: [
@@ -147,10 +147,10 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
     );
   }
 
-  // Colors the first word violet and the rest coral; falls back to a solid
+  // Colors the first word dark and the rest violet; falls back to a solid
   // violet title when the string has no separate first word to split.
   List<TextSpan> _titleSpans(String title) {
-    const baseStyle = TextStyle(fontSize: 30, fontWeight: FontWeight.w800);
+    const baseStyle = TextStyle(fontSize: 32, fontWeight: FontWeight.w800);
     final firstSpace = title.indexOf(' ');
     if (firstSpace < 0) {
       return [
@@ -162,11 +162,11 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
     return [
       TextSpan(
         text: title.substring(0, firstSpace),
-        style: baseStyle.copyWith(color: RRColors.accentViolet),
+        style: baseStyle.copyWith(color: const Color(0xFF1A1A2E)),
       ),
       TextSpan(
         text: title.substring(firstSpace),
-        style: baseStyle.copyWith(color: RRColors.accentCoral),
+        style: baseStyle.copyWith(color: RRColors.accentViolet),
       ),
     ];
   }
@@ -181,12 +181,7 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           const SizedBox(height: RRSpace.sp12),
-          Image.asset(
-            'assets/images/vault_hero.webp',
-            width: double.infinity,
-            height: 260,
-            fit: BoxFit.contain,
-          ),
+          const _VaultLockHero(),
           const SizedBox(height: RRSpace.sp24),
           RichText(
             textAlign: TextAlign.center,
@@ -204,23 +199,24 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
           ),
           const SizedBox(height: RRSpace.sp24),
           Container(
-            width: 48,
-            height: 48,
+            width: 56,
+            height: 56,
             decoration: BoxDecoration(
-              color: RRColors.bgElevated,
+              color: RRColors.accentViolet.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             alignment: Alignment.center,
             child: const Icon(
               CupertinoIcons.viewfinder,
               color: RRColors.accentViolet,
-              size: 22,
+              size: 24,
             ),
           ),
           const SizedBox(height: RRSpace.sp20),
           PrimaryButton(
             label: l10n.unlockWithFaceId,
             icon: CupertinoIcons.viewfinder,
+            gradient: RRColors.gradVioletPink,
             onPressed: _authenticating ? null : _unlock,
           ),
           const SizedBox(height: RRSpace.sp20),
@@ -245,7 +241,8 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
               height: RRSpace.buttonHeight,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(RRSpace.radiusFull),
-                border: Border.all(color: RRColors.divider),
+                border: Border.all(
+                    color: RRColors.accentViolet.withValues(alpha: 0.4)),
               ),
               alignment: Alignment.center,
               child: Row(
@@ -273,6 +270,12 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
             decoration: BoxDecoration(
               color: RRColors.bgElevated,
               borderRadius: BorderRadius.circular(RRSpace.radiusLg),
+              boxShadow: const [
+                BoxShadow(
+                    color: Color(0x0F000000),
+                    blurRadius: 12,
+                    offset: Offset(0, 4)),
+              ],
             ),
             child: Row(
               children: [
@@ -376,6 +379,112 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
               _VaultThumb(asset: assets[index]),
         );
       },
+    );
+  }
+}
+
+// ─── Vault lock hero graphic ──────────────────────────────────────────────────
+
+class _VaultLockHero extends StatelessWidget {
+  const _VaultLockHero();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 280,
+      height: 240,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Ambient glow
+          Container(
+            width: 230,
+            height: 230,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: [
+                  RRColors.accentViolet.withValues(alpha: 0.14),
+                  Colors.transparent,
+                ],
+              ),
+            ),
+          ),
+          // Floating photo/video/folder icon chips
+          const Positioned(
+            top: 20,
+            left: 30,
+            child: _FloatIcon(icon: CupertinoIcons.film),
+          ),
+          const Positioned(
+            top: 30,
+            right: 20,
+            child: _FloatIcon(icon: CupertinoIcons.photo_fill),
+          ),
+          const Positioned(
+            bottom: 40,
+            left: 10,
+            child: _FloatIcon(icon: CupertinoIcons.folder_fill),
+          ),
+          const Positioned(
+            top: 10,
+            right: 70,
+            child: Icon(CupertinoIcons.sparkles,
+                color: RRColors.accentViolet, size: 16),
+          ),
+          const Positioned(
+            bottom: 60,
+            right: 30,
+            child: Icon(CupertinoIcons.sparkles,
+                color: RRColors.accentViolet, size: 13),
+          ),
+          // Lock icon
+          Container(
+            width: 110,
+            height: 110,
+            decoration: BoxDecoration(
+              gradient: RRColors.gradPro,
+              borderRadius: BorderRadius.circular(30),
+              boxShadow: [
+                BoxShadow(
+                  color: RRColors.accentViolet.withValues(alpha: 0.35),
+                  blurRadius: 30,
+                  offset: const Offset(0, 12),
+                ),
+              ],
+            ),
+            alignment: Alignment.center,
+            child: const Icon(
+              CupertinoIcons.lock_fill,
+              color: Colors.white,
+              size: 48,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FloatIcon extends StatelessWidget {
+  const _FloatIcon({required this.icon});
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const [
+          BoxShadow(
+              color: Color(0x14000000), blurRadius: 10, offset: Offset(0, 4)),
+        ],
+      ),
+      alignment: Alignment.center,
+      child: Icon(icon, color: RRColors.accentViolet, size: 20),
     );
   }
 }
