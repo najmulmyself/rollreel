@@ -677,18 +677,18 @@ class _TopFoldersCard extends StatelessWidget {
                     color: RRColors.accentBlue, size: 20),
               ),
               const SizedBox(width: RRSpace.sp12),
-              const Expanded(
+              Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'Review Demo Library',
                       style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
                           color: Color(0xFF1A1A2E)),
                     ),
-                    SizedBox(height: 2),
+                    const SizedBox(height: 2),
                     Text('3 videos',
                         style: TextStyle(
                             color: RRColors.textSecond, fontSize: 13)),
