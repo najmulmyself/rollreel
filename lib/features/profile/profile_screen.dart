@@ -13,12 +13,10 @@ class ProfileScreen extends StatelessWidget {
 
   final VoidCallback? onOpenSettings;
 
-  static const _bgTint = Color(0xFFF3F1FB);
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _bgTint,
+      backgroundColor: RRColors.bgTint,
       body: SafeArea(
         bottom: false,
         child: ListView(

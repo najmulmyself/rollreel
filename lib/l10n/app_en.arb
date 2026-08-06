@@ -80,6 +80,9 @@
     }
   },
   "yourLibrary": "Your Library",
+  "libraryTitle": "Library",
+  "librarySubtitle": "Your personal video collection",
+  "totalInLibrary": "Total in your library",
   "localBadge": "Local",
   "noResults": "No Results",
   "noVideosFound": "No Videos Found",

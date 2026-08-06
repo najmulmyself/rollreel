@@ -92,7 +92,6 @@ class _MainShellState extends ConsumerState<MainShell> {
         children: [
           ProfileScreen(onOpenSettings: () => _setTab(3)),
           BrowseScreen(
-            onBack: () => _setTab(0),
             onOpenPaywall: widget.onOpenPaywall,
             onPlayAt: (assetId) => _openFeed(context, assetId: assetId),
           ),

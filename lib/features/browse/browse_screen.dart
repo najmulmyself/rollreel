@@ -16,27 +16,24 @@ import '../../core/theme/spacing.dart';
 import '../../core/vault/vault_provider.dart';
 import '../../core/video/video_library_provider.dart';
 import '../memories/on_this_day_screen.dart';
-import '../../shared/widgets/local_badge.dart';
 import '../feed/video_feed_item.dart' show VideoInfoSheet;
 import '../states/empty_state.dart';
 import '../states/loading_state.dart';
 import 'filter_sheet.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// BrowseScreen
+// BrowseScreen ("Library" tab)
 // ─────────────────────────────────────────────────────────────────────────────
 
 class BrowseScreen extends ConsumerStatefulWidget {
   const BrowseScreen({
     super.key,
-    this.onBack,
     this.onPlayAt,
     this.initialScrollOffset = 0.0,
     this.onScrollChanged,
     this.onOpenPaywall,
   });
 
-  final VoidCallback? onBack;
   final void Function(String assetId)? onPlayAt;
   final double initialScrollOffset;
   final void Function(double offset)? onScrollChanged;
@@ -90,26 +87,12 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
   // ── Quick chip definitions ────────────────────────────────────────────────
 
   static const List<_QuickChip> _quickChips = [
+    _QuickChip(id: _QuickChipId.all, icon: CupertinoIcons.rectangle_stack_fill),
+    _QuickChip(id: _QuickChipId.today, icon: CupertinoIcons.calendar),
+    _QuickChip(id: _QuickChipId.shorts, icon: CupertinoIcons.bolt_fill),
     _QuickChip(
-      id: _QuickChipId.all,
-      icon: CupertinoIcons.rectangle_stack_fill,
-    ),
-    _QuickChip(
-      id: _QuickChipId.today,
-      icon: CupertinoIcons.calendar,
-    ),
-    _QuickChip(
-      id: _QuickChipId.shorts,
-      icon: CupertinoIcons.bolt_fill,
-    ),
-    _QuickChip(
-      id: _QuickChipId.long,
-      icon: CupertinoIcons.video_camera_solid,
-    ),
-    _QuickChip(
-      id: _QuickChipId.recent,
-      icon: CupertinoIcons.clock_fill,
-    ),
+        id: _QuickChipId.long, icon: CupertinoIcons.video_camera_solid),
+    _QuickChip(id: _QuickChipId.recent, icon: CupertinoIcons.clock_fill),
   ];
 
   String _quickChipLabel(_QuickChipId id, AppLocalizations l10n) {
@@ -252,27 +235,6 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
     );
   }
 
-  // ── Title styling: colors the count substring violet, rest white ──────────
-
-  List<TextSpan> _splitCountTitle(String title, String count) {
-    const baseStyle = TextStyle(
-      fontSize: 34,
-      fontWeight: FontWeight.w800,
-      color: Colors.white,
-      letterSpacing: -0.5,
-    );
-    final idx = title.indexOf(count);
-    if (idx < 0) return [TextSpan(text: title, style: baseStyle)];
-    return [
-      TextSpan(text: title.substring(0, idx), style: baseStyle),
-      TextSpan(
-        text: count,
-        style: baseStyle.copyWith(color: RRColors.accentViolet),
-      ),
-      TextSpan(text: title.substring(idx + count.length), style: baseStyle),
-    ];
-  }
-
   // ── Date grouping helpers ─────────────────────────────────────────────────
 
   String _groupLabel(BuildContext context, DateTime dt, DateTime now) {
@@ -318,47 +280,57 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
     final allAsync = ref.watch(videoLibraryProvider);
 
     return Scaffold(
-      backgroundColor: RRColors.bgDeep,
+      backgroundColor: RRColors.bgTint,
       body: SafeArea(
+        bottom: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Top navigation row ─────────────────────────────────────────
+            // ── Header ───────────────────────────────────────────────────
             Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: RRSpace.sp4, vertical: RRSpace.sp4),
+              padding: const EdgeInsets.fromLTRB(
+                  RRSpace.sp16, RRSpace.sp12, RRSpace.sp16, 0),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (widget.onBack != null)
-                  TextButton.icon(
-                    onPressed: widget.onBack,
-                    icon: const Icon(
-                      CupertinoIcons.chevron_left,
-                      size: 16,
-                      color: RRColors.accentViolet,
-                    ),
-                    label: Text(
-                      l10n.feed,
-                      style: const TextStyle(
-                        color: RRColors.accentViolet,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: RRSpace.sp8, vertical: RRSpace.sp4),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Library',
+                          style: TextStyle(
+                            fontSize: 34,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF1A1A2E),
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          l10n.librarySubtitle,
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: RRColors.textSecond,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const Spacer(),
                   GestureDetector(
                     onTap: _toggleSearch,
                     child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: RRColors.bgElevated,
+                      width: 44,
+                      height: 44,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
                         shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                              color: Color(0x14000000),
+                              blurRadius: 8,
+                              offset: Offset(0, 2)),
+                        ],
                       ),
                       child: Icon(
                         _searchActive
@@ -366,8 +338,8 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                             : CupertinoIcons.search,
                         color: _searchActive
                             ? RRColors.accentCoral
-                            : RRColors.textPrimary,
-                        size: 18,
+                            : RRColors.accentViolet,
+                        size: 20,
                       ),
                     ),
                   ),
@@ -379,7 +351,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
             if (_searchActive)
               Padding(
                 padding: const EdgeInsets.fromLTRB(
-                    RRSpace.sp16, 0, RRSpace.sp16, RRSpace.sp8),
+                    RRSpace.sp16, RRSpace.sp12, RRSpace.sp16, 0),
                 child: CupertinoTextField(
                   controller: _searchCtrl,
                   autofocus: true,
@@ -390,7 +362,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                   padding: const EdgeInsets.symmetric(
                       horizontal: RRSpace.sp12, vertical: RRSpace.sp8),
                   decoration: BoxDecoration(
-                    color: RRColors.bgElevated,
+                    color: Colors.white,
                     borderRadius:
                         BorderRadius.circular(RRSpace.radiusMd),
                   ),
@@ -403,68 +375,14 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                 ),
               ),
 
-            // ── Header section ─────────────────────────────────────────────
+            // ── Stats card ───────────────────────────────────────────────
             Padding(
               padding: const EdgeInsets.fromLTRB(
-                  RRSpace.sp16, RRSpace.sp8, RRSpace.sp16, RRSpace.sp8),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        allAsync.when(
-                          loading: () => Text(
-                            l10n.videosTitle,
-                            style: TextStyle(
-                              fontSize: 34,
-                              fontWeight: FontWeight.w800,
-                              color: RRColors.textPrimary,
-                              letterSpacing: -0.5,
-                            ),
-                          ),
-                          error: (_, __) => Text(
-                            l10n.videosTitle,
-                            style: TextStyle(
-                              fontSize: 34,
-                              fontWeight: FontWeight.w800,
-                              color: RRColors.textPrimary,
-                              letterSpacing: -0.5,
-                            ),
-                          ),
-                          data: (all) => RichText(
-                            text: TextSpan(
-                              children: _splitCountTitle(
-                                  l10n.videosCount(all.length), '${all.length}'),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          l10n.yourLibrary,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: RRColors.textSecond,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      LocalBadge(label: l10n.localBadge),
-                      const SizedBox(height: RRSpace.sp8),
-                      _FilterBtn(onTap: _openFilterSheet),
-                    ],
-                  ),
-                ],
-              ),
+                  RRSpace.sp16, RRSpace.sp16, RRSpace.sp16, 0),
+              child: _StatsCard(allAsync: allAsync, onFilterTap: _openFilterSheet),
             ),
 
-            // ── On This Day memories card ──────────────────────────────────
-            _OnThisDayCard(onOpenPaywall: widget.onOpenPaywall),
+            const SizedBox(height: RRSpace.sp16),
 
             // ── Quick filter chips ─────────────────────────────────────────
             SizedBox(
@@ -497,12 +415,8 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
 
             const SizedBox(height: RRSpace.sp12),
 
-            // ── Divider ────────────────────────────────────────────────────
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: RRSpace.sp16),
-              child: Divider(height: 1, thickness: 1, color: RRColors.divider),
-            ),
-            const SizedBox(height: RRSpace.sp4),
+            // ── On This Day memories card ──────────────────────────────────
+            _OnThisDayCard(onOpenPaywall: widget.onOpenPaywall),
 
             // ── Main list ──────────────────────────────────────────────────
             Expanded(
@@ -555,7 +469,6 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                         onTap: () {
                           widget.onScrollChanged?.call(_scrollController.offset);
                           widget.onPlayAt?.call(asset.id);
-                          widget.onBack?.call();
                         },
                         onLongPress: () => _showVideoOptions(asset),
                       );
@@ -573,23 +486,199 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// _StatsCard
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _StatsCard extends StatelessWidget {
+  const _StatsCard({required this.allAsync, required this.onFilterTap});
+
+  final AsyncValue<List<AssetEntity>> allAsync;
+  final VoidCallback onFilterTap;
+
+  List<TextSpan> _countSpans(String title, String count) {
+    const baseStyle = TextStyle(
+      fontSize: 30,
+      fontWeight: FontWeight.w800,
+      color: Color(0xFF1A1A2E),
+      letterSpacing: -0.5,
+    );
+    final idx = title.indexOf(count);
+    if (idx < 0) return [TextSpan(text: title, style: baseStyle)];
+    return [
+      TextSpan(
+        text: count,
+        style: baseStyle.copyWith(color: RRColors.accentViolet),
+      ),
+      TextSpan(text: title.substring(idx + count.length), style: baseStyle),
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return Container(
+      padding: const EdgeInsets.all(RRSpace.sp16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFEBE7FA),
+        borderRadius: BorderRadius.circular(RRSpace.radiusLg),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                    color: Color(0x14000000), blurRadius: 8, offset: Offset(0, 2)),
+              ],
+            ),
+            alignment: Alignment.center,
+            child: const Icon(CupertinoIcons.folder_fill,
+                color: RRColors.accentViolet, size: 26),
+          ),
+          const SizedBox(width: RRSpace.sp12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                allAsync.when(
+                  loading: () => const Text(
+                    '—',
+                    style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF1A1A2E)),
+                  ),
+                  error: (_, __) => const Text(
+                    '—',
+                    style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF1A1A2E)),
+                  ),
+                  data: (all) => RichText(
+                    text: TextSpan(
+                      children: _countSpans(
+                          l10n.videosCount(all.length), '${all.length}'),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  l10n.totalInLibrary,
+                  style: TextStyle(color: RRColors.textSecond, fontSize: 13),
+                ),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: RRColors.accentGreen.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(RRSpace.radiusFull),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 7,
+                      height: 7,
+                      decoration: const BoxDecoration(
+                          color: RRColors.accentGreen, shape: BoxShape.circle),
+                    ),
+                    const SizedBox(width: 5),
+                    Text(
+                      l10n.localBadge,
+                      style: const TextStyle(
+                          color: Color(0xFF1A8A4A),
+                          fontWeight: FontWeight.w700,
+                          fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: RRSpace.sp8),
+              GestureDetector(
+                onTap: onFilterTap,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(RRSpace.radiusFull),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(CupertinoIcons.line_horizontal_3_decrease,
+                          size: 13, color: RRColors.accentViolet),
+                      const SizedBox(width: 5),
+                      Text(
+                        l10n.filter,
+                        style: const TextStyle(
+                            color: RRColors.accentViolet,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // _OnThisDayCard — memories entry point (Pro perk; teaser shown to everyone)
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _OnThisDayCard extends ConsumerWidget {
+class _OnThisDayCard extends ConsumerStatefulWidget {
   const _OnThisDayCard({this.onOpenPaywall});
 
   final VoidCallback? onOpenPaywall;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_OnThisDayCard> createState() => _OnThisDayCardState();
+}
+
+class _OnThisDayCardState extends ConsumerState<_OnThisDayCard> {
+  final Map<String, Uint8List> _thumbs = {};
+
+  Future<void> _loadThumb(AssetEntity asset) async {
+    if (_thumbs.containsKey(asset.id)) return;
+    final bytes =
+        await asset.thumbnailDataWithSize(const ThumbnailSize(120, 120));
+    if (mounted && bytes != null) {
+      setState(() => _thumbs[asset.id] = bytes);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final memories = ref.watch(onThisDayProvider).valueOrNull ?? const [];
     if (memories.isEmpty) return const SizedBox.shrink();
 
-    final l10n = AppLocalizations.of(context)!;
     final isPro = ref.watch(isProProvider);
-    final years = DateTime.now().year - memories.first.createDateTime.year;
-    final yearsAgo = years == 1 ? l10n.yearsAgoOne : l10n.yearsAgoMany(years);
+    final locale = Localizations.localeOf(context).toString();
+    final preview = memories.take(3).toList();
+    for (final m in preview) {
+      _loadThumb(m);
+    }
+    final extra = memories.length - preview.length;
+    final dateLabels =
+        preview.map((m) => DateFormat.MMMd(locale).format(m.createDateTime));
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -602,23 +691,18 @@ class _OnThisDayCard extends ConsumerWidget {
                   builder: (_) => const OnThisDayScreen()),
             );
           } else {
-            onOpenPaywall?.call();
+            widget.onOpenPaywall?.call();
           }
         },
         child: Container(
           padding: const EdgeInsets.all(RRSpace.sp12),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                const Color(0xFF8B5CF6).withValues(alpha: 0.25),
-                const Color(0xFF00D4FF).withValues(alpha: 0.18),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
+            color: Colors.white,
             borderRadius: BorderRadius.circular(RRSpace.radiusLg),
-            border: Border.all(
-                color: Colors.white.withValues(alpha: 0.12)),
+            boxShadow: const [
+              BoxShadow(
+                  color: Color(0x0F000000), blurRadius: 10, offset: Offset(0, 3)),
+            ],
           ),
           child: Row(
             children: [
@@ -626,31 +710,31 @@ class _OnThisDayCard extends ConsumerWidget {
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF8B5CF6),
+                  color: RRColors.accentViolet.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 alignment: Alignment.center,
-                child: const Icon(CupertinoIcons.calendar_today,
-                    color: Colors.white, size: 20),
+                child: const Icon(CupertinoIcons.calendar,
+                    color: RRColors.accentViolet, size: 20),
               ),
               const SizedBox(width: RRSpace.sp12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      l10n.onThisDay,
+                    const Text(
+                      'On This Day',
                       style: TextStyle(
-                        color: RRColors.textPrimary,
+                        color: Color(0xFF1A1A2E),
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      memories.length == 1
-                          ? l10n.onThisDaySubtitleOne(yearsAgo)
-                          : l10n.onThisDaySubtitleMany(memories.length),
+                      dateLabels.join(', '),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         color: RRColors.textSecond,
                         fontSize: 12,
@@ -659,56 +743,50 @@ class _OnThisDayCard extends ConsumerWidget {
                   ],
                 ),
               ),
-              Icon(
-                isPro ? CupertinoIcons.chevron_right : CupertinoIcons.lock_fill,
-                color: isPro ? RRColors.textDisabled : RRColors.accentAmber,
-                size: 16,
-              ),
+              const SizedBox(width: RRSpace.sp8),
+              for (final m in preview)
+                Padding(
+                  padding: const EdgeInsets.only(left: 4),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: SizedBox(
+                      width: 32,
+                      height: 32,
+                      child: _thumbs[m.id] != null
+                          ? Image.memory(_thumbs[m.id]!, fit: BoxFit.cover)
+                          : ColoredBox(color: RRColors.bgTint),
+                    ),
+                  ),
+                ),
+              if (extra > 0)
+                Padding(
+                  padding: const EdgeInsets.only(left: 6),
+                  child: Container(
+                    width: 32,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: RRColors.accentViolet.withValues(alpha: 0.12),
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      '+$extra',
+                      style: const TextStyle(
+                        color: RRColors.accentViolet,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                )
+              else if (!isPro)
+                const Padding(
+                  padding: EdgeInsets.only(left: 6),
+                  child: Icon(CupertinoIcons.lock_fill,
+                      color: RRColors.accentAmber, size: 16),
+                ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// _FilterBtn
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _FilterBtn extends StatelessWidget {
-  const _FilterBtn({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: RRSpace.sp12, vertical: RRSpace.sp8),
-        decoration: BoxDecoration(
-          color: RRColors.bgElevated,
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              CupertinoIcons.line_horizontal_3_decrease,
-              size: 14,
-              color: RRColors.textSecond,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              AppLocalizations.of(context)!.filter,
-              style: TextStyle(
-                fontSize: 13,
-                color: RRColors.textSecond,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
         ),
       ),
     );
@@ -743,29 +821,45 @@ class _QuickChipTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fg = active ? RRColors.textPrimary : RRColors.textSecond;
-
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(right: RRSpace.sp8),
         padding: const EdgeInsets.symmetric(
-            horizontal: RRSpace.sp16, vertical: RRSpace.sp8),
+            horizontal: RRSpace.sp16, vertical: 10),
         decoration: BoxDecoration(
           gradient: active ? RRColors.gradPro : null,
-          color: active ? null : RRColors.bgElevated,
+          color: active ? null : Colors.white,
           borderRadius: BorderRadius.circular(RRSpace.radiusFull),
+          boxShadow: active
+              ? null
+              : const [
+                  BoxShadow(
+                      color: Color(0x0F000000),
+                      blurRadius: 6,
+                      offset: Offset(0, 2)),
+                ],
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(chip.icon, size: 14, color: fg),
+            if (active)
+              Container(
+                width: 20,
+                height: 20,
+                decoration: const BoxDecoration(
+                    color: Colors.white, shape: BoxShape.circle),
+                alignment: Alignment.center,
+                child: Icon(chip.icon, size: 11, color: RRColors.accentViolet),
+              )
+            else
+              Icon(chip.icon, size: 14, color: RRColors.textSecond),
             const SizedBox(width: RRSpace.sp8),
             Text(
               label,
               style: TextStyle(
-                color: fg,
-                fontSize: 12,
+                color: active ? Colors.white : RRColors.textSecond,
+                fontSize: 13,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -789,26 +883,15 @@ class _SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-          RRSpace.sp16, 20, RRSpace.sp16, RRSpace.sp8),
-      child: Row(
-        children: [
-          Text(
-            label,
-            style: const TextStyle(
-              color: RRColors.accentViolet,
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.8,
-            ),
-          ),
-          const SizedBox(width: RRSpace.sp8),
-          Expanded(
-            child: Divider(
-              height: 1,
-              color: RRColors.accentViolet.withValues(alpha: 0.25),
-            ),
-          ),
-        ],
+          RRSpace.sp16, RRSpace.sp16, RRSpace.sp16, RRSpace.sp8),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: RRColors.accentViolet,
+          fontSize: 13,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 0.6,
+        ),
       ),
     );
   }
@@ -855,21 +938,8 @@ class _VideoRowState extends State<_VideoRow> {
     if (mounted && title.isNotEmpty) setState(() => _title = title);
   }
 
-  String _relativeDate(BuildContext context, DateTime dt) {
-    final l10n = AppLocalizations.of(context)!;
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final itemDay = DateTime(dt.year, dt.month, dt.day);
-
-    if (itemDay == today) return l10n.today;
-    if (itemDay == today.subtract(const Duration(days: 1))) {
-      return l10n.yesterday;
-    }
-
+  String _fullDate(BuildContext context, DateTime dt) {
     final locale = Localizations.localeOf(context).toString();
-    if (dt.year == now.year) {
-      return DateFormat.MMMd(locale).format(dt);
-    }
     return DateFormat.yMMMd(locale).format(dt);
   }
 
@@ -881,24 +951,32 @@ class _VideoRowState extends State<_VideoRow> {
 
   @override
   Widget build(BuildContext context) {
-    final title = _title ??
-        widget.asset.title ??
-        _relativeDate(context, widget.asset.createDateTime);
+    final title = _title ?? widget.asset.title ?? '';
     final durationStr = _formatDuration(widget.asset.duration);
-    final dateStr = _relativeDate(context, widget.asset.createDateTime);
+    final dateStr = _fullDate(context, widget.asset.createDateTime);
 
     return Padding(
       padding: const EdgeInsets.symmetric(
           horizontal: RRSpace.sp16, vertical: RRSpace.sp4),
       child: Material(
-        color: RRColors.accentViolet.withValues(alpha: 0.06),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(RRSpace.radiusLg),
+        elevation: 0,
         child: InkWell(
           onTap: widget.onTap,
           onLongPress: widget.onLongPress,
           borderRadius: BorderRadius.circular(RRSpace.radiusLg),
-          child: Padding(
+          child: Container(
             padding: const EdgeInsets.all(RRSpace.sp12),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(RRSpace.radiusLg),
+              boxShadow: const [
+                BoxShadow(
+                    color: Color(0x0F000000),
+                    blurRadius: 10,
+                    offset: Offset(0, 3)),
+              ],
+            ),
             child: Row(
               children: [
                 _BrowseThumbnail(
@@ -914,13 +992,13 @@ class _VideoRowState extends State<_VideoRow> {
                         title,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: RRColors.textPrimary,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
+                        style: const TextStyle(
+                          color: Color(0xFF1A1A2E),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 5),
                       Row(
                         children: [
                           Icon(CupertinoIcons.calendar,
@@ -943,15 +1021,15 @@ class _VideoRowState extends State<_VideoRow> {
                   onTap: widget.onLongPress,
                   behavior: HitTestBehavior.opaque,
                   child: Container(
-                    width: 32,
-                    height: 32,
+                    width: 36,
+                    height: 36,
                     decoration: BoxDecoration(
-                      color: RRColors.bgElevated,
+                      color: RRColors.accentViolet.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(
+                    child: const Icon(
                       CupertinoIcons.ellipsis_vertical,
-                      color: RRColors.textSecond,
+                      color: RRColors.accentViolet,
                       size: 16,
                     ),
                   ),
@@ -998,7 +1076,13 @@ class _BrowseThumbnail extends StatelessWidget {
             if (bytes != null)
               Image.memory(bytes!, fit: BoxFit.cover)
             else
-              Container(color: RRColors.bgElevated),
+              Container(color: RRColors.bgTint),
+
+            // Play icon overlay
+            const Center(
+              child: Icon(CupertinoIcons.play_fill,
+                  color: Colors.white, size: 22),
+            ),
 
             // Duration badge — bottom left
             Positioned(
@@ -1010,24 +1094,13 @@ class _BrowseThumbnail extends StatelessWidget {
                   color: Colors.black.withValues(alpha: 0.65),
                   borderRadius: BorderRadius.circular(RRSpace.radiusSm),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.play_arrow_rounded,
-                      color: Colors.white,
-                      size: 12,
-                    ),
-                    const SizedBox(width: 2),
-                    Text(
-                      _formatDuration(durationSeconds),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  _formatDuration(durationSeconds),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ),

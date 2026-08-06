@@ -10,6 +10,11 @@ class RRColors {
 
   static Color get bgDeep =>
       isDark.value ? const Color(0xFF07070F) : const Color(0xFFF5F5F7);
+  // Light-lavender page background used by the new light-theme screens
+  // (Profile, Library). Falls back to bgDeep in dark mode until a dark
+  // variant of this design system exists.
+  static Color get bgTint =>
+      isDark.value ? const Color(0xFF07070F) : const Color(0xFFF3F1FB);
   static Color get bgSurface =>
       isDark.value ? const Color(0xFF111118) : const Color(0xFFFFFFFF);
   static Color get bgElevated =>
