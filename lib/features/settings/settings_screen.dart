@@ -345,25 +345,28 @@ class SettingsScreen extends ConsumerWidget {
 
     return GestureDetector(
       onTap: onOpenPaywall,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(RRSpace.radiusLg),
-        child: Container(
-          padding: const EdgeInsets.all(RRSpace.sp16),
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage('assets/images/settings_pro_card.webp'),
-              fit: BoxFit.cover,
-            ),
-          ),
-          child: Column(
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(RRSpace.radiusLg),
+            child: Container(
+              padding: const EdgeInsets.all(RRSpace.sp16),
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/images/settings_pro_card.webp'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // The badge icon is baked into the background image
-                    // (top-left) — this just reserves matching space so
-                    // the title/tagline text starts to its right.
+                    // Badge image is layered on top via Positioned below —
+                    // this just reserves matching space so the title/
+                    // tagline text starts to its right.
                     const SizedBox(width: 56, height: 56),
                     const SizedBox(width: RRSpace.sp12),
                     Expanded(
@@ -454,7 +457,27 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ],
             ),
-        ),
+            ),
+          ),
+          Positioned(
+            top: RRSpace.sp16,
+            left: RRSpace.sp16,
+            child: Image.asset(
+              'assets/images/settings_pro_badge.png',
+              width: 56,
+              height: 56,
+            ),
+          ),
+          Positioned(
+            top: 4,
+            right: 8,
+            child: Image.asset(
+              'assets/images/settings_pro_trophy.png',
+              width: 78,
+              height: 78,
+            ),
+          ),
+        ],
       ),
     );
   }
