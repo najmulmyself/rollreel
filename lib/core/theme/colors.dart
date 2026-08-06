@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 class RRColors {
   const RRColors._();
 
-  static final ValueNotifier<bool> isDark = ValueNotifier<bool>(true);
+  static final ValueNotifier<bool> isDark = ValueNotifier<bool>(false);
 
   static Color get bgDeep =>
       isDark.value ? const Color(0xFF07070F) : const Color(0xFFF5F5F7);
