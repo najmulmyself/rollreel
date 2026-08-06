@@ -345,37 +345,26 @@ class SettingsScreen extends ConsumerWidget {
 
     return GestureDetector(
       onTap: onOpenPaywall,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(RRSpace.sp16),
-            decoration: BoxDecoration(
-              gradient: RRColors.gradPro,
-              borderRadius: BorderRadius.circular(RRSpace.radiusLg),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(RRSpace.radiusLg),
+        child: Container(
+          padding: const EdgeInsets.all(RRSpace.sp16),
+          decoration: const BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/images/settings_pro_card.webp'),
+              fit: BoxFit.cover,
             ),
-            child: Column(
+          ),
+          child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Placeholder app-badge icon — swap for the real
-                    // ribbon/medal asset once provided.
-                    Container(
-                      width: 56,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      alignment: Alignment.center,
-                      child: const Icon(
-                        Icons.military_tech_rounded,
-                        color: Color(0xFFFFB347),
-                        size: 28,
-                      ),
-                    ),
+                    // The badge icon is baked into the background image
+                    // (top-left) — this just reserves matching space so
+                    // the title/tagline text starts to its right.
+                    const SizedBox(width: 56, height: 56),
                     const SizedBox(width: RRSpace.sp12),
                     Expanded(
                       child: Padding(
@@ -465,33 +454,7 @@ class SettingsScreen extends ConsumerWidget {
                 ),
               ],
             ),
-          ),
-          // Placeholder for the 3D glass play-button render — swap for the
-          // real asset once provided.
-          Positioned(
-            top: 8,
-            right: 12,
-            child: Transform.rotate(
-              angle: -0.08,
-              child: Container(
-                width: 68,
-                height: 68,
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.18),
-                  borderRadius: BorderRadius.circular(18),
-                  border:
-                      Border.all(color: Colors.white.withValues(alpha: 0.35)),
-                ),
-                alignment: Alignment.center,
-                child: const Icon(
-                  CupertinoIcons.play_fill,
-                  color: Colors.white,
-                  size: 26,
-                ),
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
