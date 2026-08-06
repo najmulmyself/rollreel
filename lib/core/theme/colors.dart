@@ -38,6 +38,18 @@ class RRColors {
   static const Color accentViolet = Color(0xFF8B5CF6);
   static const Color accentGreen = Color(0xFF4ADE80);
   static const Color accentPink = Color(0xFFFF5E8B);
+  static const Color accentBlue = Color(0xFF3B82F6);
+  static const Color accentRed = Color(0xFFEF4444);
+  static const Color accentOrange = Color(0xFFF59E0B);
+
+  // Flat icon-tile colors — same vivid value in both themes, matching
+  // iOS Settings-style colorful glyph tiles.
+  static const Color iconOrange = Color(0xFFFF9F43);
+  static const Color iconGreen = Color(0xFF2ECC71);
+  static const Color iconRed = Color(0xFFEE4D6E);
+  static const Color iconPurple = Color(0xFF8B5CF6);
+  static const Color iconBlue = Color(0xFF4A90E2);
+  static const Color iconTeal = Color(0xFF34C9A3);
 
   static const LinearGradient gradBrand = LinearGradient(
     colors: [accentCoral, accentViolet],

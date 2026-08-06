@@ -8,8 +8,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../core/ads/system_prompt_coordinator.dart';
 import '../core/video/video_library_provider.dart';
 import '../features/browse/browse_screen.dart';
+import '../features/favorites/favorites_screen.dart';
 import '../features/feed/feed_screen.dart';
 import '../features/settings/settings_screen.dart';
+import 'main_nav_bar.dart';
 
 class MainShell extends ConsumerStatefulWidget {
   const MainShell({
@@ -82,13 +84,18 @@ class _MainShellState extends ConsumerState<MainShell> {
           FeedScreen(
             isTabActive: _tab == 0,
             onOpenBrowse: () => _setTab(1),
-            onOpenSettings: () => _setTab(2),
             onOpenPaywall: widget.onOpenPaywall,
           ),
           BrowseScreen(
             onBack: () => _setTab(0),
             onOpenPaywall: widget.onOpenPaywall,
-            onOpenSettings: () => _setTab(2),
+            onPlayAt: (assetId) {
+              ref.read(feedJumpToAssetProvider.notifier).state = assetId;
+              _setTab(0);
+            },
+          ),
+          FavoritesScreen(
+            onOpenLibrary: () => _setTab(1),
             onPlayAt: (assetId) {
               ref.read(feedJumpToAssetProvider.notifier).state = assetId;
               _setTab(0);
@@ -100,6 +107,11 @@ class _MainShellState extends ConsumerState<MainShell> {
             onOpenVault: widget.onOpenVault,
           ),
         ],
+      ),
+      bottomNavigationBar: MainNavBar(
+        currentIndex: _tab,
+        onTap: _setTab,
+        onCenterTap: () => _setTab(0),
       ),
     );
   }

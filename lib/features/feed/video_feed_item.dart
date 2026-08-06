@@ -18,7 +18,6 @@ import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
 import '../../core/vault/vault_provider.dart';
 import '../../l10n/app_localizations.dart';
-import '../../shared/widgets/app_bottom_nav.dart';
 import 'dynamic_bg.dart';
 
 // ─── Gesture drag type ────────────────────────────────────────────────────────
@@ -33,8 +32,6 @@ class VideoFeedItem extends ConsumerStatefulWidget {
     required this.onControllerReady,
     this.onDelete,
     this.onPlayStateChanged,
-    this.onOpenLibrary,
-    this.onOpenSettings,
     this.onOpenPaywall,
   });
 
@@ -43,8 +40,6 @@ class VideoFeedItem extends ConsumerStatefulWidget {
   final void Function(VideoPlayerController?) onControllerReady;
   final VoidCallback? onDelete;
   final ValueChanged<bool>? onPlayStateChanged;
-  final VoidCallback? onOpenLibrary;
-  final VoidCallback? onOpenSettings;
   final VoidCallback? onOpenPaywall;
 
   @override
@@ -576,8 +571,6 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
                         onTogglePlay: _togglePlay,
                         onSeekPrev: () => _seekBy(const Duration(seconds: -10)),
                         onSeekNext: () => _seekBy(const Duration(seconds: 10)),
-                        onOpenLibrary: widget.onOpenLibrary,
-                        onOpenSettings: widget.onOpenSettings,
                       ),
                     ),
                   ),
@@ -818,8 +811,6 @@ class _InfoCard extends StatelessWidget {
     required this.onSeekPrev,
     required this.onSeekNext,
     this.title,
-    this.onOpenLibrary,
-    this.onOpenSettings,
   });
 
   final AssetEntity asset;
@@ -829,8 +820,6 @@ class _InfoCard extends StatelessWidget {
   final VoidCallback onTogglePlay;
   final VoidCallback onSeekPrev;
   final VoidCallback onSeekNext;
-  final VoidCallback? onOpenLibrary;
-  final VoidCallback? onOpenSettings;
 
   String _fmtDay(BuildContext context, DateTime dt) {
     final l10n = AppLocalizations.of(context)!;
@@ -928,18 +917,6 @@ class _InfoCard extends StatelessWidget {
                 onSeekPrev: onSeekPrev,
                 onSeekNext: onSeekNext,
               ),
-        const SizedBox(height: 18),
-        AppBottomNav(
-          active: AppBottomTab.library,
-          onLibrary: onOpenLibrary,
-          onInfo: () => showModalBottomSheet<void>(
-            context: context,
-            backgroundColor: Colors.transparent,
-            isScrollControlled: true,
-            builder: (_) => VideoInfoSheet(asset: asset),
-          ),
-          onSettings: onOpenSettings,
-        ),
       ],
     );
   }

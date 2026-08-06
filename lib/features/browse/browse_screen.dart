@@ -16,7 +16,6 @@ import '../../core/theme/spacing.dart';
 import '../../core/vault/vault_provider.dart';
 import '../../core/video/video_library_provider.dart';
 import '../memories/on_this_day_screen.dart';
-import '../../shared/widgets/app_bottom_nav.dart';
 import '../../shared/widgets/local_badge.dart';
 import '../feed/video_feed_item.dart' show VideoInfoSheet;
 import '../states/empty_state.dart';
@@ -35,7 +34,6 @@ class BrowseScreen extends ConsumerStatefulWidget {
     this.initialScrollOffset = 0.0,
     this.onScrollChanged,
     this.onOpenPaywall,
-    this.onOpenSettings,
   });
 
   final VoidCallback? onBack;
@@ -43,7 +41,6 @@ class BrowseScreen extends ConsumerStatefulWidget {
   final double initialScrollOffset;
   final void Function(double offset)? onScrollChanged;
   final VoidCallback? onOpenPaywall;
-  final VoidCallback? onOpenSettings;
 
   @override
   ConsumerState<BrowseScreen> createState() => _BrowseScreenState();
@@ -568,14 +565,6 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
               ),
             ),
             const Center(child: BannerAdWidget()),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                  RRSpace.sp16, RRSpace.sp8, RRSpace.sp16, RRSpace.sp8),
-              child: AppBottomNav(
-                active: AppBottomTab.library,
-                onSettings: widget.onOpenSettings,
-              ),
-            ),
           ],
         ),
       ),

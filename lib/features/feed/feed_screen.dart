@@ -24,7 +24,6 @@ class FeedScreen extends ConsumerStatefulWidget {
   const FeedScreen({
     super.key,
     this.onOpenBrowse,
-    this.onOpenSettings,
     this.onOpenPaywall,
     this.initialAssetId,
     this.onVideoChanged,
@@ -33,7 +32,6 @@ class FeedScreen extends ConsumerStatefulWidget {
   });
 
   final VoidCallback? onOpenBrowse;
-  final VoidCallback? onOpenSettings;
   final VoidCallback? onOpenPaywall;
   final String? initialAssetId;
   final void Function(String assetId)? onVideoChanged;
@@ -326,8 +324,6 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
               onControllerReady: _handleControllerReady,
               onDelete: () => _deleteCurrentVideo(videos),
               onPlayStateChanged: _handlePlayStateChanged,
-              onOpenLibrary: widget.onOpenBrowse,
-              onOpenSettings: widget.onOpenSettings,
               onOpenPaywall: widget.onOpenPaywall,
             ),
           ),
