@@ -60,7 +60,7 @@ class PermissionDeniedScreen extends StatelessWidget {
                             header: true,
                             child: Text(
                               l10n.permissionDeniedTitle,
-                              style: style.title(53),
+                              style: style.title(),
                             ),
                           ),
                           const SizedBox(height: 12),
@@ -80,10 +80,7 @@ class PermissionDeniedScreen extends StatelessWidget {
                             style: TextButton.styleFrom(
                               foregroundColor: style.ink,
                               minimumSize: const Size(0, 48),
-                              textStyle: const TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.w600,
-                              ),
+                              textStyle: style.label,
                             ),
                             child: Text(
                               l10n.continueAnyway,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../core/theme/colors.dart';
+import '../../core/theme/typography.dart';
 
 class OnboardingStyle {
   const OnboardingStyle._({
@@ -11,20 +12,26 @@ class OnboardingStyle {
     required this.line,
     required this.action,
     required this.onAction,
+    required this.progress,
     required this.accent,
+    required this.artworkFrame,
+    required this.artworkAccent,
     required this.systemOverlay,
   });
 
   static OnboardingStyle get current => RRColors.isDark.value ? _dark : _light;
 
   static const _light = OnboardingStyle._(
-    background: Color(0xFFF9F6F0),
-    ink: Color(0xFF211D25),
-    secondary: Color(0xFF5E5662),
-    line: Color(0xFFD9D1D9),
-    action: Color(0xFF2D203D),
+    background: Color(0xFFF3FAFD),
+    ink: Color(0xFF0C2639),
+    secondary: Color(0xFF405C70),
+    line: Color(0xFFC5DCEB),
+    action: Color(0xFF0A4E8C),
     onAction: Color(0xFFFFFFFF),
-    accent: Color(0xFFE6DCF5),
+    progress: Color(0xFF087D9B),
+    accent: Color(0xFFD5F2FA),
+    artworkFrame: Color(0xFF102D43),
+    artworkAccent: Color(0xFFB4EDF8),
     systemOverlay: SystemUiOverlayStyle.dark,
   );
 
@@ -35,7 +42,10 @@ class OnboardingStyle {
     line: Color(0xFF544A59),
     action: Color(0xFFE6DCF5),
     onAction: Color(0xFF2D203D),
+    progress: Color(0xFFE6DCF5),
     accent: Color(0xFF3F334B),
+    artworkFrame: Color(0xFF252124),
+    artworkAccent: Color(0xFFE6DCF5),
     systemOverlay: SystemUiOverlayStyle.light,
   );
 
@@ -45,19 +55,23 @@ class OnboardingStyle {
   final Color line;
   final Color action;
   final Color onAction;
+  final Color progress;
   final Color accent;
+  final Color artworkFrame;
+  final Color artworkAccent;
 
   final SystemUiOverlayStyle systemOverlay;
 
-  TextStyle title(double fontSize) => TextStyle(
-    fontFamily: 'Instrument Serif',
+  TextStyle title([double fontSize = 34]) => RRTypography.title1.copyWith(
     fontSize: fontSize,
-    height: 0.98,
-    letterSpacing: -0.55,
+    height: 1.12,
     color: ink,
   );
 
-  TextStyle get body => TextStyle(fontSize: 16, height: 1.45, color: secondary);
+  TextStyle get body =>
+      RRTypography.body.copyWith(height: 1.45, color: secondary);
+
+  TextStyle get label => RRTypography.headline.copyWith(fontSize: 15);
 
   ButtonStyle get primaryButton => FilledButton.styleFrom(
     backgroundColor: action,
@@ -68,6 +82,6 @@ class OnboardingStyle {
     minimumSize: const Size(0, 54),
     padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-    textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+    textStyle: label.copyWith(fontSize: 16),
   );
 }

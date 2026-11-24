@@ -110,12 +110,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         Expanded(
                           child: Text(
                             'RollReel',
-                            style: TextStyle(
-                              color: style.ink,
-                              fontSize: 19,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: -0.5,
-                            ),
+                            style: style
+                                .title(19)
+                                .copyWith(letterSpacing: -0.5),
                           ),
                         ),
                         TextButton(
@@ -127,10 +124,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           style: TextButton.styleFrom(
                             foregroundColor: style.secondary,
                             minimumSize: const Size(48, 48),
-                            textStyle: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            textStyle: style.label,
                           ),
                           child: Text(l10n.skip),
                         ),
@@ -272,7 +266,7 @@ class _OnboardingPage extends StatelessWidget {
               SizedBox(
                 height: artworkHeight,
                 child: ExcludeSemantics(
-                  child: _OnboardingArtwork(index: index),
+                  child: _OnboardingArtwork(index: index, style: style),
                 ),
               ),
               SizedBox(height: constraints.maxHeight < 480 ? 16 : 25),
@@ -289,7 +283,7 @@ class _OnboardingPage extends StatelessWidget {
                           height: 3,
                           margin: const EdgeInsetsDirectional.only(end: 5),
                           decoration: BoxDecoration(
-                            color: step == index ? style.action : style.line,
+                            color: step == index ? style.progress : style.line,
                             borderRadius: BorderRadius.circular(2),
                           ),
                         ),
@@ -300,7 +294,10 @@ class _OnboardingPage extends StatelessWidget {
               const SizedBox(height: 13),
               Semantics(
                 header: true,
-                child: Text(title, style: style.title(compact ? 42 : 54)),
+                child: Text(
+                  title,
+                  style: compact ? style.title(28) : style.title(),
+                ),
               ),
               const SizedBox(height: 10),
               Text(body, style: style.body),
@@ -336,24 +333,25 @@ class _OnboardingPage extends StatelessWidget {
 }
 
 class _OnboardingArtwork extends StatelessWidget {
-  const _OnboardingArtwork({required this.index});
+  const _OnboardingArtwork({required this.index, required this.style});
 
   static const _coast = 'assets/images/onboarding-coast.webp';
   static const _dinner = 'assets/images/onboarding-dinner.webp';
   static const _drive = 'assets/images/onboarding-drive.webp';
-  static const _frame = Color(0xFF252124);
-  static const _lilac = Color(0xFFE6DCF5);
-
   final int index;
+  final OnboardingStyle style;
 
   Widget _photo(String asset, {Alignment alignment = Alignment.center}) =>
       Image.asset(asset, fit: BoxFit.cover, alignment: alignment);
 
-  Widget _badge(IconData icon, {Color background = _lilac}) => DecoratedBox(
-    decoration: BoxDecoration(color: background, shape: BoxShape.circle),
+  Widget _badge(IconData icon, {Color? background}) => DecoratedBox(
+    decoration: BoxDecoration(
+      color: background ?? style.artworkAccent,
+      shape: BoxShape.circle,
+    ),
     child: SizedBox.square(
       dimension: 44,
-      child: Icon(icon, color: _frame, size: 19),
+      child: Icon(icon, color: style.artworkFrame, size: 19),
     ),
   );
 
@@ -362,7 +360,7 @@ class _OnboardingArtwork extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(23),
       child: ColoredBox(
-        color: _frame,
+        color: style.artworkFrame,
         child: switch (index) {
           0 => Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -433,10 +431,10 @@ class _OnboardingArtwork extends StatelessWidget {
                   fit: StackFit.expand,
                   children: [
                     _photo(_drive, alignment: const Alignment(0, 0.25)),
-                    const DecoratedBox(
+                    DecoratedBox(
                       decoration: BoxDecoration(
                         border: Border.fromBorderSide(
-                          BorderSide(color: _lilac, width: 2),
+                          BorderSide(color: style.artworkAccent, width: 2),
                         ),
                       ),
                     ),
