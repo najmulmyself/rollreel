@@ -1,14 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../../core/theme/spacing.dart';
-import '../../core/theme/typography.dart';
 import '../../l10n/app_localizations.dart';
-import '../../shared/widgets/primary_button.dart';
-import '../../shared/widgets/secondary_button.dart';
+import '../onboarding/onboarding_style.dart';
 
 class PermissionDeniedScreen extends StatelessWidget {
-  const PermissionDeniedScreen({super.key, required this.onTryAgain, required this.onContinue});
+  const PermissionDeniedScreen({
+    super.key,
+    required this.onTryAgain,
+    required this.onContinue,
+  });
 
   final VoidCallback onTryAgain;
   final VoidCallback onContinue;
@@ -16,27 +17,86 @@ class PermissionDeniedScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(RRSpace.sp20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(CupertinoIcons.photo_fill_on_rectangle_fill, size: 64),
-              const SizedBox(height: RRSpace.sp16),
-              Text(l10n.permissionDeniedTitle, style: RRTypography.title1, textAlign: TextAlign.center),
-              const SizedBox(height: RRSpace.sp12),
-              Text(
-                l10n.permissionDeniedBody,
-                style: RRTypography.body.copyWith(color: Colors.white70),
-                textAlign: TextAlign.center,
+    final style = OnboardingStyle.current;
+    return AnnotatedRegion(
+      value: style.systemOverlay,
+      child: Scaffold(
+        backgroundColor: style.background,
+        body: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) => SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 420),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 32,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Align(
+                            alignment: AlignmentDirectional.centerStart,
+                            child: DecoratedBox(
+                              decoration: BoxDecoration(
+                                color: style.accent,
+                                borderRadius: BorderRadius.circular(22),
+                              ),
+                              child: SizedBox.square(
+                                dimension: 68,
+                                child: Icon(
+                                  CupertinoIcons.photo_on_rectangle,
+                                  color: style.ink,
+                                  size: 30,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 23),
+                          Semantics(
+                            header: true,
+                            child: Text(
+                              l10n.permissionDeniedTitle,
+                              style: style.title(53),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(l10n.permissionDeniedBody, style: style.body),
+                          const SizedBox(height: 28),
+                          FilledButton(
+                            onPressed: onTryAgain,
+                            style: style.primaryButton,
+                            child: Text(
+                              l10n.openSettings,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          TextButton(
+                            onPressed: onContinue,
+                            style: TextButton.styleFrom(
+                              foregroundColor: style.ink,
+                              minimumSize: const Size(0, 48),
+                              textStyle: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            child: Text(
+                              l10n.continueAnyway,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
               ),
-              const SizedBox(height: RRSpace.sp24),
-              PrimaryButton(label: l10n.openSettings, onPressed: onTryAgain),
-              const SizedBox(height: RRSpace.sp12),
-              SecondaryButton(label: l10n.continueAnyway, onPressed: onContinue),
-            ],
+            ),
           ),
         ),
       ),

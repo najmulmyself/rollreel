@@ -1,12 +1,20 @@
 {
   "@@locale": "en",
-  "onboardingTitle": "Your Videos.\nFinally Watchable.",
-  "onboardingSubtitle": "Swipe through your camera roll like a real feed. No uploads, no accounts. Just your memories.",
-  "onboardingPrivacyBody": "Your videos never leave your phone. No cloud, no sign-in, no tracking. Just you.",
-  "onboardingPermissionBody": "RollReel needs access to your photo library to show your videos. They stay on your device, always.",
-  "onboardingPermissionNote": "We only read videos — never photos, never uploads.",
-  "onboardingPrivacyTitle": "100% Private.\n100% Yours.",
-  "onboardingPermissionTitle": "Let's Find\nYour Videos",
+  "onboardingTitle": "Your videos,\nworth a replay.",
+  "onboardingSubtitle": "Swipe through the clips in your camera roll, one video at a time.",
+  "onboardingPrivacyBody": "Watch your videos right on your device. There’s no account to set up and no library to upload.",
+  "onboardingPermissionBody": "Allow photo library access so RollReel can find and play your videos.",
+  "onboardingPermissionNote": "You can change access anytime in Settings.",
+  "onboardingPermissionError": "Couldn’t request access. Try again or skip for now.",
+  "onboardingStep": "Step {step} of {total}",
+  "@onboardingStep": {
+    "placeholders": {
+      "step": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "onboardingPrivacyTitle": "For your eyes only.",
+  "onboardingPermissionTitle": "Open your\ncamera roll.",
   "onboardingNoCloud": "No Cloud",
   "onboardingNoAccount": "No Account",
   "onboardingNoTracking": "No Tracking",
@@ -20,8 +28,8 @@
   "noVideosYetBody": "Your camera roll videos will appear here.",
   "openPhotosApp": "Open Photos App",
   "loadingLibrary": "Loading your library...",
-  "permissionDeniedTitle": "No Videos Found",
-  "permissionDeniedBody": "RollReel needs photo library access to show your local videos. Your videos are never uploaded.",
+  "permissionDeniedTitle": "Photo access is off.",
+  "permissionDeniedBody": "Allow access in Settings to see your camera roll videos here. You can also continue without access.",
   "openSettings": "Open Settings",
   "continueAnyway": "Continue Anyway",
   "today": "Today",
