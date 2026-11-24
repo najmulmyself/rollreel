@@ -6,15 +6,19 @@ const _kFavoritesIds = 'favorites_ids';
 
 class FavoritesNotifier extends StateNotifier<Set<String>> {
   FavoritesNotifier() : super(const {}) {
-    _load();
+    ready = _load();
   }
+
+  late final Future<void> ready;
 
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
-    state = (prefs.getStringList(_kFavoritesIds) ?? []).toSet();
+    if (mounted) state = (prefs.getStringList(_kFavoritesIds) ?? []).toSet();
   }
 
   Future<void> toggle(String assetId) async {
+    await ready;
+    if (!mounted) return;
     if (state.contains(assetId)) {
       state = {...state}..remove(assetId);
     } else {
@@ -33,7 +37,8 @@ class FavoritesNotifier extends StateNotifier<Set<String>> {
 
 final favoritesIdsProvider =
     StateNotifierProvider<FavoritesNotifier, Set<String>>(
-        (ref) => FavoritesNotifier());
+      (ref) => FavoritesNotifier(),
+    );
 
 final favoriteAssetsProvider = FutureProvider<List<AssetEntity>>((ref) async {
   final ids = ref.watch(favoritesIdsProvider);
