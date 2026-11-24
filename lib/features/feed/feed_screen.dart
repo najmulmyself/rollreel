@@ -43,8 +43,11 @@ class FeedScreen extends ConsumerStatefulWidget {
 }
 
 class _FeedScreenState extends ConsumerState<FeedScreen> {
-  late final PageController _pageController;
-  late int _currentIndex;
+  PageController? _controller;
+  int _currentIndex = 0;
+
+  PageController get _pageController =>
+      _controller ??= PageController(initialPage: _currentIndex);
   bool _awaitingDeletion = false;
   bool _showDateLabel = false;
   String _dateLabelText = '';
@@ -53,23 +56,8 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   bool _navVisible = true;
   Timer? _navHideTimer;
 
-  @override
-  void initState() {
-    super.initState();
-    int startPage = 0;
-    if (widget.initialAssetId != null) {
-      final cached = ref.read(feedVideosProvider).valueOrNull;
-      if (cached != null) {
-        final idx = cached.indexWhere((v) => v.id == widget.initialAssetId);
-        if (idx >= 0) startPage = idx;
-      }
-    }
-    _currentIndex = startPage;
-    _pageController = PageController(initialPage: startPage);
-  }
-
   void _initializeDefaultFilter() {
-    if (_filterInitialized) return;
+    if (!mounted || _filterInitialized || widget.initialAssetId != null) return;
     _filterInitialized = true;
     final defaultFilter = ref.read(settingsProvider).defaultFilter;
     if (defaultFilter != FeedFilter.all) {
@@ -188,7 +176,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   @override
   void dispose() {
     _navHideTimer?.cancel();
-    _pageController.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
@@ -224,7 +212,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       final idx = cached.indexWhere((v) => v.id == assetId);
       if (idx >= 0) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted && _pageController.hasClients) {
+          if (mounted && _controller?.hasClients == true) {
             _pageController.jumpToPage(idx);
             setState(() => _currentIndex = idx);
           }
@@ -233,7 +221,10 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       ref.read(feedJumpToAssetProvider.notifier).state = null;
     });
 
-    final videos = videosAsync.valueOrNull;
+    final openingVideo = _controller == null && widget.initialAssetId != null;
+    final videos = openingVideo && videosAsync.isLoading
+        ? null
+        : videosAsync.valueOrNull;
 
     if (videos == null) {
       if (videosAsync.hasError) {
@@ -293,6 +284,11 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           ],
         ),
       );
+    }
+
+    if (openingVideo) {
+      final index = videos.indexWhere((video) => video.id == widget.initialAssetId);
+      _currentIndex = index < 0 ? 0 : index;
     }
 
     final safeIndex = _currentIndex.clamp(0, videos.length - 1);

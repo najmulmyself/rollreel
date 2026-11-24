@@ -1,179 +1,119 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
+import '../../core/theme/typography.dart';
+import '../../l10n/app_localizations.dart';
+import 'home_video_sections.dart';
 
-// Stats dashboard ("Home" tab). All numbers here are the exact static demo
-// values from the reference design — no watch-time/play-count/streak
-// tracking exists in the app yet, so this screen isn't wired to real data.
-// Swap in live providers once that tracking is built.
 class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key, this.onOpenSettings});
+  const ProfileScreen({
+    super.key,
+    required this.onOpenSettings,
+    required this.onOpenLibrary,
+    required this.onPlayAt,
+    required this.onOpenMemories,
+  });
 
-  final VoidCallback? onOpenSettings;
+  final VoidCallback onOpenSettings;
+  final VoidCallback onOpenLibrary;
+  final ValueChanged<String> onPlayAt;
+  final ValueChanged<String?> onOpenMemories;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: RRColors.bgTint,
-      body: SafeArea(
-        bottom: false,
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(
-              RRSpace.sp16, RRSpace.sp16, RRSpace.sp16, RRSpace.sp24),
-          children: [
-            _Header(onOpenSettings: onOpenSettings),
-            const SizedBox(height: RRSpace.sp20),
-            const _TodayCard(),
-            const SizedBox(height: RRSpace.sp16),
-            const _StatTilesRow(),
-            const SizedBox(height: RRSpace.sp16),
-            const _StreakBanner(),
-            const SizedBox(height: RRSpace.sp16),
-            const _WatchActivityCard(),
-            const SizedBox(height: RRSpace.sp16),
-            const _TopFoldersCard(),
-            const SizedBox(height: RRSpace.sp16),
-            const _MostWatchedCard(),
-            const SizedBox(height: RRSpace.sp16),
-            const _RecapCard(),
-          ],
+    final l10n = AppLocalizations.of(context)!;
+    final isDark = RRColors.isDark.value;
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
+
+    return AnnotatedRegion(
+      value: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+      child: Scaffold(
+        backgroundColor: isDark
+            ? RRColors.bgDeep
+            : RRColors.brandLightBackground,
+        body: SafeArea(
+          bottom: false,
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 640),
+              child: ListView(
+                key: const PageStorageKey('home'),
+                padding: EdgeInsets.fromLTRB(20, 16, 20, bottomInset + 24),
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Semantics(
+                          header: true,
+                          child: Text(
+                            l10n.home,
+                            style: RRTypography.title1.copyWith(
+                              fontSize: 34,
+                              color: isDark
+                                  ? RRColors.textPrimary
+                                  : RRColors.brandInk,
+                            ),
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        tooltip: l10n.settings,
+                        onPressed: onOpenSettings,
+                        icon: ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.asset(
+                            'assets/icons/icon.png',
+                            width: 32,
+                            height: 32,
+                            excludeFromSemantics: true,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
+                  HomeVideoSections(
+                    onOpenLibrary: onOpenLibrary,
+                    onPlayAt: onPlayAt,
+                    onOpenMemories: onOpenMemories,
+                  ),
+                  const SizedBox(height: 30),
+                  Text(
+                    l10n.homeActivityPreview,
+                    style: RRTypography.subheadline.copyWith(
+                      color: isDark
+                          ? RRColors.textSecond
+                          : RRColors.brandMutedInk,
+                    ),
+                  ),
+                  const SizedBox(height: RRSpace.sp12),
+                  const _TodayCard(),
+                  const SizedBox(height: RRSpace.sp16),
+                  const _StatTiles(),
+                  const SizedBox(height: RRSpace.sp16),
+                  const _StreakBanner(),
+                  const SizedBox(height: RRSpace.sp16),
+                  const _WatchActivityCard(),
+                  const SizedBox(height: RRSpace.sp16),
+                  const _TopFoldersCard(),
+                  const SizedBox(height: RRSpace.sp16),
+                  const _MostWatchedCard(),
+                  const SizedBox(height: RRSpace.sp16),
+                  const _RecapCard(),
+                ],
+              ),
+            ),
+          ),
         ),
       ),
     );
   }
 }
 
-// ─── Header ───────────────────────────────────────────────────────────────────
-
-class _Header extends StatelessWidget {
-  const _Header({this.onOpenSettings});
-  final VoidCallback? onOpenSettings;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Profile',
-                style: TextStyle(
-                  fontSize: 34,
-                  fontWeight: FontWeight.w800,
-                  color: Color(0xFF1A1A2E),
-                  letterSpacing: -0.5,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                'Track your viewing habits and achievements.',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: RRColors.textSecond,
-                  height: 1.3,
-                ),
-              ),
-            ],
-          ),
-        ),
-        // Placeholder header illustration — swap for the real
-        // avatar/chart graphic once provided.
-        const SizedBox(
-          width: 88,
-          height: 88,
-          child: _HeaderIllustration(),
-        ),
-        const SizedBox(width: RRSpace.sp8),
-        GestureDetector(
-          onTap: onOpenSettings,
-          child: Container(
-            width: 40,
-            height: 40,
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                    color: Color(0x14000000), blurRadius: 8, offset: Offset(0, 2)),
-              ],
-            ),
-            child: const Icon(CupertinoIcons.gear_alt_fill,
-                color: RRColors.accentViolet, size: 18),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _HeaderIllustration extends StatelessWidget {
-  const _HeaderIllustration();
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Positioned(
-          left: 8,
-          top: 4,
-          child: Container(
-            width: 64,
-            height: 64,
-            decoration: BoxDecoration(
-              gradient: RRColors.gradPro,
-              borderRadius: BorderRadius.circular(18),
-              boxShadow: const [
-                BoxShadow(
-                    color: Color(0x338B5CF6), blurRadius: 16, offset: Offset(0, 6)),
-              ],
-            ),
-            alignment: Alignment.center,
-            child: const Icon(CupertinoIcons.person_fill,
-                color: Colors.white, size: 30),
-          ),
-        ),
-        Positioned(
-          right: 0,
-          bottom: 0,
-          child: Container(
-            width: 40,
-            height: 34,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: const [
-                BoxShadow(
-                    color: Color(0x1F000000), blurRadius: 8, offset: Offset(0, 2)),
-              ],
-            ),
-            alignment: Alignment.center,
-            child: const Icon(CupertinoIcons.chart_bar_fill,
-                color: RRColors.accentViolet, size: 16),
-          ),
-        ),
-        const Positioned(
-          left: 0,
-          top: 0,
-          child: Icon(CupertinoIcons.sparkles,
-              color: RRColors.accentPink, size: 14),
-        ),
-        const Positioned(
-          right: 10,
-          top: 20,
-          child: Icon(CupertinoIcons.sparkles,
-              color: RRColors.accentAmber, size: 12),
-        ),
-      ],
-    );
-  }
-}
-
+// Dashboard figures are sample data until watch activity is recorded.
 // ─── Today card ───────────────────────────────────────────────────────────────
 
 class _TodayCard extends StatelessWidget {
@@ -191,33 +131,39 @@ class _TodayCard extends StatelessWidget {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: RRColors.accentBlue.withValues(alpha: 0.12),
+                  color: RRColors.brandBlue.withValues(alpha: 0.12),
                   shape: BoxShape.circle,
                 ),
                 alignment: Alignment.center,
-                child: const Icon(CupertinoIcons.videocam_fill,
-                    color: RRColors.accentBlue, size: 17),
+                child: const Icon(
+                  CupertinoIcons.videocam_fill,
+                  color: RRColors.brandBlue,
+                  size: 17,
+                ),
               ),
               const SizedBox(width: 10),
               const Text(
                 'Today',
                 style: TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF1A1A2E)),
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                  color: RRColors.brandInk,
+                ),
               ),
               const Spacer(),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
-                  color: RRColors.accentBlue.withValues(alpha: 0.12),
+                  color: RRColors.brandBlue.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(RRSpace.radiusFull),
                 ),
                 child: const Text(
                   '0%',
                   style: TextStyle(
-                    color: RRColors.accentBlue,
+                    color: RRColors.brandBlue,
                     fontWeight: FontWeight.w700,
                     fontSize: 13,
                   ),
@@ -231,7 +177,7 @@ class _TodayCard extends StatelessWidget {
               Expanded(
                 child: _StatBlock(
                   icon: CupertinoIcons.clock_fill,
-                  iconColor: RRColors.accentViolet,
+                  iconColor: RRColors.brandBlue,
                   value: '0m',
                   label: 'Total watch time',
                 ),
@@ -240,7 +186,7 @@ class _TodayCard extends StatelessWidget {
               Expanded(
                 child: _StatBlock(
                   icon: CupertinoIcons.play_fill,
-                  iconColor: RRColors.accentBlue,
+                  iconColor: RRColors.brandBlue,
                   value: '0',
                   label: 'Videos watched',
                 ),
@@ -253,9 +199,10 @@ class _TodayCard extends StatelessWidget {
             child: LinearProgressIndicator(
               value: 0,
               minHeight: 6,
-              backgroundColor: const Color(0xFFEDEDF2),
-              valueColor:
-                  const AlwaysStoppedAnimation<Color>(RRColors.accentViolet),
+              backgroundColor: const Color(0xFFE1EDF4),
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                RRColors.brandBlue,
+              ),
             ),
           ),
           const SizedBox(height: 6),
@@ -263,7 +210,7 @@ class _TodayCard extends StatelessWidget {
             alignment: Alignment.centerRight,
             child: Text(
               'vs last week',
-              style: TextStyle(color: RRColors.textSecond, fontSize: 12),
+              style: TextStyle(color: RRColors.brandMutedInk, fontSize: 12),
             ),
           ),
         ],
@@ -307,15 +254,16 @@ class _StatBlock extends StatelessWidget {
               Text(
                 value,
                 style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF1A1A2E)),
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: RRColors.brandInk,
+                ),
               ),
               Text(
                 label,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(color: RRColors.textSecond, fontSize: 12),
+                style: TextStyle(color: RRColors.brandMutedInk, fontSize: 12),
               ),
             ],
           ),
@@ -327,49 +275,34 @@ class _StatBlock extends StatelessWidget {
 
 // ─── 4 stat tiles ─────────────────────────────────────────────────────────────
 
-class _StatTilesRow extends StatelessWidget {
-  const _StatTilesRow();
+class _StatTiles extends StatelessWidget {
+  const _StatTiles();
+
+  static const _tiles = [
+    _StatTile(icon: CupertinoIcons.videocam, value: '3', label: 'Videos'),
+    _StatTile(icon: CupertinoIcons.heart, value: '2', label: 'Liked'),
+    _StatTile(icon: CupertinoIcons.play, value: '32', label: 'Plays'),
+    _StatTile(
+      icon: CupertinoIcons.device_phone_portrait,
+      value: '0 GB',
+      label: 'Storage',
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: const [
-        Expanded(
-          child: _StatTile(
-            icon: CupertinoIcons.video_camera_solid,
-            iconColor: RRColors.accentViolet,
-            value: '3',
-            label: 'Videos',
-          ),
-        ),
-        SizedBox(width: RRSpace.sp8),
-        Expanded(
-          child: _StatTile(
-            icon: CupertinoIcons.heart_fill,
-            iconColor: RRColors.accentPink,
-            value: '2',
-            label: 'Liked',
-          ),
-        ),
-        SizedBox(width: RRSpace.sp8),
-        Expanded(
-          child: _StatTile(
-            icon: CupertinoIcons.chart_bar_alt_fill,
-            iconColor: RRColors.accentBlue,
-            value: '32',
-            label: 'Plays',
-          ),
-        ),
-        SizedBox(width: RRSpace.sp8),
-        Expanded(
-          child: _StatTile(
-            icon: CupertinoIcons.device_phone_portrait,
-            iconColor: RRColors.iconGreen,
-            value: '0 GB',
-            label: 'Storage',
-          ),
-        ),
-      ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const gap = 10.0;
+        final width = (constraints.maxWidth - gap) / 2;
+        return Wrap(
+          spacing: gap,
+          runSpacing: gap,
+          children: [
+            for (final tile in _tiles) SizedBox(width: width, child: tile),
+          ],
+        );
+      },
     );
   }
 }
@@ -377,40 +310,39 @@ class _StatTilesRow extends StatelessWidget {
 class _StatTile extends StatelessWidget {
   const _StatTile({
     required this.icon,
-    required this.iconColor,
     required this.value,
     required this.label,
   });
 
   final IconData icon;
-  final Color iconColor;
   final String value;
   final String label;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-          horizontal: RRSpace.sp8, vertical: RRSpace.sp16),
-      decoration: BoxDecoration(
-        color: iconColor.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(RRSpace.radiusMd),
-      ),
-      child: Column(
+    return _WhiteCard(
+      child: Row(
         children: [
-          Icon(icon, color: iconColor, size: 20),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF1A1A2E)),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            style: TextStyle(color: RRColors.textSecond, fontSize: 11),
+          Icon(icon, color: RRColors.brandBlue, size: 22),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  value,
+                  style: RRTypography.headline.copyWith(
+                    color: RRColors.brandInk,
+                  ),
+                ),
+                Text(
+                  label,
+                  style: RRTypography.caption.copyWith(
+                    color: RRColors.brandMutedInk,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -428,11 +360,7 @@ class _StreakBanner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(RRSpace.sp16),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFFFDF0E0), Color(0xFFFCE8E0)],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-        ),
+        color: const Color(0xFFE3F4FA),
         borderRadius: BorderRadius.circular(RRSpace.radiusLg),
       ),
       child: Row(
@@ -445,8 +373,11 @@ class _StreakBanner extends StatelessWidget {
               shape: BoxShape.circle,
             ),
             alignment: Alignment.center,
-            child: const Icon(CupertinoIcons.flame_fill,
-                color: Color(0xFFF5943C), size: 22),
+            child: const Icon(
+              CupertinoIcons.flame_fill,
+              color: RRColors.brandCyan,
+              size: 22,
+            ),
           ),
           const SizedBox(width: RRSpace.sp12),
           const Expanded(
@@ -456,14 +387,18 @@ class _StreakBanner extends StatelessWidget {
                 Text(
                   'Watch streak',
                   style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF1A1A2E)),
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: RRColors.brandInk,
+                  ),
                 ),
                 SizedBox(height: 2),
                 Text(
                   'Watch 3+ minutes today\nto start a streak',
-                  style: TextStyle(color: Color(0xFF8A7A6E), fontSize: 12.5),
+                  style: TextStyle(
+                    color: RRColors.brandMutedInk,
+                    fontSize: 12.5,
+                  ),
                 ),
               ],
             ),
@@ -471,20 +406,26 @@ class _StreakBanner extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text('Best',
-                  style: TextStyle(color: RRColors.textSecond, fontSize: 12)),
+              Text(
+                'Best',
+                style: TextStyle(color: RRColors.brandMutedInk, fontSize: 12),
+              ),
               const Text(
                 '0 days',
                 style: TextStyle(
-                    color: Color(0xFFF5943C),
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800),
+                  color: RRColors.brandCyan,
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ],
           ),
           const SizedBox(width: 6),
-          const Icon(CupertinoIcons.chevron_right,
-              color: Color(0xFFC9A98E), size: 16),
+          const Icon(
+            CupertinoIcons.chevron_right,
+            color: RRColors.brandMutedInk,
+            size: 16,
+          ),
         ],
       ),
     );
@@ -504,42 +445,50 @@ class _WatchActivityCard extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Text(
-                'Watch Activity',
-                style: TextStyle(
+              const Expanded(
+                child: Text(
+                  'Watch Activity',
+                  style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF1A1A2E)),
+                    color: RRColors.brandInk,
+                  ),
+                ),
               ),
-              const Spacer(),
+              const SizedBox(width: 8),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
-                  color: RRColors.accentViolet.withValues(alpha: 0.1),
+                  color: RRColors.brandBlue.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(RRSpace.radiusFull),
                 ),
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('Today',
-                        style: TextStyle(
-                            color: RRColors.accentViolet,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 13)),
+                    Text(
+                      'Today',
+                      style: TextStyle(
+                        color: RRColors.brandBlue,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13,
+                      ),
+                    ),
                     SizedBox(width: 4),
-                    Icon(CupertinoIcons.chevron_down,
-                        color: RRColors.accentViolet, size: 12),
+                    Icon(
+                      CupertinoIcons.chevron_down,
+                      color: RRColors.brandBlue,
+                      size: 12,
+                    ),
                   ],
                 ),
               ),
             ],
           ),
           const SizedBox(height: RRSpace.sp20),
-          const SizedBox(
-            height: 150,
-            child: _FlatActivityChart(),
-          ),
+          const _FlatActivityChart(),
         ],
       ),
     );
@@ -564,9 +513,10 @@ class _FlatActivityChart extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               for (final label in _yLabels)
-                Text(label,
-                    style:
-                        TextStyle(color: RRColors.textDisabled, fontSize: 11)),
+                Text(
+                  label,
+                  style: TextStyle(color: RRColors.textDisabled, fontSize: 11),
+                ),
             ],
           ),
         ),
@@ -582,8 +532,10 @@ class _FlatActivityChart extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              Text('Thu',
-                  style: TextStyle(color: RRColors.textSecond, fontSize: 12)),
+              Text(
+                'Thu',
+                style: TextStyle(color: RRColors.brandMutedInk, fontSize: 12),
+              ),
             ],
           ),
         ),
@@ -598,7 +550,7 @@ class _FlatLinePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final gridPaint = Paint()
-      ..color = const Color(0xFFE9E9F0)
+      ..color = RRColors.brandOutline
       ..strokeWidth = 1;
     for (var i = 0; i < 4; i++) {
       final y = size.height * i / 3;
@@ -608,7 +560,7 @@ class _FlatLinePainter extends CustomPainter {
     final baseY = size.height - 4;
     final dx = size.width / (_points - 1);
     final linePaint = Paint()
-      ..color = RRColors.accentViolet
+      ..color = RRColors.brandBlue
       ..strokeWidth = 2.5
       ..style = PaintingStyle.stroke;
     final path = Path();
@@ -622,11 +574,17 @@ class _FlatLinePainter extends CustomPainter {
     }
     canvas.drawPath(path, linePaint);
 
-    final dotPaint = Paint()..color = RRColors.accentViolet;
+    final dotPaint = Paint()..color = RRColors.brandBlue;
     for (var i = 0; i < _points; i++) {
       canvas.drawCircle(Offset(dx * i, baseY), 4, dotPaint);
       canvas.drawCircle(
-          Offset(dx * i, baseY), 4, Paint()..color = Colors.white..style = PaintingStyle.stroke..strokeWidth = 1.5);
+        Offset(dx * i, baseY),
+        4,
+        Paint()
+          ..color = Colors.white
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 1.5,
+      );
     }
   }
 
@@ -638,8 +596,9 @@ class _FlatLinePainter extends CustomPainter {
     var covered = 0.0;
     while (covered < total) {
       final start = a + dir * covered;
-      final segmentEnd =
-          (covered + dashWidth) > total ? total : covered + dashWidth;
+      final segmentEnd = (covered + dashWidth) > total
+          ? total
+          : covered + dashWidth;
       final end = a + dir * segmentEnd;
       canvas.drawLine(start, end, paint);
       covered += dashWidth + dashSpace;
@@ -669,12 +628,15 @@ class _TopFoldersCard extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: RRColors.accentBlue.withValues(alpha: 0.1),
+                  color: RRColors.brandBlue.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 alignment: Alignment.center,
-                child: const Icon(CupertinoIcons.folder_fill,
-                    color: RRColors.accentBlue, size: 20),
+                child: const Icon(
+                  CupertinoIcons.folder_fill,
+                  color: RRColors.brandBlue,
+                  size: 20,
+                ),
               ),
               const SizedBox(width: RRSpace.sp12),
               Expanded(
@@ -684,27 +646,36 @@ class _TopFoldersCard extends StatelessWidget {
                     const Text(
                       'Review Demo Library',
                       style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF1A1A2E)),
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                        color: RRColors.brandInk,
+                      ),
                     ),
                     const SizedBox(height: 2),
-                    Text('3 videos',
-                        style: TextStyle(
-                            color: RRColors.textSecond, fontSize: 13)),
+                    Text(
+                      '3 videos',
+                      style: TextStyle(
+                        color: RRColors.brandMutedInk,
+                        fontSize: 13,
+                      ),
+                    ),
                   ],
                 ),
               ),
               const Text(
                 '0m',
                 style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: Color(0xFF1A1A2E)),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
+                  color: RRColors.brandInk,
+                ),
               ),
               const SizedBox(width: 6),
-              Icon(CupertinoIcons.chevron_right,
-                  color: RRColors.textDisabled, size: 16),
+              Icon(
+                CupertinoIcons.chevron_right,
+                color: RRColors.textDisabled,
+                size: 16,
+              ),
             ],
           ),
         ],
@@ -795,8 +766,10 @@ class _MostWatchedTile extends StatelessWidget {
                 right: 5,
                 bottom: 5,
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 5,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.black.withValues(alpha: 0.55),
                     borderRadius: BorderRadius.circular(4),
@@ -804,9 +777,10 @@ class _MostWatchedTile extends StatelessWidget {
                   child: const Text(
                     '0:04',
                     style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600),
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
@@ -819,18 +793,29 @@ class _MostWatchedTile extends StatelessWidget {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(
-              fontSize: 12.5,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF1A1A2E)),
+            fontSize: 12.5,
+            fontWeight: FontWeight.w700,
+            color: RRColors.brandInk,
+          ),
         ),
         const SizedBox(height: 2),
         Row(
           children: [
-            const Icon(CupertinoIcons.play_fill,
-                color: RRColors.accentViolet, size: 10),
+            const Icon(
+              CupertinoIcons.play_fill,
+              color: RRColors.brandBlue,
+              size: 10,
+            ),
             const SizedBox(width: 3),
-            Text(item.plays,
-                style: TextStyle(color: RRColors.textSecond, fontSize: 11)),
+            Expanded(
+              child: Text(
+                item.plays,
+                style: const TextStyle(
+                  color: RRColors.brandMutedInk,
+                  fontSize: 11,
+                ),
+              ),
+            ),
           ],
         ),
       ],
@@ -846,56 +831,51 @@ class _RecapCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return _WhiteCard(
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  '2026 Recap 🎉',
-                  style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF1A1A2E)),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  '2026 Recap',
+                  style: RRTypography.headline.copyWith(
+                    color: RRColors.brandInk,
+                  ),
                 ),
-                const SizedBox(height: RRSpace.sp12),
-                const _RecapRow(
-                  icon: CupertinoIcons.clock,
-                  label: 'Total watch time',
-                  value: '0m',
-                ),
-                const _RecapRow(
-                  icon: CupertinoIcons.play,
-                  label: 'Videos watched',
-                  value: '17',
-                ),
-                const _RecapRow(
-                  icon: CupertinoIcons.star,
-                  label: 'Most watched',
-                  value: 'Demo: Morning Highlights',
-                ),
-                const _RecapRow(
-                  icon: CupertinoIcons.folder,
-                  label: 'Top folder',
-                  value: 'Review Demo Library',
-                ),
-                const _RecapRow(
-                  icon: CupertinoIcons.add_circled,
-                  label: 'Videos added',
-                  value: '3',
-                ),
-              ],
-            ),
+              ),
+              const Icon(
+                CupertinoIcons.rosette,
+                color: RRColors.brandCyan,
+                size: 24,
+              ),
+            ],
           ),
-          const SizedBox(width: RRSpace.sp8),
-          // Placeholder trophy illustration — swap for the real asset
-          // once provided.
-          const SizedBox(
-            width: 90,
-            height: 130,
-            child: _TrophyIllustration(),
+          const SizedBox(height: 10),
+          const _RecapRow(
+            icon: CupertinoIcons.clock,
+            label: 'Total watch time',
+            value: '0m',
+          ),
+          const _RecapRow(
+            icon: CupertinoIcons.play,
+            label: 'Videos watched',
+            value: '17',
+          ),
+          const _RecapRow(
+            icon: CupertinoIcons.star,
+            label: 'Most watched',
+            value: 'Demo: Morning Highlights',
+          ),
+          const _RecapRow(
+            icon: CupertinoIcons.folder,
+            label: 'Top folder',
+            value: 'Review Demo Library',
+          ),
+          const _RecapRow(
+            icon: CupertinoIcons.add_circled,
+            label: 'Videos added',
+            value: '3',
           ),
         ],
       ),
@@ -904,8 +884,11 @@ class _RecapCard extends StatelessWidget {
 }
 
 class _RecapRow extends StatelessWidget {
-  const _RecapRow(
-      {required this.icon, required this.label, required this.value});
+  const _RecapRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
 
   final IconData icon;
   final String label;
@@ -917,46 +900,28 @@ class _RecapRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
-          Icon(icon, color: RRColors.accentViolet, size: 14),
+          Icon(icon, color: RRColors.brandBlue, size: 14),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               label,
-              style: TextStyle(color: RRColors.textSecond, fontSize: 12.5),
+              style: TextStyle(color: RRColors.brandMutedInk, fontSize: 12.5),
             ),
           ),
-          Text(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              style: const TextStyle(
                 fontSize: 12.5,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFF1A1A2E)),
+                color: RRColors.brandInk,
+              ),
+            ),
           ),
         ],
       ),
-    );
-  }
-}
-
-class _TrophyIllustration extends StatelessWidget {
-  const _TrophyIllustration();
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        const Positioned(
-            top: 4, left: 4, child: Icon(CupertinoIcons.sparkles,
-                color: RRColors.accentPink, size: 14)),
-        const Positioned(
-            bottom: 10, right: 0, child: Icon(CupertinoIcons.sparkles,
-                color: RRColors.accentAmber, size: 12)),
-        Icon(Icons.emoji_events_rounded,
-            color: RRColors.accentViolet, size: 76),
-      ],
     );
   }
 }
@@ -971,20 +936,24 @@ class _CardHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Text(
-          title,
-          style: const TextStyle(
+        Expanded(
+          child: Text(
+            title,
+            style: const TextStyle(
               fontSize: 17,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF1A1A2E)),
+              color: RRColors.brandInk,
+            ),
+          ),
         ),
-        const Spacer(),
-        Text(
+        const SizedBox(width: 8),
+        const Text(
           'View all',
           style: TextStyle(
-              color: RRColors.accentViolet,
-              fontWeight: FontWeight.w600,
-              fontSize: 13),
+            color: RRColors.brandBlue,
+            fontWeight: FontWeight.w600,
+            fontSize: 13,
+          ),
         ),
       ],
     );
@@ -1003,10 +972,7 @@ class _WhiteCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(RRSpace.radiusLg),
-        boxShadow: const [
-          BoxShadow(
-              color: Color(0x0F000000), blurRadius: 12, offset: Offset(0, 4)),
-        ],
+        border: Border.all(color: RRColors.brandOutline),
       ),
       child: child,
     );

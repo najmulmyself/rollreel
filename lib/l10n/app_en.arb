@@ -1,5 +1,8 @@
 {
   "@@locale": "en",
+  "watchNext": "Watch next",
+  "seeAll": "See all",
+  "homeActivityPreview": "Activity preview · Sample data",
   "onboardingTitle": "Your videos,\nworth a replay.",
   "onboardingSubtitle": "Swipe through the clips in your camera roll, one video at a time.",
   "onboardingPrivacyBody": "Watch your videos right on your device. There’s no account to set up and no library to upload.",

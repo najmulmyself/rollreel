@@ -22,13 +22,13 @@ class OnboardingStyle {
   static OnboardingStyle get current => RRColors.isDark.value ? _dark : _light;
 
   static const _light = OnboardingStyle._(
-    background: Color(0xFFF3FAFD),
-    ink: Color(0xFF0C2639),
-    secondary: Color(0xFF405C70),
-    line: Color(0xFFC5DCEB),
-    action: Color(0xFF0A4E8C),
+    background: RRColors.brandLightBackground,
+    ink: RRColors.brandInk,
+    secondary: RRColors.brandMutedInk,
+    line: RRColors.brandOutline,
+    action: RRColors.brandBlue,
     onAction: Color(0xFFFFFFFF),
-    progress: Color(0xFF087D9B),
+    progress: RRColors.brandCyan,
     accent: Color(0xFFD5F2FA),
     artworkFrame: Color(0xFF102D43),
     artworkAccent: Color(0xFFB4EDF8),

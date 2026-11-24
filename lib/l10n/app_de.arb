@@ -1,5 +1,8 @@
 {
   "@@locale": "de",
+  "watchNext": "Als Nächstes ansehen",
+  "seeAll": "Alle ansehen",
+  "homeActivityPreview": "Aktivitätsvorschau · Beispieldaten",
   "onboardingTitle": "Deine Videos sind einen zweiten Blick wert.",
   "onboardingSubtitle": "Entdecke deine gespeicherten Clips neu. Wische direkt durch die Videos in deiner Fotomediathek.",
   "onboardingPrivacyBody": "Sieh dir deine Videos direkt auf deinem Gerät an. Du brauchst kein Konto und musst nichts hochladen.",

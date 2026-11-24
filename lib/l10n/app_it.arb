@@ -1,5 +1,8 @@
 {
   "@@locale": "it",
+  "watchNext": "Da guardare",
+  "seeAll": "Vedi tutto",
+  "homeActivityPreview": "Anteprima attività · Dati di esempio",
   "onboardingTitle": "I tuoi video meritano un altro sguardo.",
   "onboardingSubtitle": "Riscopri i clip che hai salvato. Scorri da un video all’altro, direttamente dal rullino.",
   "onboardingPrivacyBody": "Guarda i tuoi video sul dispositivo. Non serve creare un account né caricare la libreria.",

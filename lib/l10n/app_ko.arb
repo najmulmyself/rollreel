@@ -1,5 +1,8 @@
 {
   "@@locale": "ko",
+  "watchNext": "다음에 볼 영상",
+  "seeAll": "모두 보기",
+  "homeActivityPreview": "활동 미리보기 · 샘플 데이터",
   "onboardingTitle": "다시 보고 싶은 나의 영상.",
   "onboardingSubtitle": "저장해 둔 영상을 다시 만나 보세요. 스와이프하면 카메라 롤의 다음 영상으로 넘어갑니다.",
   "onboardingPrivacyBody": "내 기기에서 바로 영상을 보세요. 계정을 만들거나 보관함을 업로드할 필요가 없습니다.",

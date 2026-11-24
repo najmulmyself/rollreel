@@ -1,5 +1,8 @@
 {
   "@@locale": "zh",
+  "watchNext": "接着观看",
+  "seeAll": "查看全部",
+  "homeActivityPreview": "活动预览 · 示例数据",
   "onboardingTitle": "你的影片，值得再看一遍。",
   "onboardingSubtitle": "重温保存过的片段。轻轻一滑，就能播放相册里的下一段影片。",
   "onboardingPrivacyBody": "直接在设备上观看影片，无需注册账号，也无需上传相册。",

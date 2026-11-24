@@ -1,5 +1,8 @@
 {
   "@@locale": "tr",
+  "watchNext": "Sırada izle",
+  "seeAll": "Tümünü gör",
+  "homeActivityPreview": "Etkinlik önizlemesi · Örnek veriler",
   "onboardingTitle": "Videolarınıza bir kez daha bakın.",
   "onboardingSubtitle": "Kaydettiğiniz klipleri yeniden keşfedin. Film rulonuzda bir videodan diğerine kaydırın.",
   "onboardingPrivacyBody": "Videolarınızı doğrudan cihazınızda izleyin. Hesap açmanız veya arşivinizi yüklemeniz gerekmez.",

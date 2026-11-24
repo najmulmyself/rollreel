@@ -1,5 +1,8 @@
 {
   "@@locale": "ja",
+  "watchNext": "次に見る",
+  "seeAll": "すべて見る",
+  "homeActivityPreview": "アクティビティのプレビュー・サンプルデータ",
   "onboardingTitle": "もう一度、あの動画を。",
   "onboardingSubtitle": "保存した動画を見返しましょう。スワイプするだけでカメラロールの次の動画へ進めます。",
   "onboardingPrivacyBody": "動画はデバイス上で再生します。アカウントの作成やライブラリのアップロードは不要です。",

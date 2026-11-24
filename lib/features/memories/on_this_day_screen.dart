@@ -12,19 +12,21 @@ import '../states/loading_state.dart';
 /// Full-screen memories viewer: videos taken on today's month/day in
 /// previous years, swiped vertically like the main feed.
 class OnThisDayScreen extends ConsumerStatefulWidget {
-  const OnThisDayScreen({super.key});
+  const OnThisDayScreen({super.key, this.initialAssetId});
+
+  final String? initialAssetId;
 
   @override
   ConsumerState<OnThisDayScreen> createState() => _OnThisDayScreenState();
 }
 
 class _OnThisDayScreenState extends ConsumerState<OnThisDayScreen> {
-  final PageController _pageController = PageController();
+  PageController? _pageController;
   int _currentIndex = 0;
 
   @override
   void dispose() {
-    _pageController.dispose();
+    _pageController?.dispose();
     super.dispose();
   }
 
@@ -54,6 +56,11 @@ class _OnThisDayScreenState extends ConsumerState<OnThisDayScreen> {
               if (mounted) Navigator.of(context).maybePop();
             });
             return const SizedBox.shrink();
+          }
+          if (_pageController == null) {
+            final index = videos.indexWhere((video) => video.id == widget.initialAssetId);
+            _currentIndex = index < 0 ? 0 : index;
+            _pageController = PageController(initialPage: _currentIndex);
           }
           final safeIndex = _currentIndex.clamp(0, videos.length - 1);
 

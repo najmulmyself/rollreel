@@ -1,5 +1,8 @@
 {
   "@@locale": "fr",
+  "watchNext": "À regarder",
+  "seeAll": "Tout voir",
+  "homeActivityPreview": "Aperçu de l’activité · Données d’exemple",
   "onboardingTitle": "Vos vidéos méritent un deuxième regard.",
   "onboardingSubtitle": "Redécouvrez vos clips enregistrés. Balayez l’écran pour passer d’une vidéo à l’autre dans votre photothèque.",
   "onboardingPrivacyBody": "Regardez vos vidéos sur votre appareil, sans créer de compte ni importer votre photothèque.",

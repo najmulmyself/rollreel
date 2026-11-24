@@ -1,5 +1,8 @@
 {
   "@@locale": "es",
+  "watchNext": "Para ver ahora",
+  "seeAll": "Ver todo",
+  "homeActivityPreview": "Vista previa de actividad · Datos de ejemplo",
   "onboardingTitle": "Tus vídeos merecen otra mirada.",
   "onboardingSubtitle": "Redescubre los clips que has guardado. Desliza para pasar de un vídeo a otro de tu carrete.",
   "onboardingPrivacyBody": "Mira tus vídeos en tu dispositivo. No tienes que crear una cuenta ni subir tu fototeca.",

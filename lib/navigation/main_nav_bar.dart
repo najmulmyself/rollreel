@@ -23,15 +23,20 @@ class MainNavBar extends StatelessWidget {
   final VoidCallback onCenterTap;
 
   static const double _barHeight = 68;
-  static const double _centerSize = 60;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
     final isDark = RRColors.isDark.value;
+    final centerSize = isDark ? 60.0 : 54.0;
     return Padding(
-      padding: EdgeInsets.fromLTRB(16, 0, 16, bottomInset > 0 ? bottomInset : 12),
+      padding: EdgeInsets.fromLTRB(
+        16,
+        0,
+        16,
+        bottomInset > 0 ? bottomInset : 12,
+      ),
       child: SizedBox(
         height: _barHeight + 12,
         child: Stack(
@@ -44,14 +49,15 @@ class MainNavBar extends StatelessWidget {
                 color: isDark ? const Color(0xF0131320) : Colors.white,
                 borderRadius: BorderRadius.circular(_barHeight / 2),
                 border: Border.all(
-                    color: isDark
-                        ? Colors.white.withValues(alpha: 0.06)
-                        : Colors.black.withValues(alpha: 0.04)),
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.06)
+                      : RRColors.brandOutline.withValues(alpha: 0.7),
+                ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.1),
-                    blurRadius: 24,
-                    offset: const Offset(0, 10),
+                    color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.08),
+                    blurRadius: isDark ? 24 : 12,
+                    offset: Offset(0, isDark ? 10 : 3),
                   ),
                 ],
               ),
@@ -75,7 +81,7 @@ class MainNavBar extends StatelessWidget {
                       onTap: () => onTap(1),
                     ),
                   ),
-                  const SizedBox(width: _centerSize),
+                  SizedBox(width: centerSize),
                   Expanded(
                     child: _NavBtn(
                       icon: CupertinoIcons.heart,
@@ -98,34 +104,53 @@ class MainNavBar extends StatelessWidget {
               ),
             ),
             Positioned(
-              bottom: (_barHeight - _centerSize) / 2,
-              child: GestureDetector(
+              bottom: (_barHeight - centerSize) / 2,
+              child: Semantics(
+                label: l10n.feed,
+                button: true,
                 onTap: onCenterTap,
-                child: Container(
-                  width: _centerSize,
-                  height: _centerSize,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [RRColors.accentBlue, RRColors.accentViolet],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+                excludeSemantics: true,
+                child: GestureDetector(
+                  onTap: onCenterTap,
+                  child: Container(
+                    width: centerSize,
+                    height: centerSize,
+                    decoration: BoxDecoration(
+                      color: isDark ? null : RRColors.brandBlue,
+                      gradient: isDark
+                          ? const LinearGradient(
+                              colors: [
+                                RRColors.accentBlue,
+                                RRColors.accentViolet,
+                              ],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            )
+                          : null,
+                      shape: BoxShape.circle,
+                      border: isDark
+                          ? Border.all(
+                              color: Colors.white.withValues(alpha: 0.25),
+                              width: 2,
+                            )
+                          : null,
+                      boxShadow: [
+                        if (isDark)
+                          BoxShadow(
+                            color: RRColors.accentViolet.withValues(
+                              alpha: 0.55,
+                            ),
+                            blurRadius: 22,
+                            spreadRadius: 1,
+                          ),
+                      ],
                     ),
-                    shape: BoxShape.circle,
-                    border:
-                        Border.all(color: Colors.white.withValues(alpha: 0.25), width: 2),
-                    boxShadow: [
-                      BoxShadow(
-                        color: RRColors.accentViolet.withValues(alpha: 0.55),
-                        blurRadius: 22,
-                        spreadRadius: 1,
-                      ),
-                    ],
-                  ),
-                  alignment: Alignment.center,
-                  child: const Icon(
-                    CupertinoIcons.play_fill,
-                    color: Colors.white,
-                    size: 24,
+                    alignment: Alignment.center,
+                    child: const Icon(
+                      CupertinoIcons.play_fill,
+                      color: Colors.white,
+                      size: 24,
+                    ),
                   ),
                 ),
               ),
@@ -154,7 +179,10 @@ class _NavBtn extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = active ? RRColors.accentViolet : const Color(0xFF7A7A8C);
+    final isDark = RRColors.isDark.value;
+    final color = isDark
+        ? (active ? RRColors.accentViolet : const Color(0xFF7A7A8C))
+        : (active ? RRColors.brandBlue : RRColors.brandMutedInk);
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,

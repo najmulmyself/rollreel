@@ -86,17 +86,22 @@ final videoLibraryProvider = FutureProvider<List<AssetEntity>>((ref) async {
 /// Drives cross-tab Browse → Feed navigation. Set to an asset ID to jump there.
 final feedJumpToAssetProvider = StateProvider<String?>((ref) => null);
 
+/// Share the same vault exclusion across public video surfaces.
+final visibleVideosProvider = FutureProvider<List<AssetEntity>>((ref) async {
+  final library = ref.watch(videoLibraryProvider.future);
+  final vault = ref.watch(vaultIdsProvider.notifier);
+  ref.watch(vaultIdsProvider);
+  await vault.ready;
+  return (await library).where((asset) => !vault.contains(asset.id)).toList();
+});
+
 /// Active quick-filter for the feed screen.
 final feedFilterProvider = StateProvider<FeedFilter>((ref) => FeedFilter.all);
 
 /// Returns all videos excluding those in the vault, filtered by [feedFilterProvider].
 final feedVideosProvider = FutureProvider<List<AssetEntity>>((ref) async {
-  final all = await ref.watch(videoLibraryProvider.future);
-  final vaultIds = ref.watch(vaultIdsProvider);
   final feedFilter = ref.watch(feedFilterProvider);
-
-  Iterable<AssetEntity> result =
-      vaultIds.isEmpty ? all : all.where((a) => !vaultIds.contains(a.id));
+  Iterable<AssetEntity> result = await ref.watch(visibleVideosProvider.future);
 
   final now = DateTime.now();
   final todayStart = DateTime(now.year, now.month, now.day);
@@ -122,16 +127,11 @@ final feedVideosProvider = FutureProvider<List<AssetEntity>>((ref) async {
 /// Returns the filtered + sorted subset of [videoLibraryProvider] excluding vault.
 final browseVideosProvider = FutureProvider<List<AssetEntity>>((ref) async {
   try {
-    final all = await ref.watch(videoLibraryProvider.future);
     final filter = ref.watch(browseFilterProvider);
-    final vaultIds = ref.watch(vaultIdsProvider);
+    Iterable<AssetEntity> result = await ref.watch(visibleVideosProvider.future);
 
     final now = DateTime.now();
     final todayStart = DateTime(now.year, now.month, now.day);
-
-    // ── Vault filter ─────────────────────────────────────────────────────────
-    Iterable<AssetEntity> result =
-        vaultIds.isEmpty ? all : all.where((a) => !vaultIds.contains(a.id));
 
     // ── Period filter ────────────────────────────────────────────────────────
 

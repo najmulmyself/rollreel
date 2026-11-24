@@ -1,5 +1,8 @@
 {
   "@@locale": "pt",
+  "watchNext": "Assistir a seguir",
+  "seeAll": "Ver tudo",
+  "homeActivityPreview": "Prévia da atividade · Dados de exemplo",
   "onboardingTitle": "Seus vídeos merecem ser revistos.",
   "onboardingSubtitle": "Redescubra os clipes que você salvou. Deslize para passar de um vídeo a outro no rolo da câmera.",
   "onboardingPrivacyBody": "Assista aos vídeos no seu dispositivo. Você não precisa criar uma conta nem enviar sua fototeca.",

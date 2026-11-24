@@ -6,15 +6,19 @@ const _kVaultIds = 'vault_ids';
 
 class VaultNotifier extends StateNotifier<Set<String>> {
   VaultNotifier() : super(const {}) {
-    _load();
+    ready = _load();
   }
+
+  late final Future<void> ready;
 
   Future<void> _load() async {
     final prefs = await SharedPreferences.getInstance();
-    state = (prefs.getStringList(_kVaultIds) ?? []).toSet();
+    if (mounted) state = (prefs.getStringList(_kVaultIds) ?? []).toSet();
   }
 
   Future<void> toggle(String assetId) async {
+    await ready;
+    if (!mounted) return;
     if (state.contains(assetId)) {
       state = {...state}..remove(assetId);
     } else {
@@ -31,8 +35,9 @@ class VaultNotifier extends StateNotifier<Set<String>> {
   }
 }
 
-final vaultIdsProvider =
-    StateNotifierProvider<VaultNotifier, Set<String>>((ref) => VaultNotifier());
+final vaultIdsProvider = StateNotifierProvider<VaultNotifier, Set<String>>(
+  (ref) => VaultNotifier(),
+);
 
 /// Resolves vaulted asset IDs to actual AssetEntities for display in the vault.
 final vaultAssetsProvider = FutureProvider<List<AssetEntity>>((ref) async {

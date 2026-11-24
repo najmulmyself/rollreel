@@ -8,6 +8,13 @@ class RRColors {
 
   static final ValueNotifier<bool> isDark = ValueNotifier<bool>(false);
 
+  static const Color brandLightBackground = Color(0xFFF3FAFD);
+  static const Color brandInk = Color(0xFF0C2639);
+  static const Color brandMutedInk = Color(0xFF405C70);
+  static const Color brandOutline = Color(0xFFC5DCEB);
+  static const Color brandBlue = Color(0xFF0A4E8C);
+  static const Color brandCyan = Color(0xFF087D9B);
+
   static Color get bgDeep =>
       isDark.value ? const Color(0xFF07070F) : const Color(0xFFF5F5F7);
   // Light-lavender page background used by the new light-theme screens

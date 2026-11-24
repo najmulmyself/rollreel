@@ -1,15 +1,20 @@
 import 'dart:io';
 
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/ads/system_prompt_coordinator.dart';
+import '../core/iap/iap_provider.dart';
+import '../core/settings/settings_provider.dart';
 import '../core/theme/colors.dart';
+import '../core/video/video_library_provider.dart';
 import '../features/browse/browse_screen.dart';
 import '../features/favorites/favorites_screen.dart';
 import '../features/feed/feed_screen.dart';
+import '../features/memories/on_this_day_screen.dart';
 import '../features/profile/profile_screen.dart';
 import '../features/settings/settings_screen.dart';
 import 'main_nav_bar.dart';
@@ -47,7 +52,7 @@ class _MainShellState extends ConsumerState<MainShell> {
   // Requesting from a mounted screen's first post-frame callback, with an
   // extra delay, guarantees the window is actually on screen first.
   Future<void> _requestAttIfNeeded() async {
-    if (!Platform.isIOS) return;
+    if (kIsWeb || !Platform.isIOS) return;
     await Future.delayed(const Duration(seconds: 1));
     if (!mounted) return;
     try {
@@ -74,14 +79,31 @@ class _MainShellState extends ConsumerState<MainShell> {
   // button (or from tapping a video in Library/Favorites), not one of the
   // persistent bottom-nav tabs.
   void _openFeed(BuildContext context, {String? assetId}) {
-    Navigator.of(context).push(MaterialPageRoute<void>(
-      fullscreenDialog: true,
-      builder: (_) => FeedScreen(
-        initialAssetId: assetId,
-        onOpenBrowse: () => Navigator.of(context).pop(),
-        onOpenPaywall: widget.onOpenPaywall,
+    if (assetId != null) {
+      ref.read(feedFilterProvider.notifier).state = FeedFilter.all;
+    }
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        fullscreenDialog: true,
+        builder: (_) => FeedScreen(
+          initialAssetId: assetId,
+          onOpenBrowse: () => Navigator.of(context).pop(),
+          onOpenPaywall: widget.onOpenPaywall,
+        ),
       ),
-    ));
+    );
+  }
+
+  void _openMemories(BuildContext context, String? assetId) {
+    if (!ref.read(isProProvider)) {
+      widget.onOpenPaywall();
+      return;
+    }
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => OnThisDayScreen(initialAssetId: assetId),
+      ),
+    );
   }
 
   @override
@@ -96,7 +118,12 @@ class _MainShellState extends ConsumerState<MainShell> {
       body: IndexedStack(
         index: _tab,
         children: [
-          ProfileScreen(onOpenSettings: () => _setTab(3)),
+          ProfileScreen(
+            onOpenSettings: () => _setTab(3),
+            onOpenLibrary: () => _setTab(1),
+            onPlayAt: (assetId) => _openFeed(context, assetId: assetId),
+            onOpenMemories: (assetId) => _openMemories(context, assetId),
+          ),
           BrowseScreen(
             onOpenPaywall: widget.onOpenPaywall,
             onPlayAt: (assetId) => _openFeed(context, assetId: assetId),
