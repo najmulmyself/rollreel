@@ -1,0 +1,767 @@
+// ignore: unused_import
+import 'package:intl/intl.dart' as intl;
+import 'app_localizations.dart';
+
+// ignore_for_file: type=lint
+
+/// The translations for German (`de`).
+class AppLocalizationsDe extends AppLocalizations {
+  AppLocalizationsDe([String locale = 'de']) : super(locale);
+
+  @override
+  String get watchNext => 'Als Nächstes ansehen';
+
+  @override
+  String get seeAll => 'Alle ansehen';
+
+  @override
+  String get homeRecordedToday => 'Heute aufgenommene Videos';
+
+  @override
+  String get homePlays => 'Wiedergaben';
+
+  @override
+  String get homeWatchActivity => 'Wiedergabeaktivität';
+
+  @override
+  String get homeWatchStreak => 'Tage in Folge';
+
+  @override
+  String get homeMostWatched => 'Am häufigsten angesehen';
+
+  @override
+  String get homeTopFolders => 'Top-Ordner';
+
+  @override
+  String get homeVideoRecap => 'Video-Rückblick';
+
+  @override
+  String get homeRecordedThisYear => 'Dieses Jahr aufgenommene Videos';
+
+  @override
+  String get homeNoWatchHistory =>
+      'RollReel zeichnet noch keinen Wiedergabeverlauf auf.';
+
+  @override
+  String get homeFolderDetailsUnavailable =>
+      'Für diese Mediathek sind keine Ordnerdetails verfügbar.';
+
+  @override
+  String get homeUnavailable => 'Nicht verfügbar';
+
+  @override
+  String get homeLoading => 'Wird geladen…';
+
+  @override
+  String get homeCameraRoll => 'Deine\nVideos';
+
+  @override
+  String get homeWatchTab => 'Ansehen';
+
+  @override
+  String get homeActivityTab => 'Aktivität';
+
+  @override
+  String get homeYourActivity => 'Deine Aktivität';
+
+  @override
+  String get homeEmptyTitle => 'Dein erstes Video beginnt hier';
+
+  @override
+  String get homeEmptyBody =>
+      'Nimm ein Video mit deiner Kamera auf. Wenn du zurückkommst, findest du es hier.';
+
+  @override
+  String get homeOpenCamera => 'Kamera öffnen';
+
+  @override
+  String get homeCaptureFailed =>
+      'RollReel konnte das Video nicht aufnehmen oder speichern.';
+
+  @override
+  String get homeAccessTitle => 'Wähle deine Videos';
+
+  @override
+  String get homeAccessBody =>
+      'Erlaube in den Einstellungen den Zugriff auf Fotos, um deine Videos anzusehen.';
+
+  @override
+  String get homeLoadFailed => 'Deine Videos konnten nicht geladen werden';
+
+  @override
+  String get homeLoadFailedBody =>
+      'Deine Mediathek wird vielleicht noch synchronisiert. Versuch es erneut.';
+
+  @override
+  String get homeNoMemories =>
+      'Keine Videos von diesem Datum in früheren Jahren.';
+
+  @override
+  String homePlayClip(String title) {
+    return '$title abspielen';
+  }
+
+  @override
+  String get homePlaybackFailed =>
+      'Dieses Video konnte nicht abgespielt werden.';
+
+  @override
+  String get homePause => 'Pausieren';
+
+  @override
+  String get homePlay => 'Abspielen';
+
+  @override
+  String get onboardingTitle => 'Zurück zu deinen\nAufnahmen.';
+
+  @override
+  String get onboardingSwipeTitle => 'Wisch nach oben\nzum nächsten Video.';
+
+  @override
+  String get onboardingSwipeSubtitle => 'Probier es in der Vorschau aus.';
+
+  @override
+  String get onboardingTrySwipe => 'Wischen ausprobieren';
+
+  @override
+  String onboardingSampleClip(int current, int total) {
+    return 'Beispielvideo $current von $total';
+  }
+
+  @override
+  String get onboardingNextSample => 'Nächstes Beispielvideo anzeigen';
+
+  @override
+  String get onboardingLimitedTitle => 'Einzelne Videos wählen';
+
+  @override
+  String get onboardingLimitedBody =>
+      'Wähle im System aus, welche Elemente RollReel sehen darf.';
+
+  @override
+  String get onboardingFullTitle => 'Ganze Mediathek erlauben';
+
+  @override
+  String get onboardingFullBody =>
+      'Durchstöbere alle Videos. Den Zugriff kannst du in den Einstellungen ändern.';
+
+  @override
+  String get onboardingChooseVideos => 'Videos auswählen';
+
+  @override
+  String get onboardingNotNow => 'Jetzt nicht';
+
+  @override
+  String get onboardingSubtitle =>
+      'Schau dir die kleinen Momente an, die du gefilmt hast.';
+
+  @override
+  String get onboardingPrivacyBody =>
+      'Deine Videos werden direkt auf deinem Gerät abgespielt. Du brauchst kein Konto und keinen Upload.';
+
+  @override
+  String get onboardingPermissionBody =>
+      'Erlaube den Zugriff auf deine Fotomediathek, damit RollReel deine Videos finden und abspielen kann.';
+
+  @override
+  String get onboardingAccessBody =>
+      'RollReel braucht Zugriff auf Fotos, um deine Videos anzuzeigen.';
+
+  @override
+  String get onboardingPermissionNote =>
+      'Du kannst den Zugriff jederzeit in den Einstellungen ändern.';
+
+  @override
+  String get onboardingPermissionError =>
+      'Der Zugriff konnte nicht angefragt werden. Versuche es erneut oder überspringe diesen Schritt.';
+
+  @override
+  String onboardingStep(int step, int total) {
+    return 'Schritt $step von $total';
+  }
+
+  @override
+  String get onboardingPrivacyTitle => 'Nur für dich.';
+
+  @override
+  String get onboardingPermissionTitle =>
+      'Welche Videos\ndürfen wir abspielen?';
+
+  @override
+  String get onboardingNoCloud => 'Keine Cloud';
+
+  @override
+  String get onboardingNoAccount => 'Kein Konto';
+
+  @override
+  String get onboardingNoTracking => 'Kein Tracking';
+
+  @override
+  String get swipeHint => 'WISCHEN';
+
+  @override
+  String get skip => 'Überspringen';
+
+  @override
+  String get getStarted => 'Los geht\'s';
+
+  @override
+  String get continueLabel => 'Weiter';
+
+  @override
+  String get requesting => 'Wird angefragt…';
+
+  @override
+  String get allowAccess => 'Zugriff erlauben';
+
+  @override
+  String get noVideosYetTitle => 'Noch keine Videos';
+
+  @override
+  String get noVideosYetBody =>
+      'Deine Videos aus der Mediathek erscheinen hier.';
+
+  @override
+  String get openPhotosApp => 'Fotos-App öffnen';
+
+  @override
+  String get loadingLibrary => 'Mediathek wird geladen...';
+
+  @override
+  String get permissionDeniedTitle => 'Der Zugriff auf Fotos\nist aus.';
+
+  @override
+  String get permissionDeniedBody =>
+      'Wähle Videos in den Einstellungen, wenn du möchtest. Du kannst RollReel weiter erkunden.';
+
+  @override
+  String get openSettings => 'Einstellungen öffnen';
+
+  @override
+  String get continueAnyway => 'Trotzdem fortfahren';
+
+  @override
+  String get today => 'Heute';
+
+  @override
+  String get yesterday => 'Gestern';
+
+  @override
+  String get cancel => 'Abbrechen';
+
+  @override
+  String get ok => 'OK';
+
+  @override
+  String get back => 'Zurück';
+
+  @override
+  String get remove => 'Entfernen';
+
+  @override
+  String get manage => 'Verwalten';
+
+  @override
+  String get videoFallbackTitle => 'Video';
+
+  @override
+  String get filterAll => 'Alle';
+
+  @override
+  String get filterToday => 'Heute';
+
+  @override
+  String get filterShorts => 'Kurz';
+
+  @override
+  String get filterLong => 'Lang';
+
+  @override
+  String get filterRecent => 'Neueste';
+
+  @override
+  String get videoDeleted => 'Video gelöscht';
+
+  @override
+  String get getInfo => 'Informationen';
+
+  @override
+  String get addToVault => 'Zum Tresor hinzufügen';
+
+  @override
+  String get removeFromVault => 'Aus Tresor entfernen';
+
+  @override
+  String get deleteVideo => 'Video löschen';
+
+  @override
+  String get deleteVideoWarning =>
+      'Das Video wird dauerhaft aus deiner Mediathek gelöscht.';
+
+  @override
+  String get thisVideo => 'Dieses Video';
+
+  @override
+  String get share => 'Teilen';
+
+  @override
+  String get like => 'Like';
+
+  @override
+  String get expand => 'Erweitern';
+
+  @override
+  String get photoLibraryAccess => 'Zugriff auf Fotomediathek';
+
+  @override
+  String get limitedAccessMessage =>
+      'Du teilst derzeit nur eine begrenzte Auswahl an Videos.';
+
+  @override
+  String get selectMoreVideos => 'Weitere Videos auswählen';
+
+  @override
+  String get allowFullAccess => 'Vollzugriff erlauben';
+
+  @override
+  String managingCount(int count) {
+    return '$count deiner Videos werden verwaltet';
+  }
+
+  @override
+  String get infoDate => 'Datum';
+
+  @override
+  String get infoDuration => 'Dauer';
+
+  @override
+  String get infoResolution => 'Auflösung';
+
+  @override
+  String get infoFileSize => 'Dateigröße';
+
+  @override
+  String get infoFormat => 'Format';
+
+  @override
+  String get feed => 'Feed';
+
+  @override
+  String get library => 'Library';
+
+  @override
+  String get favoritesEmptyTitle => 'No Favorites Yet';
+
+  @override
+  String get favoritesEmptyBody =>
+      'Tap the heart on any video to save it here.';
+
+  @override
+  String get goToLibrary => 'Go to Library';
+
+  @override
+  String get infoTab => 'Info';
+
+  @override
+  String get searchVideos => 'Videos suchen…';
+
+  @override
+  String get videosTitle => 'Videos';
+
+  @override
+  String videosCount(int count) {
+    return '$count Videos';
+  }
+
+  @override
+  String get yourLibrary => 'Deine Mediathek';
+
+  @override
+  String get libraryTitle => 'Library';
+
+  @override
+  String get librarySubtitle => 'Your personal video collection';
+
+  @override
+  String get totalInLibrary => 'Total in your library';
+
+  @override
+  String get localBadge => 'Lokal';
+
+  @override
+  String get noResults => 'Keine Ergebnisse';
+
+  @override
+  String get noVideosFound => 'Keine Videos gefunden';
+
+  @override
+  String noSearchMatches(String query) {
+    return 'Keine Videos für \"$query\".';
+  }
+
+  @override
+  String get tryDifferentFilter => 'Versuche einen anderen Filter.';
+
+  @override
+  String get clearSearch => 'Suche löschen';
+
+  @override
+  String get clearFilters => 'Filter zurücksetzen';
+
+  @override
+  String get filter => 'Filter';
+
+  @override
+  String get reset => 'Zurücksetzen';
+
+  @override
+  String get timePeriod => 'ZEITRAUM';
+
+  @override
+  String get thisWeek => 'Diese Woche';
+
+  @override
+  String get thisMonth => 'Dieser Monat';
+
+  @override
+  String get duration => 'DAUER';
+
+  @override
+  String get any => 'Beliebig';
+
+  @override
+  String get durationShort => '< 1 Min.';
+
+  @override
+  String get durationMedium => '1–5 Min.';
+
+  @override
+  String get durationLong => '> 5 Min.';
+
+  @override
+  String get sortBy => 'SORTIEREN NACH';
+
+  @override
+  String get newestFirst => 'Neueste zuerst';
+
+  @override
+  String get oldestFirst => 'Älteste zuerst';
+
+  @override
+  String get shortestFirst => 'Kürzeste zuerst';
+
+  @override
+  String get longestFirst => 'Längste zuerst';
+
+  @override
+  String get applyFilters => 'Filter anwenden';
+
+  @override
+  String get onThisDay => 'An diesem Tag';
+
+  @override
+  String onThisDaySubtitleOne(String years) {
+    return '1 Erinnerung aus $years';
+  }
+
+  @override
+  String onThisDaySubtitleMany(int count) {
+    return '$count Erinnerungen aus vergangenen Jahren';
+  }
+
+  @override
+  String get yearsAgoOne => 'Vor 1 Jahr';
+
+  @override
+  String yearsAgoMany(int years) {
+    return 'Vor $years Jahren';
+  }
+
+  @override
+  String onThisDayHeader(String yearsAgo) {
+    return 'An diesem Tag · $yearsAgo';
+  }
+
+  @override
+  String positionCounter(int current, int total) {
+    return '$current von $total';
+  }
+
+  @override
+  String couldNotLoadMemories(String error) {
+    return 'Erinnerungen konnten nicht geladen werden: $error';
+  }
+
+  @override
+  String couldNotLoadVideos(String error) {
+    return 'Videos konnten nicht geladen werden: $error';
+  }
+
+  @override
+  String get settings => 'Einstellungen';
+
+  @override
+  String get home => 'Home';
+
+  @override
+  String get favorites => 'Favorites';
+
+  @override
+  String get playbackSection => 'WIEDERGABE';
+
+  @override
+  String get loopShortVideos => 'Kurze Videos wiederholen';
+
+  @override
+  String get loopShortVideosSub => 'Automatically loop to the next video';
+
+  @override
+  String get autoPlayOnLaunch => 'Autoplay beim Start';
+
+  @override
+  String get autoPlayOnLaunchSub => 'Start playing videos automatically';
+
+  @override
+  String get defaultFilter => 'Standardfilter';
+
+  @override
+  String get defaultFilterSub => 'Set your default video filter';
+
+  @override
+  String get appearanceSection => 'DARSTELLUNG';
+
+  @override
+  String get darkMode => 'Dunkelmodus';
+
+  @override
+  String get darkModeSub => 'Use dark theme for the app';
+
+  @override
+  String get showDateLabels => 'Datum anzeigen';
+
+  @override
+  String get showDateLabelsSub => 'Display date on video thumbnails';
+
+  @override
+  String get showDurationBadges => 'Dauer anzeigen';
+
+  @override
+  String get showDurationBadgesSub => 'Show video duration on thumbnails';
+
+  @override
+  String get privacySection => 'DATENSCHUTZ';
+
+  @override
+  String get privacyVault => 'Privater Tresor';
+
+  @override
+  String get privacySettingsTitle => 'Privacy Settings';
+
+  @override
+  String get privacySettingsSub => 'Manage your data and permissions';
+
+  @override
+  String get proBadge => 'Pro';
+
+  @override
+  String get aboutSection => 'INFO';
+
+  @override
+  String get privacyPolicy => 'Datenschutzrichtlinie';
+
+  @override
+  String get privacyPolicyBody =>
+      'RollReel lädt deine Videos nicht hoch, überträgt sie nicht und speichert sie nicht außerhalb deines Geräts. Es ist kein Konto erforderlich. Es werden keine persönlichen Daten an Dritte weitergegeben.';
+
+  @override
+  String get rateApp => 'RollReel bewerten';
+
+  @override
+  String get shareApp => 'RollReel teilen';
+
+  @override
+  String get version => 'Version';
+
+  @override
+  String get proCardSubtitle => 'Werbefrei · Tresor · Tempo · Sammlungen';
+
+  @override
+  String get proCardTagline => 'Elevate your viewing experience';
+
+  @override
+  String get shareAppMessage =>
+      'Schau dir RollReel an – wische durch deine Kamera-Videos, 100 % offline!';
+
+  @override
+  String get vaultTitle => 'Privater Tresor';
+
+  @override
+  String get vaultLocked => 'Tresor gesperrt';
+
+  @override
+  String get vaultLockedSubtitle => 'Deine privaten Videos sind hier sicher';
+
+  @override
+  String get unlockWithFaceId => 'Mit Face ID entsperren';
+
+  @override
+  String get unlockVaultReason => 'Entsperre deinen privaten Tresor';
+
+  @override
+  String get faceIdUnavailable =>
+      'Face ID ist auf diesem Gerät nicht verfügbar.';
+
+  @override
+  String get orDivider => 'OR';
+
+  @override
+  String get enterPasscode => 'Enter Passcode';
+
+  @override
+  String get vaultBadgeSecureTitle => 'Private & Secure';
+
+  @override
+  String get vaultBadgeSecureSub => 'Only you can access your vault';
+
+  @override
+  String get vaultBadgeEncryptedTitle => 'End-to-End Encrypted';
+
+  @override
+  String get vaultBadgeEncryptedSub => 'Your videos stay fully encrypted';
+
+  @override
+  String get vaultBadgeHiddenTitle => 'Hidden & Discreet';
+
+  @override
+  String get vaultBadgeHiddenSub => 'Your privacy is our priority';
+
+  @override
+  String get authFailed =>
+      'Authentifizierung fehlgeschlagen. Bitte versuche es erneut.';
+
+  @override
+  String get vaultLoadFailed => 'Tresor konnte nicht geladen werden';
+
+  @override
+  String get vaultEmpty => 'Tresor ist leer';
+
+  @override
+  String get vaultEmptyHint =>
+      'Tippe bei einem Video auf •••, um es hinzuzufügen';
+
+  @override
+  String get vaultEmptySubtitle =>
+      'Keep your private videos safe and secure in one place.';
+
+  @override
+  String get addVideosToVault => 'Add Videos to Vault';
+
+  @override
+  String get howItWorks => 'How it works';
+
+  @override
+  String get removeFromVaultTitle => 'Aus Tresor entfernen?';
+
+  @override
+  String get removeFromVaultBody =>
+      'Dieses Video kehrt in deine Hauptmediathek zurück.';
+
+  @override
+  String get paywallTitle => 'RollReel Pro';
+
+  @override
+  String get paywallTagline => 'Mehr sehen. Weniger sorgen.';
+
+  @override
+  String get featureAdFree => 'Werbefreies Erlebnis';
+
+  @override
+  String get featureAdFreeSub => 'Keine Unterbrechungen, nie';
+
+  @override
+  String get featureVault => 'Privater Tresor';
+
+  @override
+  String get featureVaultSub => 'Sensible Videos mit Face ID sperren';
+
+  @override
+  String get featureSpeed => 'Wiedergabegeschwindigkeit';
+
+  @override
+  String get featureSpeedSub => '2× Vorlauf durch langes Drücken';
+
+  @override
+  String get featureOnThisDay => 'An diesem Tag';
+
+  @override
+  String get featureOnThisDaySub => 'Videos aus vergangenen Jahren neu erleben';
+
+  @override
+  String get unlockPro => 'RollReel Pro freischalten';
+
+  @override
+  String get unlockProForever => 'Unlock Pro Forever';
+
+  @override
+  String get youArePro => 'Du bist Pro!';
+
+  @override
+  String get lifetimeFooter => 'Einmaliger Kauf · Kein Abo';
+
+  @override
+  String get monthlyFooter => 'Verlängert sich monatlich · Jederzeit kündbar';
+
+  @override
+  String get restorePurchases => 'Käufe wiederherstellen';
+
+  @override
+  String get subscriptionDisclaimer =>
+      'Die Zahlung wird über die Apple ID abgerechnet. Das Abo verlängert sich automatisch, sofern es nicht mindestens 24 Std. vor Ablauf des Zeitraums gekündigt wird.';
+
+  @override
+  String get oneTimeDisclaimer =>
+      'Payment charged to Apple ID. No subscription. Your access is permanent.';
+
+  @override
+  String get onePaymentLabel => 'One-time payment';
+
+  @override
+  String get bulletLifetimeAccess => 'Lifetime access';
+
+  @override
+  String get bulletAllProFeatures => 'All Pro features';
+
+  @override
+  String get bulletFutureUpdates => 'Future updates';
+
+  @override
+  String get termsOfUse => 'Nutzungsbedingungen (EULA)';
+
+  @override
+  String get lifetimeAccess => 'Lebenslanger Zugriff';
+
+  @override
+  String get foundingMember => 'Gründungsmitglied';
+
+  @override
+  String get bestValue => 'Best Value';
+
+  @override
+  String get planNotAvailable =>
+      'Dieser Plan ist derzeit nicht verfügbar. Bitte versuche es später erneut.';
+
+  @override
+  String get purchaseFailed => 'Kauf fehlgeschlagen';
+
+  @override
+  String get active => 'AKTIV';
+
+  @override
+  String get pro => 'PRO';
+
+  @override
+  String get plus => 'PLUS';
+
+  @override
+  String get retry => 'Erneut versuchen';
+}
