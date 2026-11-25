@@ -70,6 +70,7 @@ class _MainShellState extends ConsumerState<MainShell> {
 
   void _setTab(int index) {
     if (_tab == index) return;
+    FocusManager.instance.primaryFocus?.unfocus();
     HapticFeedback.selectionClick();
     setState(() => _tab = index);
     widget.onTabChanged?.call(index);

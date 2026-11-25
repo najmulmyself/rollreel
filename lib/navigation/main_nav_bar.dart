@@ -23,27 +23,12 @@ class MainNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
-    final darkSettings = isDark && currentIndex == 3;
-    final accent = darkSettings
-        ? const Color(0xFFA9DFFF)
-        : isDark
-        ? RRColors.accentViolet
-        : RRColors.brandBlue;
-    final muted = darkSettings
-        ? const Color(0xFFB0C4D5)
-        : isDark
-        ? const Color(0xFF7A7A8C)
-        : RRColors.brandMutedInk;
-    final background = darkSettings
-        ? const Color(0xFF0E1D2C)
-        : isDark
+    final accent = isDark ? RRColors.accentViolet : RRColors.brandBlue;
+    final muted = isDark ? const Color(0xFF7A7A8C) : RRColors.brandMutedInk;
+    final background = isDark
         ? const Color(0xFF131320)
         : const Color(0xFFFBFDFF);
-    final outline = darkSettings
-        ? const Color(0xFF2A3D52)
-        : isDark
-        ? const Color(0x0FFFFFFF)
-        : const Color(0xFFDCE6ED);
+    final outline = isDark ? const Color(0x0FFFFFFF) : const Color(0xFFDCE6ED);
     final destinations = [
       (CupertinoIcons.house, CupertinoIcons.house_fill, l10n.home),
       (CupertinoIcons.folder, CupertinoIcons.folder_fill, l10n.library),
@@ -89,7 +74,7 @@ class MainNavBar extends StatelessWidget {
                   height: 44,
                   decoration: BoxDecoration(
                     color: accent,
-                    gradient: isDark && !darkSettings
+                    gradient: isDark
                         ? const LinearGradient(
                             colors: [
                               RRColors.accentBlue,
@@ -100,11 +85,11 @@ class MainNavBar extends StatelessWidget {
                           )
                         : null,
                     shape: BoxShape.circle,
-                    border: isDark && !darkSettings
+                    border: isDark
                         ? Border.all(color: const Color(0x40FFFFFF), width: 2)
                         : null,
                     boxShadow: [
-                      if (isDark && !darkSettings)
+                      if (isDark)
                         const BoxShadow(
                           color: Color(0x8C8B5CF6),
                           blurRadius: 22,
@@ -113,11 +98,9 @@ class MainNavBar extends StatelessWidget {
                     ],
                   ),
                   alignment: Alignment.center,
-                  child: Icon(
+                  child: const Icon(
                     CupertinoIcons.play_fill,
-                    color: darkSettings
-                        ? const Color(0xFF092840)
-                        : Colors.white,
+                    color: Colors.white,
                     size: 17,
                   ),
                 ),

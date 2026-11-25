@@ -252,6 +252,11 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
     final filter = ref.watch(browseFilterProvider);
     final hasFilters = _hasFilters(filter);
     final dark = RRColors.isDark.value;
+    // Use the full window height so showing the keyboard cannot swap the
+    // sliver that owns the focused search field.
+    final canPin =
+        MediaQuery.sizeOf(context).height >= 520 &&
+        MediaQuery.textScalerOf(context).scale(16) < 24;
     return AnnotatedRegion(
       value: (dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark)
           .copyWith(statusBarColor: Colors.transparent),
@@ -282,9 +287,6 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
                       filter: filter,
                       onFilter: _setFilter,
                     );
-                    final canPin =
-                        constraints.maxHeight >= 420 &&
-                        MediaQuery.textScalerOf(context).scale(16) < 24;
                     return CustomScrollView(
                       key: const PageStorageKey('library'),
                       controller: _scrollController,

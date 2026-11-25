@@ -16,15 +16,14 @@ import '../../l10n/app_localizations.dart';
 final _packageInfoProvider = FutureProvider((_) => PackageInfo.fromPlatform());
 
 Color get _background =>
-    RRColors.isDark.value ? const Color(0xFF0B1725) : const Color(0xFFF4FAFF);
-Color get _surface =>
-    RRColors.isDark.value ? const Color(0xFF142538) : Colors.white;
+    RRColors.isDark.value ? RRColors.bgDeep : const Color(0xFFF4FAFF);
+Color get _surface => RRColors.bgSurface;
 Color get _line =>
-    RRColors.isDark.value ? const Color(0xFF2A3D52) : const Color(0xFFE0EBF2);
+    RRColors.isDark.value ? RRColors.divider : const Color(0xFFE0EBF2);
 Color get _ink =>
-    RRColors.isDark.value ? const Color(0xFFF1F7FC) : RRColors.brandInk;
+    RRColors.isDark.value ? RRColors.textPrimary : RRColors.brandInk;
 Color get _muted =>
-    RRColors.isDark.value ? const Color(0xFFB0C4D5) : RRColors.brandMutedInk;
+    RRColors.isDark.value ? RRColors.textSecond : RRColors.brandMutedInk;
 Color get _accent =>
     RRColors.isDark.value ? const Color(0xFFA9DFFF) : RRColors.brandBlue;
 
@@ -67,7 +66,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ..showSnackBar(
         SnackBar(
           behavior: SnackBarBehavior.floating,
-          backgroundColor: RRColors.brandInk,
+          backgroundColor: RRColors.isDark.value
+              ? RRColors.bgElevated
+              : RRColors.brandInk,
           content: Text(
             message,
             style: RRTypography.subheadline.copyWith(color: Colors.white),
@@ -128,7 +129,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final selection = await showModalBottomSheet<FeedFilter>(
       context: context,
       backgroundColor: _surface,
-      barrierColor: const Color(0x6A0B2033),
+      barrierColor: RRColors.isDark.value
+          ? Colors.black54
+          : const Color(0x6A0B2033),
       isScrollControlled: true,
       useSafeArea: true,
       showDragHandle: false,
@@ -376,9 +379,7 @@ class _SettingsHeaderState extends State<_SettingsHeader> {
                       center: Alignment(rtl ? -.34 : .34, .17),
                       radius: 1.45,
                       colors: [
-                        dark
-                            ? const Color(0xFF1E4161)
-                            : const Color(0xFFD2EFFE),
+                        dark ? RRColors.bgElevated : const Color(0xFFD2EFFE),
                         _background.withValues(alpha: 0),
                       ],
                     ),
@@ -450,7 +451,7 @@ class _ProBanner extends StatelessWidget {
             begin: AlignmentDirectional.topStart,
             end: AlignmentDirectional.bottomEnd,
             colors: dark
-                ? const [Color(0xFF153858), Color(0xFF185782)]
+                ? [RRColors.bgElevated, RRColors.bgSurface]
                 : const [Color(0xFF0D3B67), Color(0xFF135D97)],
           ),
         ),
@@ -689,9 +690,9 @@ class _SettingsToggle extends StatelessWidget {
             onChanged: onChanged,
             activeTrackColor: dark ? _accent : const Color(0xFF0C619E),
             inactiveTrackColor: dark
-                ? const Color(0xFF4B6176)
+                ? const Color(0xFF4B4B5C)
                 : const Color(0xFFC1D1DC),
-            thumbColor: dark ? const Color(0xFF092840) : Colors.white,
+            thumbColor: dark ? RRColors.bgDeep : Colors.white,
             inactiveThumbColor: Colors.white,
           ),
         ),
@@ -721,7 +722,7 @@ class _DefaultFilterSheet extends StatelessWidget {
                 height: 4,
                 decoration: BoxDecoration(
                   color: RRColors.isDark.value
-                      ? const Color(0xFF61758B)
+                      ? RRColors.textDisabled
                       : const Color(0xFFB9CDDC),
                   borderRadius: BorderRadius.circular(2),
                 ),
