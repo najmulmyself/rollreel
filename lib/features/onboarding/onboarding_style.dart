@@ -5,83 +5,52 @@ import '../../core/theme/colors.dart';
 import '../../core/theme/typography.dart';
 
 class OnboardingStyle {
-  const OnboardingStyle._({
-    required this.background,
-    required this.ink,
-    required this.secondary,
-    required this.line,
-    required this.action,
-    required this.onAction,
-    required this.progress,
-    required this.accent,
-    required this.artworkFrame,
-    required this.artworkAccent,
-    required this.systemOverlay,
-  });
+  const OnboardingStyle();
 
-  static OnboardingStyle get current => RRColors.isDark.value ? _dark : _light;
+  Color get background => const Color(0xFFFAF9F5);
+  Color get ink => const Color(0xFF102C40);
+  Color get secondary => const Color(0xFF455D70);
+  Color get line => const Color(0xFFD5DFE4);
+  Color get progressTrack => const Color(0xFFC4D5DE);
+  Color get action => RRColors.brandBlue;
 
-  static const _light = OnboardingStyle._(
-    background: RRColors.brandLightBackground,
-    ink: RRColors.brandInk,
-    secondary: RRColors.brandMutedInk,
-    line: RRColors.brandOutline,
-    action: RRColors.brandBlue,
-    onAction: Color(0xFFFFFFFF),
-    progress: RRColors.brandCyan,
-    accent: Color(0xFFD5F2FA),
-    artworkFrame: Color(0xFF102D43),
-    artworkAccent: Color(0xFFB4EDF8),
-    systemOverlay: SystemUiOverlayStyle.dark,
+  SystemUiOverlayStyle get systemOverlay => SystemUiOverlayStyle.dark.copyWith(
+    statusBarColor: Colors.transparent,
+    systemNavigationBarColor: background,
+    systemNavigationBarIconBrightness: Brightness.dark,
   );
 
-  static const _dark = OnboardingStyle._(
-    background: Color(0xFF1E1A23),
-    ink: Color(0xFFF9F6F0),
-    secondary: Color(0xFFCEC4D1),
-    line: Color(0xFF544A59),
-    action: Color(0xFFE6DCF5),
-    onAction: Color(0xFF2D203D),
-    progress: Color(0xFFE6DCF5),
-    accent: Color(0xFF3F334B),
-    artworkFrame: Color(0xFF252124),
-    artworkAccent: Color(0xFFE6DCF5),
-    systemOverlay: SystemUiOverlayStyle.light,
-  );
-
-  final Color background;
-  final Color ink;
-  final Color secondary;
-  final Color line;
-  final Color action;
-  final Color onAction;
-  final Color progress;
-  final Color accent;
-  final Color artworkFrame;
-  final Color artworkAccent;
-
-  final SystemUiOverlayStyle systemOverlay;
-
-  TextStyle title([double fontSize = 34]) => RRTypography.title1.copyWith(
-    fontSize: fontSize,
-    height: 1.12,
+  TextStyle title(double width) => RRTypography.title1.copyWith(
+    fontSize: (width * .111).clamp(35.0, 46.0),
+    letterSpacing: -1.8,
+    height: 1.0,
     color: ink,
   );
 
   TextStyle get body =>
-      RRTypography.body.copyWith(height: 1.45, color: secondary);
+      RRTypography.body.copyWith(height: 1.48, color: secondary);
 
-  TextStyle get label => RRTypography.headline.copyWith(fontSize: 15);
+  TextStyle get label =>
+      RRTypography.headline.copyWith(fontSize: 15, color: action);
 
   ButtonStyle get primaryButton => FilledButton.styleFrom(
     backgroundColor: action,
-    foregroundColor: onAction,
-    disabledBackgroundColor: action.withValues(alpha: 0.16),
+    foregroundColor: Colors.white,
+    disabledBackgroundColor: const Color(0xFFDCE7EE),
     disabledForegroundColor: secondary,
     visualDensity: VisualDensity.standard,
-    minimumSize: const Size(0, 54),
+    minimumSize: const Size(0, 53),
     padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-    textStyle: label.copyWith(fontSize: 16),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+    textStyle: label.copyWith(fontSize: 16, fontWeight: FontWeight.w700),
+  );
+
+  ButtonStyle get textButton => TextButton.styleFrom(
+    foregroundColor: action,
+    disabledForegroundColor: secondary,
+    visualDensity: VisualDensity.standard,
+    minimumSize: const Size(44, 44),
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+    textStyle: label,
   );
 }

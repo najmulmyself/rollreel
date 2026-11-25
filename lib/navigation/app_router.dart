@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../core/permissions/permission_provider.dart';
 import '../core/review/review_prompt_provider.dart';
 import '../core/video/video_library_provider.dart';
 import '../features/onboarding/onboarding_screen.dart';
@@ -12,14 +13,7 @@ import '../features/splash/splash_screen.dart';
 import '../features/vault/vault_screen.dart';
 import 'main_shell.dart';
 
-enum RRRoute {
-  splash,
-  onboarding,
-  main,
-  paywall,
-  vault,
-  permissionDenied,
-}
+enum RRRoute { splash, onboarding, main, paywall, vault, permissionDenied }
 
 class AppRouter extends ConsumerStatefulWidget {
   const AppRouter({super.key});
@@ -28,7 +22,8 @@ class AppRouter extends ConsumerStatefulWidget {
   ConsumerState<AppRouter> createState() => _AppRouterState();
 }
 
-class _AppRouterState extends ConsumerState<AppRouter> with WidgetsBindingObserver {
+class _AppRouterState extends ConsumerState<AppRouter>
+    with WidgetsBindingObserver {
   RRRoute _route = RRRoute.splash;
   int _mainTab = 0;
 
@@ -61,9 +56,17 @@ class _AppRouterState extends ConsumerState<AppRouter> with WidgetsBindingObserv
   }
 
   Future<void> _recheckPermission() async {
-    final perm = await PhotoManager.requestPermissionExtend();
-    if (perm.isAuth || perm == PermissionState.limited) {
-      _go(RRRoute.main);
+    try {
+      final permission = await PhotoManager.getPermissionState(
+        requestOption: const PermissionRequestOption(),
+      );
+      if (mounted &&
+          _route == RRRoute.permissionDenied &&
+          permission.hasAccess) {
+        _enterMainWithAccess();
+      }
+    } on Exception {
+      // Leave the recovery screen available when the system check fails.
     }
   }
 
@@ -84,21 +87,30 @@ class _AppRouterState extends ConsumerState<AppRouter> with WidgetsBindingObserv
   }
 
   Future<void> _finishOnboarding(PermissionState perm) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('has_seen_onboarding', true);
-    if (perm.isAuth || perm == PermissionState.limited) {
-      // On a fresh grant the Photos library can take a moment to finish
-      // syncing internally — videoLibraryProvider already retries once on
-      // an empty result, but force a second refresh shortly after landing
-      // on the feed in case that race is still lost.
-      ref.invalidate(videoLibraryProvider);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('has_seen_onboarding', true);
+    } on Exception catch (error) {
+      debugPrint('Unable to save onboarding completion: $error');
+    }
+    if (!mounted) return;
+    if (perm.hasAccess) {
+      _enterMainWithAccess();
+    } else if (perm == PermissionState.notDetermined) {
       _go(RRRoute.main);
-      Future.delayed(const Duration(seconds: 2), () {
-        if (mounted) ref.invalidate(videoLibraryProvider);
-      });
     } else {
       _go(RRRoute.permissionDenied);
     }
+  }
+
+  void _enterMainWithAccess() {
+    ref.invalidate(permissionProvider);
+    ref.invalidate(videoLibraryProvider);
+    _go(RRRoute.main);
+    // Give the Photos library time to finish syncing after a fresh grant.
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) ref.invalidate(videoLibraryProvider);
+    });
   }
 
   @override

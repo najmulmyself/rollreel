@@ -1,7 +1,7 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../l10n/app_localizations.dart';
+import '../onboarding/onboarding_layout.dart';
 import '../onboarding/onboarding_style.dart';
 
 class PermissionDeniedScreen extends StatelessWidget {
@@ -17,83 +17,34 @@ class PermissionDeniedScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final style = OnboardingStyle.current;
-    return AnnotatedRegion(
-      value: style.systemOverlay,
-      child: Scaffold(
-        backgroundColor: style.background,
-        body: SafeArea(
-          child: LayoutBuilder(
-            builder: (context, constraints) => SingleChildScrollView(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 420),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 32,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Align(
-                            alignment: AlignmentDirectional.centerStart,
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                color: style.accent,
-                                borderRadius: BorderRadius.circular(22),
-                              ),
-                              child: SizedBox.square(
-                                dimension: 68,
-                                child: Icon(
-                                  CupertinoIcons.photo_on_rectangle,
-                                  color: style.ink,
-                                  size: 30,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 23),
-                          Semantics(
-                            header: true,
-                            child: Text(
-                              l10n.permissionDeniedTitle,
-                              style: style.title(),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(l10n.permissionDeniedBody, style: style.body),
-                          const SizedBox(height: 28),
-                          FilledButton(
-                            onPressed: onTryAgain,
-                            style: style.primaryButton,
-                            child: Text(
-                              l10n.openSettings,
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          TextButton(
-                            onPressed: onContinue,
-                            style: TextButton.styleFrom(
-                              foregroundColor: style.ink,
-                              minimumSize: const Size(0, 48),
-                              textStyle: style.label,
-                            ),
-                            child: Text(
-                              l10n.continueAnyway,
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+    const style = OnboardingStyle();
+
+    return OnboardingLayout(
+      primaryLabel: l10n.openSettings,
+      onPrimary: onTryAgain,
+      secondaryLabel: l10n.continueAnyway,
+      onSecondary: onContinue,
+      body: LayoutBuilder(
+        builder: (context, constraints) => SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(
+            24,
+            (MediaQuery.sizeOf(context).height * .14).clamp(40.0, 133.0),
+            24,
+            12,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Semantics(
+                header: true,
+                child: Text(
+                  l10n.permissionDeniedTitle,
+                  style: style.title(constraints.maxWidth),
                 ),
               ),
-            ),
+              const SizedBox(height: 13),
+              Text(l10n.permissionDeniedBody, style: style.body),
+            ],
           ),
         ),
       ),

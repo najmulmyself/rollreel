@@ -12,6 +12,7 @@
 ## Table of Contents
 
 1. [Design Philosophy & Direction](#1-design-philosophy--direction)
+   - [Mascot design and production](#mascot-design-and-production)
 2. [Color System](#2-color-system)
 3. [Typography](#3-typography)
 4. [Icon System (SF Symbols)](#4-icon-system-sf-symbols)
@@ -49,6 +50,18 @@
 RollReel is not a utility. It is an experience. The moment you open it, your own memories command the entire screen. Every other element — controls, labels, dates — floats silently above the content like subtitles in a film. The phone disappears. The video remains.
 
 This design language borrows from the reference UI: a Spotify-style full-screen immersive player where the content's dominant color bleeds into the background, the controls panel sits in frosted glass at the bottom, and transitions feel like physically swiping through physical reels of film.
+
+### Mascot design and production
+
+The owner’s mascot workflow starts with the personality people should remember. For RollReel, the kingfisher is a curious, observant companion who likes spotting a moment worth replaying. Its pocket camcorder ties the character to the product. When studying references from the App Store, Pinterest or design communities, look at when a character helps someone act and how quickly it yields attention to the content.
+
+- **Use one character reference.** Start each pose from the approved standalone Home kingfisher. Preserve its proportions, cobalt cap, cyan wings, cream cheeks, orange feet and navy camcorder. Review poses together at phone size on a plain background. [Home reference](assets/images/home_kingfisher.webp)
+- **Choose the pose after choosing the task.** A wave can welcome someone, a glance or pointing wing can draw attention to a gesture, and a settled pose can accompany an empty state. Reuse a small set. Consider progress, milestones, achievements and paywalls only when the character helps explain the moment.
+- **Review the direction in context.** Map poses to the feature flow, then preview a few onboarding screens with the real app type, button sizes and spacing. Check that the bird reads as the same character, controls are easy to find, and the product feels playful at a glance. Give the silhouette space on a clean surface.
+- **Animate each pose independently.** A small wing movement, glance or nod has a clear beginning and resting frame. Keep the camera fixed. Export a still and a separate mascot-only animation per action. The supplied workflow uses ChatGPT for the character, Higgsfield for motion and one MP4 per action. Transparent animated assets are also suitable when the surface changes.
+- **Build the interface with Flutter widgets.** Load the character like any other illustration. Keep text, controls, gestures and accessibility in the widget tree. Render the still immediately while motion loads, stop playback offscreen, and use the resting pose with Reduce Motion. Meaningful instructions and actions must also work with VoiceOver and enlarged text.
+
+For first-run surfaces, use the current light Home palette and shared SF Pro styles. The dark, content-adaptive palette remains relevant to video playback. Use the owner’s eight interaction principles when reviewing a flow. [RollReel UI design guide](AGENTS.md)
 
 ### Three Pillars
 
@@ -648,118 +661,23 @@ Animation sequence (total: 1.8 seconds):
 
 ### S2 — Onboarding Flow (3 Screens)
 
-**Pattern:** Horizontal swipe paginator with dots indicator. Skip button top-right.
+**Approved flow.** Use three steps from the PRD: welcome, a hands-on feature preview, and Photos access. Use navy type on light surfaces, cobalt for primary actions and cyan for small accents. Keep the main action in a consistent place. Provide Back, Skip or Not Now where appropriate and expose progress as “Step n of 3” to assistive technology.
 
-**Global onboarding style:**
-- Background: bgDeep with animated gradient mesh (slow-moving blobs of accentCoral and accentCyan at 5% opacity)
-- Page indicator: 3 dots at bottom, active dot = gradBrand gradient, inactive = textDisabled
-- Progress: No back button — swipe left to go back naturally
+1. **Welcome.** A standalone kingfisher gives one small wave next to camera-roll imagery. Introduce the app in one sentence and offer “Try a swipe.” The artwork is illustrative.
+2. **Try the feed.** Show a clearly labeled bundled sample. Swipe up to advance, or use the accessible next-preview button. Continuing is available immediately. Explain that playback happens on the device without uploading the library.
+3. **Photos access.** Explain why RollReel reads videos and how selected or full access works. “Choose videos” requests the system sheet. “Not Now” provides a path onward. Keep the mascot off this decision screen so the choices have priority.
 
----
+The two onboarding samples are excerpts of MDN’s CC0 flower video. [Source and license](https://github.com/mdn/shared-assets/tree/main/videos)
 
-**Onboarding Screen 1 — "The Concept"**
-
-```
-Illustration area (top 55% of screen):
-  - Animated mockup of iPhone showing swipe feed
-  - Three stacked video thumbnails with parallax depth
-  - Swipe-up gesture arrow animation (looping, cyan color)
-  - Videos animate to represent "swiping" on 2-second interval
-
-Content area (bottom 45%):
-  Headline: "Your Videos. Finally Watchable."
-             tsTitle1, white, center-aligned
-  Body:     "Swipe through your camera roll like TikTok.
-             No uploads. No accounts. Just your memories."
-             tsBody, textSecond, center-aligned, lineHeight 1.5
-  
-Primary CTA: "Get Started" — PrimaryButton (gradBrand)
-Secondary:   "Skip" text button, textSecond (top-right corner)
-```
-
----
-
-**Onboarding Screen 2 — "Privacy"**
-
-```
-Illustration area:
-  - Animated lock icon (lock.fill, accentViolet, 80pt)
-  - Lock transitions: locked → keyhole glow → unlocked → re-locks
-  - Floating chips around lock: "No Cloud", "No Account", "No Tracking"
-    Each chip: LocalBadge style, animated float with staggered timing
-
-Content area:
-  Headline: "100% Private. 100% Yours."
-             tsTitle1, white
-  Body:     "Your videos never leave your phone. No cloud backup,
-             no sign-in, no ads while you watch. Just you."
-             tsBody, textSecond
-```
-
----
-
-**Onboarding Screen 3 — "Permission"**
-
-```
-Illustration area:
-  - Large photo library icon (photo.on.rectangle, 80pt, gradBrand)
-  - Below icon: Three tiny video thumbnails arranged in a fan
-
-Content area:
-  Headline: "Let's Find Your Videos"
-             tsTitle1, white
-  Body:     "RollReel needs access to your photo library to
-             find your videos. Your videos stay on your device."
-             tsBody, textSecond
-  
-Note box (glass panel, accentCyan 10% background):
-  Icon:    info.circle, accentCyan, 16pt
-  Text:    "You can choose Full Access or Limited Access.
-            We only ever read videos — never photos, never uploads."
-           tsSubheadline, textSecond
-
-Primary CTA: "Allow Access to Videos" — PrimaryButton (gradBrand)
-Secondary:   "Not Now" — SecondaryButton
-```
-
----
+Allow horizontal page navigation, preserve vertical gestures inside the demonstration, and keep controls reachable on a short phone. Use one brief transition to connect adjacent pages. With Reduce Motion, switch directly and show a static preview with manual navigation.
 
 ### S3 — Permission Request Screen
 
-This is the iOS system permission dialog — RollReel cannot customize it. However, the screen underneath (which the dialog appears over) should be the onboarding screen 3 blurred to 80% — so the transition is seamless.
-
-**Important:** The custom permission explanation before the system dialog must clearly state purpose. Apple will reject if the `NSPhotoLibraryUsageDescription` string is vague.
-
-```
-Pre-dialog screen = Onboarding S3 (blurred under system dialog)
-System dialog text = "RollReel reads your local videos to display them 
-                      in a swipe feed. No videos are uploaded."
-```
-
----
+Request access only after the person taps the permission action. While the request is pending, acknowledge the tap and prevent duplicate requests. The operating system presents the permission choices. Continue into Home on full or limited access, reading only authorized videos. If the request fails to open, show a retry action and retain the option to continue.
 
 ### S4 — Permission Denied State
 
-Shown when user has denied photo library access or taps "Not Now."
-
-```
-Background:   bgDeep
-Top area:     SF Symbol photo.slash (60pt, textDisabled), centered vertically
-Headline:     "No Videos Found"
-              tsTitle1, white, centered
-Body:         "RollReel needs access to your photo library.
-               Your videos are never uploaded or shared."
-              tsBody, textSecond, centered
-
-Primary CTA:  "Open Settings"
-              PrimaryButton, accentCoral
-              → Opens UIApplication.openSettingsURLString
-
-Secondary:    "Learn Why" — opens a compact bottom sheet explaining the permission
-
-Bottom note:  "You can also tap Videos under Settings → Privacy → Photos"
-              tsCaption, textDisabled
-```
+Use “Photos access is off” and explain how to choose videos in Settings. Offer “Open Settings” and “Continue Anyway.” Recheck permission on return. Treat an empty authorized library as a separate Home state. Skipping onboarding should allow the user to proceed without granting access.
 
 ---
 
@@ -1377,12 +1295,8 @@ Scroll:       scrollToCenter — active chip always centered in view
 ```
 
 #### M7 — Onboarding Page Swipe
-```
-Type:         PageView with custom transformer
-Effect:       Exiting page translates left -40pt + fades to 0.3 opacity
-              Entering page translates right +40pt → 0 + fades from 0.3 to 1.0
-Duration:     400ms, curveFeedSwipe
-```
+
+The outer PageView follows a horizontal gesture. Next and Back move between pages in 240 ms with an ease-out curve. The persistent controls stay in place. Reduce Motion switches pages directly, and the swipe demo offers a static preview with manual navigation.
 
 #### M8 — Paywall Pro Badge Entrance
 ```

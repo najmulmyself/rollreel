@@ -38,10 +38,32 @@
       }
     }
   },
-  "onboardingTitle": "Your videos,\nworth a replay.",
-  "onboardingSubtitle": "Swipe through the clips in your camera roll, one video at a time.",
-  "onboardingPrivacyBody": "Watch your videos right on your device. There’s no account to set up and no library to upload.",
+  "onboardingTitle": "Back to your\ncamera roll.",
+  "onboardingSwipeTitle": "Swipe up for\nthe next video.",
+  "onboardingSwipeSubtitle": "Try it on the preview below.",
+  "onboardingTrySwipe": "Try a swipe",
+  "onboardingSampleClip": "Sample clip {current} of {total}",
+  "onboardingNextSample": "Show next sample clip",
+  "onboardingLimitedTitle": "Pick specific videos",
+  "onboardingLimitedBody": "Choose the items RollReel can see in the system picker.",
+  "onboardingFullTitle": "Allow your whole library",
+  "onboardingFullBody": "Browse all your camera-roll videos. You can change access in Settings.",
+  "onboardingChooseVideos": "Choose videos",
+  "onboardingNotNow": "Not Now",
+  "@onboardingSampleClip": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingSubtitle": "Watch the little moments you filmed, one video at a time.",
+  "onboardingPrivacyBody": "Your own videos play on your device. There’s no account to create or library to upload.",
   "onboardingPermissionBody": "Allow photo library access so RollReel can find and play your videos.",
+  "onboardingAccessBody": "RollReel uses Photos access to show videos from your camera roll.",
   "onboardingPermissionNote": "You can change access anytime in Settings.",
   "onboardingPermissionError": "Couldn’t request access. Try again or skip for now.",
   "onboardingStep": "Step {step} of {total}",
@@ -52,7 +74,7 @@
     }
   },
   "onboardingPrivacyTitle": "For your eyes only.",
-  "onboardingPermissionTitle": "Open your\ncamera roll.",
+  "onboardingPermissionTitle": "Which videos\ncan we play?",
   "onboardingNoCloud": "No Cloud",
   "onboardingNoAccount": "No Account",
   "onboardingNoTracking": "No Tracking",
@@ -66,8 +88,8 @@
   "noVideosYetBody": "Your camera roll videos will appear here.",
   "openPhotosApp": "Open Photos App",
   "loadingLibrary": "Loading your library...",
-  "permissionDeniedTitle": "Photo access is off.",
-  "permissionDeniedBody": "Allow access in Settings to see your camera roll videos here. You can also continue without access.",
+  "permissionDeniedTitle": "Photos access\nis off.",
+  "permissionDeniedBody": "Choose videos in Settings when you’re ready. You can still explore RollReel.",
   "openSettings": "Open Settings",
   "continueAnyway": "Continue Anyway",
   "today": "Today",

@@ -38,5 +38,5 @@ Look at how a good app sets hierarchy, spaces touch targets, communicates select
 
 - Use the existing SF Pro typography styles and the logo’s navy, cobalt, and cyan palette. Use the approved kingfisher where its presence supports the task.
 - Review type at small phone widths and with enlarged text. Check contrast, tap targets, and selected states alongside the visual layout.
-- Use the latest approved concept for the screen. [RollReel_Design.md](RollReel_Design.md) provides background on the product and its components.
+- Use the latest approved concept for the screen. [RollReel_Design.md](RollReel_Design.md) covers the product and its components. Follow its [mascot production guidance](RollReel_Design.md#mascot-design-and-production) when designing a character-led flow.
 - When design approval is requested, show the relevant states and motion in the mockup before editing application code.
