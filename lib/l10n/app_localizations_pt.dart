@@ -113,6 +113,37 @@ class AppLocalizationsPt extends AppLocalizations {
   String get onboardingTitle => 'Volte ao seu\nrolo da câmera.';
 
   @override
+  String favoritesSavedCount(int count) {
+    return '$count salvos';
+  }
+
+  @override
+  String favoritesRemoveVideo(String title) {
+    return 'Remover $title dos Favoritos';
+  }
+
+  @override
+  String get favoritesRemoved => 'Removido dos Favoritos';
+
+  @override
+  String get favoritesUndo => 'Desfazer';
+
+  @override
+  String get favoritesLoadFailed => 'Não foi possível carregar os favoritos';
+
+  @override
+  String get favoritesRetryBody =>
+      'Tente carregar seus vídeos salvos novamente.';
+
+  @override
+  String get favoritesAccessBody =>
+      'Permita o acesso ao app Fotos para ver seus vídeos salvos.';
+
+  @override
+  String get favoritesUpdateFailed =>
+      'Não foi possível atualizar os favoritos.';
+
+  @override
   String get onboardingSwipeTitle => 'Deslize para cima\npara o próximo vídeo.';
 
   @override
@@ -410,14 +441,14 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
-  String get favoritesEmptyTitle => 'No Favorites Yet';
+  String get favoritesEmptyTitle => 'Ainda não há favoritos';
 
   @override
   String get favoritesEmptyBody =>
-      'Tap the heart on any video to save it here.';
+      'Toque no coração enquanto assiste a um vídeo para salvá-lo aqui.';
 
   @override
-  String get goToLibrary => 'Go to Library';
+  String get goToLibrary => 'Ver biblioteca';
 
   @override
   String get infoTab => 'Info';
@@ -564,7 +595,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get home => 'Home';
 
   @override
-  String get favorites => 'Favorites';
+  String get favorites => 'Favoritos';
 
   @override
   String get playbackSection => 'REPRODUÇÃO';

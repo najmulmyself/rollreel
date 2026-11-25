@@ -110,6 +110,35 @@ class AppLocalizationsAr extends AppLocalizations {
   String get onboardingTitle => 'أعد اكتشاف\nمقاطعك المصوّرة.';
 
   @override
+  String favoritesSavedCount(int count) {
+    return 'عدد المقاطع المحفوظة: $count';
+  }
+
+  @override
+  String favoritesRemoveVideo(String title) {
+    return 'إزالة $title من المفضلة';
+  }
+
+  @override
+  String get favoritesRemoved => 'أُزيل من المفضلة';
+
+  @override
+  String get favoritesUndo => 'تراجع';
+
+  @override
+  String get favoritesLoadFailed => 'تعذّر تحميل المفضلة';
+
+  @override
+  String get favoritesRetryBody => 'جرّب تحميل مقاطعك المحفوظة مرة أخرى.';
+
+  @override
+  String get favoritesAccessBody =>
+      'اسمح بالوصول إلى الصور لرؤية المقاطع المحفوظة.';
+
+  @override
+  String get favoritesUpdateFailed => 'تعذّر تحديث المفضلة.';
+
+  @override
   String get onboardingSwipeTitle => 'مرّر لأعلى لعرض\nالمقطع التالي.';
 
   @override
@@ -392,14 +421,14 @@ class AppLocalizationsAr extends AppLocalizations {
   }
 
   @override
-  String get favoritesEmptyTitle => 'No Favorites Yet';
+  String get favoritesEmptyTitle => 'لا توجد مقاطع مفضلة بعد';
 
   @override
   String get favoritesEmptyBody =>
-      'Tap the heart on any video to save it here.';
+      'اضغط على القلب أثناء مشاهدة مقطع لحفظه هنا.';
 
   @override
-  String get goToLibrary => 'Go to Library';
+  String get goToLibrary => 'تصفح المكتبة';
 
   @override
   String get infoTab => 'Info';
@@ -546,7 +575,7 @@ class AppLocalizationsAr extends AppLocalizations {
   String get home => 'Home';
 
   @override
-  String get favorites => 'Favorites';
+  String get favorites => 'المفضلة';
 
   @override
   String get playbackSection => 'التشغيل';

@@ -112,6 +112,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboardingTitle => 'Back to your\ncamera roll.';
 
   @override
+  String favoritesSavedCount(int count) {
+    return '$count saved';
+  }
+
+  @override
+  String favoritesRemoveVideo(String title) {
+    return 'Remove $title from Favorites';
+  }
+
+  @override
+  String get favoritesRemoved => 'Removed from Favorites';
+
+  @override
+  String get favoritesUndo => 'Undo';
+
+  @override
+  String get favoritesLoadFailed => 'Favorites couldn’t load';
+
+  @override
+  String get favoritesRetryBody => 'Try fetching your saved videos again.';
+
+  @override
+  String get favoritesAccessBody =>
+      'Allow Photos access to see your saved videos.';
+
+  @override
+  String get favoritesUpdateFailed => 'Couldn’t update Favorites.';
+
+  @override
   String get onboardingSwipeTitle => 'Swipe up for\nthe next video.';
 
   @override
@@ -408,14 +437,14 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get favoritesEmptyTitle => 'No Favorites Yet';
+  String get favoritesEmptyTitle => 'No favorites yet';
 
   @override
   String get favoritesEmptyBody =>
-      'Tap the heart on any video to save it here.';
+      'Tap the heart while watching a video to save it here.';
 
   @override
-  String get goToLibrary => 'Go to Library';
+  String get goToLibrary => 'Browse Library';
 
   @override
   String get infoTab => 'Info';

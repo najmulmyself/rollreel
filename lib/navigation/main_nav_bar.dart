@@ -5,7 +5,7 @@ import '../core/theme/colors.dart';
 import '../l10n/app_localizations.dart';
 
 /// Shared bottom navigation for Home, Library, Play, Favorites, and Settings.
-/// Home uses a full-width bar. The other destinations use the floating bar.
+/// Home, Library, and Favorites use a full-width bar. Settings uses a floating bar.
 /// [currentIndex] addresses the 4 real destinations (0=Home, 1=Library,
 /// 2=Favorites, 3=Settings) — the center button is a standalone action,
 /// not a tab.

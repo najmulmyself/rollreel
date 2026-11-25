@@ -107,6 +107,34 @@ class AppLocalizationsKo extends AppLocalizations {
   String get onboardingTitle => '다시 보는\n카메라 롤.';
 
   @override
+  String favoritesSavedCount(int count) {
+    return '$count개 저장됨';
+  }
+
+  @override
+  String favoritesRemoveVideo(String title) {
+    return '즐겨찾기에서 $title 삭제';
+  }
+
+  @override
+  String get favoritesRemoved => '즐겨찾기에서 삭제했어요';
+
+  @override
+  String get favoritesUndo => '실행 취소';
+
+  @override
+  String get favoritesLoadFailed => '즐겨찾기를 불러올 수 없어요';
+
+  @override
+  String get favoritesRetryBody => '저장된 동영상을 다시 불러와 보세요.';
+
+  @override
+  String get favoritesAccessBody => '저장된 동영상을 보려면 사진 접근을 허용하세요.';
+
+  @override
+  String get favoritesUpdateFailed => '즐겨찾기를 업데이트할 수 없어요.';
+
+  @override
   String get onboardingSwipeTitle => '위로 밀어\n다음 동영상 보기.';
 
   @override
@@ -384,14 +412,13 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get favoritesEmptyTitle => 'No Favorites Yet';
+  String get favoritesEmptyTitle => '아직 즐겨찾기가 없어요';
 
   @override
-  String get favoritesEmptyBody =>
-      'Tap the heart on any video to save it here.';
+  String get favoritesEmptyBody => '동영상을 보다가 하트를 누르면 여기에 저장돼요.';
 
   @override
-  String get goToLibrary => 'Go to Library';
+  String get goToLibrary => '보관함 둘러보기';
 
   @override
   String get infoTab => 'Info';
@@ -538,7 +565,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get home => 'Home';
 
   @override
-  String get favorites => 'Favorites';
+  String get favorites => '즐겨찾기';
 
   @override
   String get playbackSection => '재생';

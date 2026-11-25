@@ -107,6 +107,34 @@ class AppLocalizationsJa extends AppLocalizations {
   String get onboardingTitle => 'カメラロールを\nもう一度。';
 
   @override
+  String favoritesSavedCount(int count) {
+    return '$count 本保存済み';
+  }
+
+  @override
+  String favoritesRemoveVideo(String title) {
+    return '$titleをお気に入りから外す';
+  }
+
+  @override
+  String get favoritesRemoved => 'お気に入りから外しました';
+
+  @override
+  String get favoritesUndo => '元に戻す';
+
+  @override
+  String get favoritesLoadFailed => 'お気に入りを読み込めませんでした';
+
+  @override
+  String get favoritesRetryBody => '保存した動画をもう一度読み込んでください。';
+
+  @override
+  String get favoritesAccessBody => '保存した動画を見るには写真へのアクセスを許可してください。';
+
+  @override
+  String get favoritesUpdateFailed => 'お気に入りを更新できませんでした。';
+
+  @override
   String get onboardingSwipeTitle => '上にスワイプして\n次の動画へ。';
 
   @override
@@ -384,14 +412,13 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get favoritesEmptyTitle => 'No Favorites Yet';
+  String get favoritesEmptyTitle => 'お気に入りはまだありません';
 
   @override
-  String get favoritesEmptyBody =>
-      'Tap the heart on any video to save it here.';
+  String get favoritesEmptyBody => '動画を見ながらハートをタップすると、ここに保存できます。';
 
   @override
-  String get goToLibrary => 'Go to Library';
+  String get goToLibrary => 'ライブラリを見る';
 
   @override
   String get infoTab => 'Info';
@@ -538,7 +565,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get home => 'Home';
 
   @override
-  String get favorites => 'Favorites';
+  String get favorites => 'お気に入り';
 
   @override
   String get playbackSection => '再生';

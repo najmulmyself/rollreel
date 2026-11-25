@@ -113,6 +113,36 @@ class AppLocalizationsRu extends AppLocalizations {
   String get onboardingTitle => 'Снова в вашей\nмедиатеке.';
 
   @override
+  String favoritesSavedCount(int count) {
+    return 'Сохранено: $count';
+  }
+
+  @override
+  String favoritesRemoveVideo(String title) {
+    return 'Удалить «$title» из избранного';
+  }
+
+  @override
+  String get favoritesRemoved => 'Удалено из избранного';
+
+  @override
+  String get favoritesUndo => 'Отменить';
+
+  @override
+  String get favoritesLoadFailed => 'Не удалось загрузить избранное';
+
+  @override
+  String get favoritesRetryBody =>
+      'Попробуйте загрузить сохранённые видео снова.';
+
+  @override
+  String get favoritesAccessBody =>
+      'Разрешите доступ к приложению «Фото», чтобы увидеть сохранённые видео.';
+
+  @override
+  String get favoritesUpdateFailed => 'Не удалось обновить избранное.';
+
+  @override
   String get onboardingSwipeTitle => 'Смахните вверх\nдля следующего видео.';
 
   @override
@@ -404,14 +434,14 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String get favoritesEmptyTitle => 'No Favorites Yet';
+  String get favoritesEmptyTitle => 'Здесь пока нет избранного';
 
   @override
   String get favoritesEmptyBody =>
-      'Tap the heart on any video to save it here.';
+      'Нажмите на сердечко во время просмотра, чтобы сохранить видео здесь.';
 
   @override
-  String get goToLibrary => 'Go to Library';
+  String get goToLibrary => 'Открыть медиатеку';
 
   @override
   String get infoTab => 'Info';
@@ -558,7 +588,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get home => 'Home';
 
   @override
-  String get favorites => 'Favorites';
+  String get favorites => 'Избранное';
 
   @override
   String get playbackSection => 'ВОСПРОИЗВЕДЕНИЕ';

@@ -39,6 +39,28 @@
     }
   },
   "onboardingTitle": "Back to your\ncamera roll.",
+  "favoritesSavedCount": "{count} saved",
+  "favoritesRemoveVideo": "Remove {title} from Favorites",
+  "favoritesRemoved": "Removed from Favorites",
+  "favoritesUndo": "Undo",
+  "favoritesLoadFailed": "Favorites couldn’t load",
+  "favoritesRetryBody": "Try fetching your saved videos again.",
+  "favoritesAccessBody": "Allow Photos access to see your saved videos.",
+  "favoritesUpdateFailed": "Couldn’t update Favorites.",
+  "@favoritesSavedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@favoritesRemoveVideo": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
   "onboardingSwipeTitle": "Swipe up for\nthe next video.",
   "onboardingSwipeSubtitle": "Try it on the preview below.",
   "onboardingTrySwipe": "Try a swipe",
@@ -182,9 +204,9 @@
       }
     }
   },
-  "favoritesEmptyTitle": "No Favorites Yet",
-  "favoritesEmptyBody": "Tap the heart on any video to save it here.",
-  "goToLibrary": "Go to Library",
+  "favoritesEmptyTitle": "No favorites yet",
+  "favoritesEmptyBody": "Tap the heart while watching a video to save it here.",
+  "goToLibrary": "Browse Library",
   "infoTab": "Info",
   "searchVideos": "Search videos…",
   "videosTitle": "Videos",

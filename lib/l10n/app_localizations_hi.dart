@@ -113,6 +113,35 @@ class AppLocalizationsHi extends AppLocalizations {
   String get onboardingTitle => 'अपने कैमरा रोल\nपर लौटें।';
 
   @override
+  String favoritesSavedCount(int count) {
+    return '$count सेव किए गए';
+  }
+
+  @override
+  String favoritesRemoveVideo(String title) {
+    return 'पसंदीदा से $title हटाएँ';
+  }
+
+  @override
+  String get favoritesRemoved => 'पसंदीदा से हटाया गया';
+
+  @override
+  String get favoritesUndo => 'पहले जैसा करें';
+
+  @override
+  String get favoritesLoadFailed => 'पसंदीदा वीडियो लोड नहीं हो सके';
+
+  @override
+  String get favoritesRetryBody => 'अपने सेव किए गए वीडियो फिर से लोड करें।';
+
+  @override
+  String get favoritesAccessBody =>
+      'सेव किए गए वीडियो देखने के लिए फ़ोटो का ऐक्सेस दें।';
+
+  @override
+  String get favoritesUpdateFailed => 'पसंदीदा अपडेट नहीं हो सके।';
+
+  @override
   String get onboardingSwipeTitle => 'अगले वीडियो के लिए\nऊपर स्वाइप करें।';
 
   @override
@@ -395,14 +424,14 @@ class AppLocalizationsHi extends AppLocalizations {
   }
 
   @override
-  String get favoritesEmptyTitle => 'No Favorites Yet';
+  String get favoritesEmptyTitle => 'अभी कोई पसंदीदा वीडियो नहीं है';
 
   @override
   String get favoritesEmptyBody =>
-      'Tap the heart on any video to save it here.';
+      'वीडियो देखते समय दिल पर टैप करें ताकि वह यहाँ सेव हो जाए।';
 
   @override
-  String get goToLibrary => 'Go to Library';
+  String get goToLibrary => 'लाइब्रेरी देखें';
 
   @override
   String get infoTab => 'Info';
@@ -549,7 +578,7 @@ class AppLocalizationsHi extends AppLocalizations {
   String get home => 'Home';
 
   @override
-  String get favorites => 'Favorites';
+  String get favorites => 'पसंदीदा';
 
   @override
   String get playbackSection => 'प्लेबैक';

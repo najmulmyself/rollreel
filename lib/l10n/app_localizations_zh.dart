@@ -107,6 +107,34 @@ class AppLocalizationsZh extends AppLocalizations {
   String get onboardingTitle => '重温你的\n相机胶卷。';
 
   @override
+  String favoritesSavedCount(int count) {
+    return '已收藏 $count 个';
+  }
+
+  @override
+  String favoritesRemoveVideo(String title) {
+    return '取消收藏“$title”';
+  }
+
+  @override
+  String get favoritesRemoved => '已取消收藏';
+
+  @override
+  String get favoritesUndo => '撤销';
+
+  @override
+  String get favoritesLoadFailed => '无法加载收藏';
+
+  @override
+  String get favoritesRetryBody => '请重试加载收藏的视频。';
+
+  @override
+  String get favoritesAccessBody => '允许访问照片，即可查看收藏的视频。';
+
+  @override
+  String get favoritesUpdateFailed => '无法更新收藏。';
+
+  @override
   String get onboardingSwipeTitle => '向上滑动，\n观看下一段视频。';
 
   @override
@@ -379,14 +407,13 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get favoritesEmptyTitle => 'No Favorites Yet';
+  String get favoritesEmptyTitle => '暂无收藏';
 
   @override
-  String get favoritesEmptyBody =>
-      'Tap the heart on any video to save it here.';
+  String get favoritesEmptyBody => '播放时轻点爱心，即可将视频收藏到这里。';
 
   @override
-  String get goToLibrary => 'Go to Library';
+  String get goToLibrary => '浏览视频库';
 
   @override
   String get infoTab => 'Info';
@@ -533,7 +560,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get home => 'Home';
 
   @override
-  String get favorites => 'Favorites';
+  String get favorites => '收藏';
 
   @override
   String get playbackSection => '播放';

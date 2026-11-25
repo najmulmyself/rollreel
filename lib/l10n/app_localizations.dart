@@ -312,6 +312,54 @@ abstract class AppLocalizations {
   /// **'Back to your\ncamera roll.'**
   String get onboardingTitle;
 
+  /// No description provided for @favoritesSavedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} saved'**
+  String favoritesSavedCount(int count);
+
+  /// No description provided for @favoritesRemoveVideo.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {title} from Favorites'**
+  String favoritesRemoveVideo(String title);
+
+  /// No description provided for @favoritesRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'Removed from Favorites'**
+  String get favoritesRemoved;
+
+  /// No description provided for @favoritesUndo.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo'**
+  String get favoritesUndo;
+
+  /// No description provided for @favoritesLoadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Favorites couldn’t load'**
+  String get favoritesLoadFailed;
+
+  /// No description provided for @favoritesRetryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Try fetching your saved videos again.'**
+  String get favoritesRetryBody;
+
+  /// No description provided for @favoritesAccessBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow Photos access to see your saved videos.'**
+  String get favoritesAccessBody;
+
+  /// No description provided for @favoritesUpdateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t update Favorites.'**
+  String get favoritesUpdateFailed;
+
   /// No description provided for @onboardingSwipeTitle.
   ///
   /// In en, this message translates to:
@@ -831,19 +879,19 @@ abstract class AppLocalizations {
   /// No description provided for @favoritesEmptyTitle.
   ///
   /// In en, this message translates to:
-  /// **'No Favorites Yet'**
+  /// **'No favorites yet'**
   String get favoritesEmptyTitle;
 
   /// No description provided for @favoritesEmptyBody.
   ///
   /// In en, this message translates to:
-  /// **'Tap the heart on any video to save it here.'**
+  /// **'Tap the heart while watching a video to save it here.'**
   String get favoritesEmptyBody;
 
   /// No description provided for @goToLibrary.
   ///
   /// In en, this message translates to:
-  /// **'Go to Library'**
+  /// **'Browse Library'**
   String get goToLibrary;
 
   /// No description provided for @infoTab.

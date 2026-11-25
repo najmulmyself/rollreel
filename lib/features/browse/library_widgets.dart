@@ -171,9 +171,10 @@ final libraryTitleProvider = FutureProvider.autoDispose
     });
 
 final _libraryThumbnailProvider = FutureProvider.autoDispose
-    .family<Uint8List?, AssetEntity>((ref, asset) async {
+    .family<Uint8List?, (AssetEntity, ThumbnailSize)>((ref, request) async {
+      final (asset, size) = request;
       try {
-        return await asset.thumbnailDataWithSize(const ThumbnailSize(282, 177));
+        return await asset.thumbnailDataWithSize(size);
       } on Exception {
         return null;
       }
@@ -186,23 +187,29 @@ class LibraryThumbnail extends ConsumerWidget {
     this.width = 94,
     this.height = 59,
     this.showDuration = false,
+    this.radius = 9,
+    this.thumbnailSize = const ThumbnailSize(282, 177),
   });
 
   final AssetEntity asset;
   final double width;
   final double height;
   final bool showDuration;
+  final double radius;
+  final ThumbnailSize thumbnailSize;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final bytes = ref.watch(_libraryThumbnailProvider(asset)).valueOrNull;
+    final bytes = ref
+        .watch(_libraryThumbnailProvider((asset, thumbnailSize)))
+        .valueOrNull;
     final placeholder = ColoredBox(
       color: libraryTint,
       child: Icon(CupertinoIcons.film, size: 18, color: libraryMuted),
     );
     return ExcludeSemantics(
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(9),
+        borderRadius: BorderRadius.circular(radius),
         child: SizedBox(
           width: width,
           height: height,
