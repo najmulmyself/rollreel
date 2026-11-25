@@ -285,9 +285,8 @@ class _HomeSheet extends StatelessWidget {
             alignment: Alignment.topCenter,
             children: [
               for (final child in previous)
-                Positioned.fill(
-                  child: IgnorePointer(child: ExcludeSemantics(child: child)),
-                ),
+                // Keep outgoing panels at their natural height as they fade.
+                IgnorePointer(child: ExcludeSemantics(child: child)),
               if (current != null) current,
             ],
           ),
