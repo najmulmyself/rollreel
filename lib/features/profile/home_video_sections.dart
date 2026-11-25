@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +10,7 @@ import '../../core/memories/on_this_day_provider.dart';
 import '../../core/permissions/permission_provider.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/typography.dart';
+import '../../core/video/capture_video.dart';
 import '../../core/video/video_library_provider.dart';
 import '../../l10n/app_localizations.dart';
 import 'home_clip_player.dart';
@@ -70,9 +69,7 @@ class _HomeVideoSectionsState extends ConsumerState<HomeVideoSections> {
     }
   }
 
-  Future<void> _openCamera() => _saveCameraResult(
-    () => ImagePicker().pickVideo(source: ImageSource.camera),
-  );
+  Future<void> _openCamera() => _saveCameraResult(recordVideo);
 
   Future<void> _saveCameraResult(Future<XFile?> Function() loadClip) async {
     if (_openingCamera) return;
@@ -80,13 +77,7 @@ class _HomeVideoSectionsState extends ConsumerState<HomeVideoSections> {
     try {
       final clip = await loadClip();
       if (clip == null) return;
-      final file = File(clip.path);
-      await PhotoManager.editor.saveVideo(file);
-      try {
-        await file.delete();
-      } on FileSystemException catch (error) {
-        debugPrint('Could not remove temporary camera video: $error');
-      }
+      await saveRecordedVideo(clip);
       if (!mounted) return;
       HapticFeedback.mediumImpact();
       ref.invalidate(videoLibraryProvider);
@@ -132,16 +123,12 @@ class _HomeVideoSectionsState extends ConsumerState<HomeVideoSections> {
       }
     }
     if (latest == null) {
-      final canRecord =
-          !kIsWeb &&
-          (defaultTargetPlatform == TargetPlatform.iOS ||
-              defaultTargetPlatform == TargetPlatform.android);
       return _LibraryMessage(
         icon: CupertinoIcons.photo,
         title: l10n.homeEmptyTitle,
         body: l10n.homeEmptyBody,
-        action: canRecord ? l10n.homeOpenCamera : l10n.library,
-        onPressed: canRecord
+        action: canRecordVideo ? l10n.homeOpenCamera : l10n.library,
+        onPressed: canRecordVideo
             ? (_openingCamera ? null : _openCamera)
             : widget.onOpenLibrary,
       );

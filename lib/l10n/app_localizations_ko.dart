@@ -331,7 +331,57 @@ class AppLocalizationsKo extends AppLocalizations {
   String get feed => '피드';
 
   @override
-  String get library => 'Library';
+  String get library => '보관함';
+
+  @override
+  String get libraryFilters => '필터';
+
+  @override
+  String get libraryClose => '닫기';
+
+  @override
+  String get libraryEmptyTitle => '아직 동영상이 없어요';
+
+  @override
+  String get libraryAccessOff => '사진 접근 권한이 꺼져 있어요';
+
+  @override
+  String get libraryNoMatches => '일치하는 동영상이 없어요';
+
+  @override
+  String get librarySearchHelp => '다른 제목을 검색하거나 검색어를 지워 보세요.';
+
+  @override
+  String get libraryNoFilterMatches => '이 필터와 일치하는 동영상이 없어요';
+
+  @override
+  String get libraryFilterHelp => '모든 동영상을 보려면 필터를 지우세요.';
+
+  @override
+  String get libraryUnknownDate => '날짜를 알 수 없음';
+
+  @override
+  String get libraryDeleteFailed => 'RollReel에서 동영상을 삭제할 수 없어요.';
+
+  @override
+  String libraryDeviceCount(int count) {
+    return '이 기기의 동영상 $count개';
+  }
+
+  @override
+  String libraryMemoriesCount(int count) {
+    return '지난해 같은 날의 동영상 $count개';
+  }
+
+  @override
+  String libraryVideoOptions(String title) {
+    return '$title 옵션';
+  }
+
+  @override
+  String libraryVideoRow(String title, String date, String duration) {
+    return '$title · $date · $duration';
+  }
 
   @override
   String get favoritesEmptyTitle => 'No Favorites Yet';

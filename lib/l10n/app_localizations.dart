@@ -744,6 +744,90 @@ abstract class AppLocalizations {
   /// **'Library'**
   String get library;
 
+  /// No description provided for @libraryFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Filters'**
+  String get libraryFilters;
+
+  /// No description provided for @libraryClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get libraryClose;
+
+  /// No description provided for @libraryEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No videos yet'**
+  String get libraryEmptyTitle;
+
+  /// No description provided for @libraryAccessOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Photos access is off'**
+  String get libraryAccessOff;
+
+  /// No description provided for @libraryNoMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching videos'**
+  String get libraryNoMatches;
+
+  /// No description provided for @librarySearchHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a different title or clear your search.'**
+  String get librarySearchHelp;
+
+  /// No description provided for @libraryNoFilterMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'No videos match these filters'**
+  String get libraryNoFilterMatches;
+
+  /// No description provided for @libraryFilterHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear the filters to see all of your videos.'**
+  String get libraryFilterHelp;
+
+  /// No description provided for @libraryUnknownDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date unknown'**
+  String get libraryUnknownDate;
+
+  /// No description provided for @libraryDeleteFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'RollReel couldn’t delete the video.'**
+  String get libraryDeleteFailed;
+
+  /// No description provided for @libraryDeviceCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 video} other{{count} videos}} on this device'**
+  String libraryDeviceCount(int count);
+
+  /// No description provided for @libraryMemoriesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{1 video} other{{count} videos}} from past years'**
+  String libraryMemoriesCount(int count);
+
+  /// No description provided for @libraryVideoOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Options for {title}'**
+  String libraryVideoOptions(String title);
+
+  /// No description provided for @libraryVideoRow.
+  ///
+  /// In en, this message translates to:
+  /// **'{title} · {date} · {duration}'**
+  String libraryVideoRow(String title, String date, String duration);
+
   /// No description provided for @favoritesEmptyTitle.
   ///
   /// In en, this message translates to:
@@ -867,7 +951,7 @@ abstract class AppLocalizations {
   /// No description provided for @timePeriod.
   ///
   /// In en, this message translates to:
-  /// **'TIME PERIOD'**
+  /// **'Time period'**
   String get timePeriod;
 
   /// No description provided for @thisWeek.
@@ -885,7 +969,7 @@ abstract class AppLocalizations {
   /// No description provided for @duration.
   ///
   /// In en, this message translates to:
-  /// **'DURATION'**
+  /// **'Duration'**
   String get duration;
 
   /// No description provided for @any.
@@ -897,7 +981,7 @@ abstract class AppLocalizations {
   /// No description provided for @durationShort.
   ///
   /// In en, this message translates to:
-  /// **'< 1 min'**
+  /// **'Under 1 min'**
   String get durationShort;
 
   /// No description provided for @durationMedium.
@@ -909,13 +993,13 @@ abstract class AppLocalizations {
   /// No description provided for @durationLong.
   ///
   /// In en, this message translates to:
-  /// **'> 5 min'**
+  /// **'Over 5 min'**
   String get durationLong;
 
   /// No description provided for @sortBy.
   ///
   /// In en, this message translates to:
-  /// **'SORT BY'**
+  /// **'Sort by'**
   String get sortBy;
 
   /// No description provided for @newestFirst.

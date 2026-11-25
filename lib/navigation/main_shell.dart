@@ -139,7 +139,7 @@ class _MainShellState extends ConsumerState<MainShell> {
       ),
       bottomNavigationBar: MainNavBar(
         currentIndex: _tab,
-        flat: _tab == 0,
+        flat: _tab == 0 || _tab == 1,
         onTap: _setTab,
         onCenterTap: () => _openFeed(context),
       ),

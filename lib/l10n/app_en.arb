@@ -134,6 +134,54 @@
   "infoFormat": "Format",
   "feed": "Feed",
   "library": "Library",
+  "libraryFilters": "Filters",
+  "libraryClose": "Close",
+  "libraryEmptyTitle": "No videos yet",
+  "libraryAccessOff": "Photos access is off",
+  "libraryNoMatches": "No matching videos",
+  "librarySearchHelp": "Try a different title or clear your search.",
+  "libraryNoFilterMatches": "No videos match these filters",
+  "libraryFilterHelp": "Clear the filters to see all of your videos.",
+  "libraryUnknownDate": "Date unknown",
+  "libraryDeleteFailed": "RollReel couldn’t delete the video.",
+  "libraryDeviceCount": "{count, plural, one{1 video} other{{count} videos}} on this device",
+  "libraryMemoriesCount": "{count, plural, one{1 video} other{{count} videos}} from past years",
+  "libraryVideoOptions": "Options for {title}",
+  "libraryVideoRow": "{title} · {date} · {duration}",
+  "@libraryDeviceCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@libraryMemoriesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@libraryVideoOptions": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@libraryVideoRow": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
   "favoritesEmptyTitle": "No Favorites Yet",
   "favoritesEmptyBody": "Tap the heart on any video to save it here.",
   "goToLibrary": "Go to Library",
@@ -168,15 +216,15 @@
   "clearFilters": "Clear Filters",
   "filter": "Filter",
   "reset": "Reset",
-  "timePeriod": "TIME PERIOD",
+  "timePeriod": "Time period",
   "thisWeek": "This Week",
   "thisMonth": "This Month",
-  "duration": "DURATION",
+  "duration": "Duration",
   "any": "Any",
-  "durationShort": "< 1 min",
+  "durationShort": "Under 1 min",
   "durationMedium": "1–5 min",
-  "durationLong": "> 5 min",
-  "sortBy": "SORT BY",
+  "durationLong": "Over 5 min",
+  "sortBy": "Sort by",
   "newestFirst": "Newest First",
   "oldestFirst": "Oldest First",
   "shortestFirst": "Shortest First",

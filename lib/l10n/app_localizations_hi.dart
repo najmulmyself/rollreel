@@ -342,7 +342,57 @@ class AppLocalizationsHi extends AppLocalizations {
   String get feed => 'फ़ीड';
 
   @override
-  String get library => 'Library';
+  String get library => 'लाइब्रेरी';
+
+  @override
+  String get libraryFilters => 'फ़िल्टर';
+
+  @override
+  String get libraryClose => 'बंद करें';
+
+  @override
+  String get libraryEmptyTitle => 'अभी कोई वीडियो नहीं है';
+
+  @override
+  String get libraryAccessOff => 'फ़ोटो की अनुमति बंद है';
+
+  @override
+  String get libraryNoMatches => 'कोई मिलता-जुलता वीडियो नहीं मिला';
+
+  @override
+  String get librarySearchHelp => 'दूसरा शीर्षक आज़माएँ या खोज साफ़ करें।';
+
+  @override
+  String get libraryNoFilterMatches => 'इन फ़िल्टर से कोई वीडियो नहीं मिला';
+
+  @override
+  String get libraryFilterHelp => 'सभी वीडियो देखने के लिए फ़िल्टर साफ़ करें।';
+
+  @override
+  String get libraryUnknownDate => 'तारीख अज्ञात है';
+
+  @override
+  String get libraryDeleteFailed => 'RollReel वीडियो नहीं मिटा पाया।';
+
+  @override
+  String libraryDeviceCount(int count) {
+    return 'इस डिवाइस पर $count वीडियो';
+  }
+
+  @override
+  String libraryMemoriesCount(int count) {
+    return 'पिछले सालों के $count वीडियो';
+  }
+
+  @override
+  String libraryVideoOptions(String title) {
+    return '$title के विकल्प';
+  }
+
+  @override
+  String libraryVideoRow(String title, String date, String duration) {
+    return '$title · $date · $duration';
+  }
 
   @override
   String get favoritesEmptyTitle => 'No Favorites Yet';

@@ -326,7 +326,57 @@ class AppLocalizationsZh extends AppLocalizations {
   String get feed => '动态';
 
   @override
-  String get library => 'Library';
+  String get library => '视频库';
+
+  @override
+  String get libraryFilters => '筛选';
+
+  @override
+  String get libraryClose => '关闭';
+
+  @override
+  String get libraryEmptyTitle => '暂无视频';
+
+  @override
+  String get libraryAccessOff => '照片访问已关闭';
+
+  @override
+  String get libraryNoMatches => '没有匹配的视频';
+
+  @override
+  String get librarySearchHelp => '试试其他标题或清除搜索。';
+
+  @override
+  String get libraryNoFilterMatches => '没有符合这些筛选条件的视频';
+
+  @override
+  String get libraryFilterHelp => '清除筛选条件即可查看所有视频。';
+
+  @override
+  String get libraryUnknownDate => '日期未知';
+
+  @override
+  String get libraryDeleteFailed => 'RollReel 无法删除该视频。';
+
+  @override
+  String libraryDeviceCount(int count) {
+    return '此设备上有 $count 段视频';
+  }
+
+  @override
+  String libraryMemoriesCount(int count) {
+    return '往年的 $count 段视频';
+  }
+
+  @override
+  String libraryVideoOptions(String title) {
+    return '$title的选项';
+  }
+
+  @override
+  String libraryVideoRow(String title, String date, String duration) {
+    return '$title · $date · $duration';
+  }
 
   @override
   String get favoritesEmptyTitle => 'No Favorites Yet';

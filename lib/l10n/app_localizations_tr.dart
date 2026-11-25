@@ -342,7 +342,58 @@ class AppLocalizationsTr extends AppLocalizations {
   String get feed => 'Akış';
 
   @override
-  String get library => 'Library';
+  String get library => 'Arşiv';
+
+  @override
+  String get libraryFilters => 'Filtreler';
+
+  @override
+  String get libraryClose => 'Kapat';
+
+  @override
+  String get libraryEmptyTitle => 'Henüz video yok';
+
+  @override
+  String get libraryAccessOff => 'Fotoğraflar erişimi kapalı';
+
+  @override
+  String get libraryNoMatches => 'Eşleşen video yok';
+
+  @override
+  String get librarySearchHelp => 'Başka bir başlık dene veya aramayı temizle.';
+
+  @override
+  String get libraryNoFilterMatches => 'Bu filtrelere uyan video yok';
+
+  @override
+  String get libraryFilterHelp =>
+      'Tüm videolarını görmek için filtreleri temizle.';
+
+  @override
+  String get libraryUnknownDate => 'Tarih bilinmiyor';
+
+  @override
+  String get libraryDeleteFailed => 'RollReel videoyu silemedi.';
+
+  @override
+  String libraryDeviceCount(int count) {
+    return 'Bu cihazda $count video';
+  }
+
+  @override
+  String libraryMemoriesCount(int count) {
+    return 'Geçmiş yıllardan $count video';
+  }
+
+  @override
+  String libraryVideoOptions(String title) {
+    return '$title seçenekleri';
+  }
+
+  @override
+  String libraryVideoRow(String title, String date, String duration) {
+    return '$title · $date · $duration';
+  }
 
   @override
   String get favoritesEmptyTitle => 'No Favorites Yet';

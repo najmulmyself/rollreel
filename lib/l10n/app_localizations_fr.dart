@@ -345,7 +345,72 @@ class AppLocalizationsFr extends AppLocalizations {
   String get feed => 'Flux';
 
   @override
-  String get library => 'Library';
+  String get library => 'Photothèque';
+
+  @override
+  String get libraryFilters => 'Filtres';
+
+  @override
+  String get libraryClose => 'Fermer';
+
+  @override
+  String get libraryEmptyTitle => 'Aucune vidéo pour le moment';
+
+  @override
+  String get libraryAccessOff => 'L’accès à Photos est désactivé';
+
+  @override
+  String get libraryNoMatches => 'Aucune vidéo correspondante';
+
+  @override
+  String get librarySearchHelp =>
+      'Essayez un autre titre ou effacez votre recherche.';
+
+  @override
+  String get libraryNoFilterMatches =>
+      'Aucune vidéo ne correspond à ces filtres';
+
+  @override
+  String get libraryFilterHelp =>
+      'Effacez les filtres pour voir toutes vos vidéos.';
+
+  @override
+  String get libraryUnknownDate => 'Date inconnue';
+
+  @override
+  String get libraryDeleteFailed => 'RollReel n’a pas pu supprimer la vidéo.';
+
+  @override
+  String libraryDeviceCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count vidéos',
+      one: '1 vidéo',
+    );
+    return '$_temp0 sur cet appareil';
+  }
+
+  @override
+  String libraryMemoriesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count vidéos',
+      one: '1 vidéo',
+    );
+    return '$_temp0 des années passées';
+  }
+
+  @override
+  String libraryVideoOptions(String title) {
+    return 'Options pour $title';
+  }
+
+  @override
+  String libraryVideoRow(String title, String date, String duration) {
+    return '$title · $date · $duration';
+  }
 
   @override
   String get favoritesEmptyTitle => 'No Favorites Yet';

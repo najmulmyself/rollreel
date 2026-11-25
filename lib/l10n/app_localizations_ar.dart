@@ -339,7 +339,57 @@ class AppLocalizationsAr extends AppLocalizations {
   String get feed => 'الموجز';
 
   @override
-  String get library => 'Library';
+  String get library => 'المكتبة';
+
+  @override
+  String get libraryFilters => 'عوامل التصفية';
+
+  @override
+  String get libraryClose => 'إغلاق';
+
+  @override
+  String get libraryEmptyTitle => 'لا توجد مقاطع بعد';
+
+  @override
+  String get libraryAccessOff => 'الوصول إلى الصور متوقف';
+
+  @override
+  String get libraryNoMatches => 'لا توجد مقاطع مطابقة';
+
+  @override
+  String get librarySearchHelp => 'جرّب عنوانًا آخر أو امسح البحث.';
+
+  @override
+  String get libraryNoFilterMatches => 'لا توجد مقاطع توافق عوامل التصفية هذه';
+
+  @override
+  String get libraryFilterHelp => 'امسح عوامل التصفية لعرض كل مقاطعك.';
+
+  @override
+  String get libraryUnknownDate => 'التاريخ غير معروف';
+
+  @override
+  String get libraryDeleteFailed => 'تعذّر على RollReel حذف المقطع.';
+
+  @override
+  String libraryDeviceCount(int count) {
+    return 'عدد المقاطع على هذا الجهاز: $count';
+  }
+
+  @override
+  String libraryMemoriesCount(int count) {
+    return 'مقاطع من الأعوام السابقة: $count';
+  }
+
+  @override
+  String libraryVideoOptions(String title) {
+    return 'خيارات $title';
+  }
+
+  @override
+  String libraryVideoRow(String title, String date, String duration) {
+    return '$title · $date · $duration';
+  }
 
   @override
   String get favoritesEmptyTitle => 'No Favorites Yet';

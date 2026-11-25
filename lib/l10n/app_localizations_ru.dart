@@ -343,7 +343,65 @@ class AppLocalizationsRu extends AppLocalizations {
   String get feed => 'Лента';
 
   @override
-  String get library => 'Library';
+  String get library => 'Медиатека';
+
+  @override
+  String get libraryFilters => 'Фильтры';
+
+  @override
+  String get libraryClose => 'Закрыть';
+
+  @override
+  String get libraryEmptyTitle => 'Здесь пока нет видео';
+
+  @override
+  String get libraryAccessOff => 'Доступ к «Фото» отключён';
+
+  @override
+  String get libraryNoMatches => 'Подходящих видео нет';
+
+  @override
+  String get librarySearchHelp =>
+      'Попробуйте другое название или сбросьте поиск.';
+
+  @override
+  String get libraryNoFilterMatches =>
+      'Этим фильтрам не соответствует ни одно видео';
+
+  @override
+  String get libraryFilterHelp => 'Сбросьте фильтры, чтобы увидеть все видео.';
+
+  @override
+  String get libraryUnknownDate => 'Дата неизвестна';
+
+  @override
+  String get libraryDeleteFailed => 'RollReel не удалось удалить видео.';
+
+  @override
+  String libraryDeviceCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count видео',
+      one: '$count видео',
+    );
+    return '$_temp0 на этом устройстве';
+  }
+
+  @override
+  String libraryMemoriesCount(int count) {
+    return '$count видео из прошлых лет';
+  }
+
+  @override
+  String libraryVideoOptions(String title) {
+    return 'Параметры для «$title»';
+  }
+
+  @override
+  String libraryVideoRow(String title, String date, String duration) {
+    return '$title · $date · $duration';
+  }
 
   @override
   String get favoritesEmptyTitle => 'No Favorites Yet';

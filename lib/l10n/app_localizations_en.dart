@@ -345,6 +345,69 @@ class AppLocalizationsEn extends AppLocalizations {
   String get library => 'Library';
 
   @override
+  String get libraryFilters => 'Filters';
+
+  @override
+  String get libraryClose => 'Close';
+
+  @override
+  String get libraryEmptyTitle => 'No videos yet';
+
+  @override
+  String get libraryAccessOff => 'Photos access is off';
+
+  @override
+  String get libraryNoMatches => 'No matching videos';
+
+  @override
+  String get librarySearchHelp => 'Try a different title or clear your search.';
+
+  @override
+  String get libraryNoFilterMatches => 'No videos match these filters';
+
+  @override
+  String get libraryFilterHelp =>
+      'Clear the filters to see all of your videos.';
+
+  @override
+  String get libraryUnknownDate => 'Date unknown';
+
+  @override
+  String get libraryDeleteFailed => 'RollReel couldn’t delete the video.';
+
+  @override
+  String libraryDeviceCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count videos',
+      one: '1 video',
+    );
+    return '$_temp0 on this device';
+  }
+
+  @override
+  String libraryMemoriesCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count videos',
+      one: '1 video',
+    );
+    return '$_temp0 from past years';
+  }
+
+  @override
+  String libraryVideoOptions(String title) {
+    return 'Options for $title';
+  }
+
+  @override
+  String libraryVideoRow(String title, String date, String duration) {
+    return '$title · $date · $duration';
+  }
+
+  @override
   String get favoritesEmptyTitle => 'No Favorites Yet';
 
   @override
@@ -410,7 +473,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reset => 'Reset';
 
   @override
-  String get timePeriod => 'TIME PERIOD';
+  String get timePeriod => 'Time period';
 
   @override
   String get thisWeek => 'This Week';
@@ -419,22 +482,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get thisMonth => 'This Month';
 
   @override
-  String get duration => 'DURATION';
+  String get duration => 'Duration';
 
   @override
   String get any => 'Any';
 
   @override
-  String get durationShort => '< 1 min';
+  String get durationShort => 'Under 1 min';
 
   @override
   String get durationMedium => '1–5 min';
 
   @override
-  String get durationLong => '> 5 min';
+  String get durationLong => 'Over 5 min';
 
   @override
-  String get sortBy => 'SORT BY';
+  String get sortBy => 'Sort by';
 
   @override
   String get newestFirst => 'Newest First';

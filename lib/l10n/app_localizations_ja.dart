@@ -331,7 +331,57 @@ class AppLocalizationsJa extends AppLocalizations {
   String get feed => 'フィード';
 
   @override
-  String get library => 'Library';
+  String get library => 'ライブラリ';
+
+  @override
+  String get libraryFilters => 'フィルター';
+
+  @override
+  String get libraryClose => '閉じる';
+
+  @override
+  String get libraryEmptyTitle => '動画はまだありません';
+
+  @override
+  String get libraryAccessOff => '写真へのアクセスがオフです';
+
+  @override
+  String get libraryNoMatches => '一致する動画はありません';
+
+  @override
+  String get librarySearchHelp => '別のタイトルで検索するか、検索をクリアしてください。';
+
+  @override
+  String get libraryNoFilterMatches => 'フィルターに一致する動画はありません';
+
+  @override
+  String get libraryFilterHelp => 'フィルターを解除するとすべての動画が表示されます。';
+
+  @override
+  String get libraryUnknownDate => '日付不明';
+
+  @override
+  String get libraryDeleteFailed => 'RollReel で動画を削除できませんでした。';
+
+  @override
+  String libraryDeviceCount(int count) {
+    return 'この端末に $count 本の動画';
+  }
+
+  @override
+  String libraryMemoriesCount(int count) {
+    return '過去の年の動画 $count 本';
+  }
+
+  @override
+  String libraryVideoOptions(String title) {
+    return '$titleのオプション';
+  }
+
+  @override
+  String libraryVideoRow(String title, String date, String duration) {
+    return '$title · $date · $duration';
+  }
 
   @override
   String get favoritesEmptyTitle => 'No Favorites Yet';
