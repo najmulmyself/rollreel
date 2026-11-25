@@ -119,9 +119,7 @@ class _MainShellState extends ConsumerState<MainShell> {
         index: _tab,
         children: [
           ProfileScreen(
-            onOpenSettings: () => _setTab(3),
             onOpenLibrary: () => _setTab(1),
-            onPlayAt: (assetId) => _openFeed(context, assetId: assetId),
             onOpenMemories: (assetId) => _openMemories(context, assetId),
           ),
           BrowseScreen(
@@ -141,6 +139,7 @@ class _MainShellState extends ConsumerState<MainShell> {
       ),
       bottomNavigationBar: MainNavBar(
         currentIndex: _tab,
+        flat: _tab == 0,
         onTap: _setTab,
         onCenterTap: () => _openFeed(context),
       ),

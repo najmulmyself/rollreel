@@ -1,14 +1,15 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import '../../core/favorites/favorites_provider.dart';
+import '../../core/permissions/permission_provider.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/typography.dart';
 import '../../core/video/video_library_provider.dart';
 import '../../l10n/app_localizations.dart';
+import 'home_video_sections.dart';
 
 final _visibleFavoritesCountProvider = FutureProvider.autoDispose<int>((
   ref,
@@ -26,133 +27,76 @@ class HomeDashboard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final permission = ref.watch(permissionProvider);
+    if (permission.hasError) {
+      return HomeLibraryError(
+        onRetry: () => ref.invalidate(permissionProvider),
+      );
+    }
+    if (!permission.isLoading && permission.valueOrNull?.hasAccess != true) {
+      return const HomePhotosAccess();
+    }
     final library = ref.watch(visibleVideosProvider);
     final favorites = ref.watch(_visibleFavoritesCountProvider);
+    if (library.hasError && !permission.isLoading) {
+      return HomeLibraryError(
+        onRetry: () => ref.invalidate(videoLibraryProvider),
+      );
+    }
+
     final locale = Localizations.localeOf(context).toString();
     final numbers = NumberFormat.decimalPattern(locale);
-    final now = DateTime.now();
-    final videos = library.isLoading ? null : library.asData?.value;
-    final summary = videos == null ? null : _LibrarySummary(videos, now);
+    final loading = permission.isLoading || library.isLoading;
+    final videos = loading ? null : library.valueOrNull;
+    final summary = videos == null
+        ? null
+        : _LibrarySummary(videos, DateTime.now());
 
-    String valueLabel(int? value, {required bool loading}) {
-      if (loading) return l10n.homeLoading;
+    String valueLabel(int? value, {bool isLoading = false}) {
+      if (loading || isLoading) return l10n.homeLoading;
       return value == null ? l10n.homeUnavailable : numbers.format(value);
     }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _DashboardCard(
-          title: l10n.today,
-          children: [
-            _DashboardRow(
-              label: l10n.homeRecordedToday,
-              value: valueLabel(summary?.today, loading: library.isLoading),
-            ),
-          ],
+        _ActivityHeading(l10n.homeYourActivity),
+        _ActivityRow(
+          label: l10n.homeRecordedToday,
+          value: valueLabel(summary?.today),
         ),
-        const SizedBox(height: 14),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            const gap = 10.0;
-            final width = (constraints.maxWidth - gap) / 2;
-            final metrics = [
-              (
-                icon: CupertinoIcons.videocam,
-                label: l10n.videosTitle,
-                value: valueLabel(videos?.length, loading: library.isLoading),
-              ),
-              (
-                icon: CupertinoIcons.heart,
-                label: l10n.favorites,
-                value: valueLabel(
-                  favorites.asData?.value,
-                  loading: favorites.isLoading,
-                ),
-              ),
-              (
-                icon: CupertinoIcons.play,
-                label: l10n.homePlays,
-                value: l10n.homeUnavailable,
-              ),
-              (
-                icon: CupertinoIcons.device_phone_portrait,
-                label: l10n.homeStorage,
-                value: l10n.homeUnavailable,
-              ),
-            ];
-            return Wrap(
-              spacing: gap,
-              runSpacing: gap,
-              children: [
-                for (final metric in metrics)
-                  SizedBox(
-                    width: width,
-                    child: _DashboardSurface(
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(metric.icon, color: _accent, size: 20),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(metric.label, style: _secondary),
-                                const SizedBox(height: 3),
-                                Text(metric.value, style: _headline),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-              ],
-            );
-          },
+        _ActivityRow(
+          label: l10n.videosTitle,
+          value: valueLabel(videos?.length),
         ),
-        const SizedBox(height: 14),
-        _DashboardCard(
-          title: l10n.homeWatchActivity,
-          children: [
-            Text(l10n.homeNoWatchHistory, style: _secondary),
-            const SizedBox(height: 10),
-            _DashboardRow(
-              label: l10n.homeWatchStreak,
-              value: l10n.homeUnavailable,
-            ),
-            _DashboardRow(
-              label: l10n.homeMostWatched,
-              value: l10n.homeUnavailable,
-            ),
-          ],
+        _ActivityRow(
+          label: l10n.favorites,
+          value: valueLabel(
+            favorites.valueOrNull,
+            isLoading: favorites.isLoading,
+          ),
         ),
-        const SizedBox(height: 14),
-        _DashboardCard(
-          title: l10n.homeTopFolders,
-          children: [
-            if (library.isLoading)
-              Text(l10n.loadingLibrary, style: _secondary)
-            else if (summary == null || summary.folders.isEmpty)
-              Text(l10n.homeFolderDetailsUnavailable, style: _secondary)
-            else
-              for (final folder in summary.folders)
-                _DashboardRow(
-                  label: folder.name,
-                  value: l10n.videosCount(folder.count),
-                ),
-          ],
-        ),
-        const SizedBox(height: 14),
-        _DashboardCard(
-          title: l10n.homeVideoRecap,
-          children: [
-            _DashboardRow(
-              label: l10n.homeRecordedThisYear,
-              value: valueLabel(summary?.year, loading: library.isLoading),
+        const SizedBox(height: 17),
+        _ActivityHeading(l10n.homeWatchActivity),
+        const SizedBox(height: 6),
+        _ActivityNote(l10n.homeNoWatchHistory),
+        const SizedBox(height: 17),
+        _ActivityHeading(l10n.homeTopFolders),
+        if (loading)
+          _ActivityNote(l10n.loadingLibrary)
+        else if (summary == null || summary.folders.isEmpty)
+          _ActivityNote(l10n.homeFolderDetailsUnavailable)
+        else
+          for (final folder in summary.folders)
+            _ActivityRow(
+              label: folder.name,
+              value: l10n.videosCount(folder.count),
             ),
-          ],
+        const SizedBox(height: 17),
+        _ActivityHeading(l10n.homeVideoRecap),
+        _ActivityRow(
+          label: l10n.homeRecordedThisYear,
+          value: valueLabel(summary?.year),
         ),
       ],
     );
@@ -197,85 +141,67 @@ class _LibrarySummary {
   late final List<({String name, int count})> folders;
 }
 
-Color get _ink =>
-    RRColors.isDark.value ? RRColors.textPrimary : RRColors.brandInk;
-Color get _accent =>
-    RRColors.isDark.value ? RRColors.accentCyan : RRColors.brandBlue;
-
-TextStyle get _headline => RRTypography.headline.copyWith(color: _ink);
-TextStyle get _secondary => RRTypography.subheadline.copyWith(
-  color: RRColors.isDark.value ? RRColors.textSecond : RRColors.brandMutedInk,
-);
-
-class _DashboardCard extends StatelessWidget {
-  const _DashboardCard({required this.title, required this.children});
+class _ActivityHeading extends StatelessWidget {
+  const _ActivityHeading(this.title);
 
   final String title;
-  final List<Widget> children;
 
   @override
   Widget build(BuildContext context) {
-    return _DashboardSurface(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Semantics(header: true, child: Text(title, style: _headline)),
-          const SizedBox(height: 8),
-          ...children,
-        ],
+    return Padding(
+      padding: const EdgeInsets.only(top: 6, bottom: 6),
+      child: Semantics(header: true, child: Text(title, style: homeHeading)),
+    );
+  }
+}
+
+class _ActivityNote extends StatelessWidget {
+  const _ActivityNote(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: RRTypography.subheadline.copyWith(
+        height: 1.5,
+        color: RRColors.isDark.value
+            ? RRColors.textSecond
+            : RRColors.brandMutedInk,
       ),
     );
   }
 }
 
-class _DashboardRow extends StatelessWidget {
-  const _DashboardRow({required this.label, required this.value});
+class _ActivityRow extends StatelessWidget {
+  const _ActivityRow({required this.label, required this.value});
 
   final String label;
   final String value;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
+    final style = RRTypography.body.copyWith(fontSize: 15, color: homeInk);
+    return Container(
+      constraints: const BoxConstraints(minHeight: 43),
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: homeRule)),
+      ),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(child: Text(label, style: _secondary)),
-          const SizedBox(width: 12),
-          Flexible(
+          Expanded(child: Text(label, style: style)),
+          const SizedBox(width: 8),
+          Expanded(
             child: Text(
               value,
               textAlign: TextAlign.end,
-              style: RRTypography.subheadline.copyWith(
-                color: _ink,
-                fontWeight: FontWeight.w600,
-              ),
+              style: style.copyWith(fontWeight: FontWeight.w700),
             ),
           ),
         ],
       ),
-    );
-  }
-}
-
-class _DashboardSurface extends StatelessWidget {
-  const _DashboardSurface({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = RRColors.isDark.value;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: RRColors.bgSurface,
-        border: Border.all(
-          color: isDark ? RRColors.divider : RRColors.brandOutline,
-        ),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Padding(padding: const EdgeInsets.all(14), child: child),
     );
   }
 }

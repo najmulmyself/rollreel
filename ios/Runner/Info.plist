@@ -42,6 +42,10 @@
 	<true/>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>RollReel reads your local videos to display them in a swipe feed. No videos are uploaded, transmitted, or stored outside your device.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>RollReel uses the camera to record a video when you tap Open Camera.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>RollReel uses the microphone to include sound in videos you record.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>RollReel may save generated thumbnails and edits back to your local library when you choose to do so.</string>
 	<key>UIUserInterfaceStyle</key>

@@ -79,7 +79,7 @@ final videoLibraryProvider = FutureProvider<List<AssetEntity>>((ref) async {
     return result;
   } catch (e) {
     debugPrint('Video library error: $e');
-    return [];
+    rethrow;
   }
 });
 

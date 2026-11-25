@@ -77,13 +77,7 @@ class _AppRouterState extends ConsumerState<AppRouter> with WidgetsBindingObserv
         _go(RRRoute.onboarding);
         return;
       }
-      // Silent check — no dialog shown when permission already determined
-      final perm = await PhotoManager.requestPermissionExtend();
-      if (perm.isAuth || perm == PermissionState.limited) {
-        _go(RRRoute.main);
-      } else {
-        _go(RRRoute.permissionDenied);
-      }
+      _go(RRRoute.main);
     } catch (_) {
       _go(RRRoute.onboarding);
     }

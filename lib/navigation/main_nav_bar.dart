@@ -4,9 +4,8 @@ import 'package:flutter/material.dart';
 import '../core/theme/colors.dart';
 import '../l10n/app_localizations.dart';
 
-/// Persistent 5-item floating bottom nav: Home / Library / floating center
-/// Play button / Favorites / Settings. A floating pill that follows the
-/// app's light/dark theme, sitting on top of any page background.
+/// Shared bottom navigation for Home, Library, Play, Favorites, and Settings.
+/// Home uses a full-width bar. The other destinations use the floating bar.
 /// [currentIndex] addresses the 4 real destinations (0=Home, 1=Library,
 /// 2=Favorites, 3=Settings) — the center button is a standalone action,
 /// not a tab.
@@ -16,11 +15,13 @@ class MainNavBar extends StatelessWidget {
     required this.currentIndex,
     required this.onTap,
     required this.onCenterTap,
+    this.flat = false,
   });
 
   final int currentIndex;
   final ValueChanged<int> onTap;
   final VoidCallback onCenterTap;
+  final bool flat;
 
   static const double _barHeight = 68;
 
@@ -29,38 +30,49 @@ class MainNavBar extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
     final isDark = RRColors.isDark.value;
-    final centerSize = isDark ? 60.0 : 54.0;
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        16,
-        0,
-        16,
-        bottomInset > 0 ? bottomInset : 12,
-      ),
+    final centerSize = flat ? 44.0 : (isDark ? 60.0 : 54.0);
+    final barHeight = flat ? 60.0 : _barHeight;
+    final bottom = bottomInset > 0 ? bottomInset : 12.0;
+    final barColor = isDark ? const Color(0xFF131320) : const Color(0xFFFBFDFF);
+    final outline = isDark
+        ? Colors.white.withValues(alpha: 0.06)
+        : const Color(0xFFDCE6ED);
+    return Container(
+      decoration: flat
+          ? BoxDecoration(
+              color: barColor,
+              border: Border(top: BorderSide(color: outline)),
+            )
+          : null,
+      padding: EdgeInsets.fromLTRB(flat ? 8 : 16, 0, flat ? 8 : 16, bottom),
       child: SizedBox(
-        height: _barHeight + 12,
+        height: barHeight + (flat ? 0 : 12),
         child: Stack(
           clipBehavior: Clip.none,
           alignment: Alignment.bottomCenter,
           children: [
             Container(
-              height: _barHeight,
-              decoration: BoxDecoration(
-                color: isDark ? const Color(0xF0131320) : Colors.white,
-                borderRadius: BorderRadius.circular(_barHeight / 2),
-                border: Border.all(
-                  color: isDark
-                      ? Colors.white.withValues(alpha: 0.06)
-                      : RRColors.brandOutline.withValues(alpha: 0.7),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: isDark ? 0.45 : 0.08),
-                    blurRadius: isDark ? 24 : 12,
-                    offset: Offset(0, isDark ? 10 : 3),
-                  ),
-                ],
-              ),
+              height: barHeight,
+              decoration: flat
+                  ? null
+                  : BoxDecoration(
+                      color: isDark ? const Color(0xF0131320) : Colors.white,
+                      borderRadius: BorderRadius.circular(_barHeight / 2),
+                      border: Border.all(
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.06)
+                            : RRColors.brandOutline.withValues(alpha: 0.7),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(
+                            alpha: isDark ? 0.45 : 0.08,
+                          ),
+                          blurRadius: isDark ? 24 : 12,
+                          offset: Offset(0, isDark ? 10 : 3),
+                        ),
+                      ],
+                    ),
               child: Row(
                 children: [
                   Expanded(
@@ -104,7 +116,7 @@ class MainNavBar extends StatelessWidget {
               ),
             ),
             Positioned(
-              bottom: (_barHeight - centerSize) / 2,
+              bottom: (barHeight - centerSize) / 2,
               child: Semantics(
                 label: l10n.feed,
                 button: true,
@@ -146,10 +158,10 @@ class MainNavBar extends StatelessWidget {
                       ],
                     ),
                     alignment: Alignment.center,
-                    child: const Icon(
+                    child: Icon(
                       CupertinoIcons.play_fill,
                       color: Colors.white,
-                      size: 24,
+                      size: flat ? 17 : 24,
                     ),
                   ),
                 ),
@@ -193,6 +205,9 @@ class _NavBtn extends StatelessWidget {
           const SizedBox(height: 3),
           Text(
             label,
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: color,
               fontSize: 11,
