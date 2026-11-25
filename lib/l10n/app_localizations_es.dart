@@ -599,28 +599,28 @@ class AppLocalizationsEs extends AppLocalizations {
   String get favorites => 'Favoritos';
 
   @override
-  String get playbackSection => 'REPRODUCCIÓN';
+  String get playbackSection => 'Reproducción';
 
   @override
   String get loopShortVideos => 'Repetir videos cortos';
 
   @override
-  String get loopShortVideosSub => 'Automatically loop to the next video';
+  String get loopShortVideosSub => 'Repite los clips de menos de 30 segundos';
 
   @override
   String get autoPlayOnLaunch => 'Reproducir al abrir';
 
   @override
-  String get autoPlayOnLaunchSub => 'Start playing videos automatically';
+  String get autoPlayOnLaunchSub => 'Empieza a reproducir al abrir el feed';
 
   @override
   String get defaultFilter => 'Filtro predeterminado';
 
   @override
-  String get defaultFilterSub => 'Set your default video filter';
+  String get defaultFilterSub => 'Elige qué aparece en el feed';
 
   @override
-  String get appearanceSection => 'APARIENCIA';
+  String get appearanceSection => 'Apariencia';
 
   @override
   String get darkMode => 'Modo oscuro';
@@ -641,7 +641,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get showDurationBadgesSub => 'Show video duration on thumbnails';
 
   @override
-  String get privacySection => 'PRIVACIDAD';
+  String get privacySection => 'Privacidad';
 
   @override
   String get privacyVault => 'Bóveda privada';
@@ -656,7 +656,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get proBadge => 'Pro';
 
   @override
-  String get aboutSection => 'ACERCA DE';
+  String get aboutSection => 'Acerca de';
 
   @override
   String get privacyPolicy => 'Política de privacidad';
@@ -673,6 +673,28 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get version => 'Versión';
+
+  @override
+  String get settingsFilterDescription =>
+      'Elige qué vídeos ves al abrir el feed.';
+
+  @override
+  String get settingsProDescription =>
+      'Reproducción sin anuncios y bóveda privada';
+
+  @override
+  String get settingsProActive => 'Pro está activo';
+
+  @override
+  String get settingsVaultDescription => 'Abre tus vídeos privados';
+
+  @override
+  String get settingsRestoreComplete =>
+      'Se han comprobado las compras anteriores.';
+
+  @override
+  String get settingsRestoreFailed =>
+      'No se pudieron restaurar las compras. Inténtalo de nuevo.';
 
   @override
   String get proCardSubtitle =>

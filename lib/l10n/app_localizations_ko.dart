@@ -574,19 +574,19 @@ class AppLocalizationsKo extends AppLocalizations {
   String get loopShortVideos => '짧은 동영상 반복 재생';
 
   @override
-  String get loopShortVideosSub => 'Automatically loop to the next video';
+  String get loopShortVideosSub => '30초 미만의 클립을 반복 재생';
 
   @override
   String get autoPlayOnLaunch => '실행 시 자동 재생';
 
   @override
-  String get autoPlayOnLaunchSub => 'Start playing videos automatically';
+  String get autoPlayOnLaunchSub => '피드를 열면 재생 시작';
 
   @override
   String get defaultFilter => '기본 필터';
 
   @override
-  String get defaultFilterSub => 'Set your default video filter';
+  String get defaultFilterSub => '피드에 표시할 동영상 선택';
 
   @override
   String get appearanceSection => '화면';
@@ -642,6 +642,24 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get version => '버전';
+
+  @override
+  String get settingsFilterDescription => '피드를 열 때 표시할 동영상을 선택하세요.';
+
+  @override
+  String get settingsProDescription => '광고 없는 재생과 프라이버시 금고';
+
+  @override
+  String get settingsProActive => 'Pro 사용 중';
+
+  @override
+  String get settingsVaultDescription => '비공개 동영상 열기';
+
+  @override
+  String get settingsRestoreComplete => '이전 구매 내역 확인이 완료되었습니다.';
+
+  @override
+  String get settingsRestoreFailed => '구매를 복원할 수 없습니다. 다시 시도해 주세요.';
 
   @override
   String get proCardSubtitle => '광고 없음 · 금고 · 배속 · 컬렉션';

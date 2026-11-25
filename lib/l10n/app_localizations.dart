@@ -1155,55 +1155,55 @@ abstract class AppLocalizations {
   /// No description provided for @playbackSection.
   ///
   /// In en, this message translates to:
-  /// **'PLAYBACK'**
+  /// **'Playback'**
   String get playbackSection;
 
   /// No description provided for @loopShortVideos.
   ///
   /// In en, this message translates to:
-  /// **'Loop Short Videos'**
+  /// **'Loop short videos'**
   String get loopShortVideos;
 
   /// No description provided for @loopShortVideosSub.
   ///
   /// In en, this message translates to:
-  /// **'Automatically loop to the next video'**
+  /// **'Replay clips under 30 seconds'**
   String get loopShortVideosSub;
 
   /// No description provided for @autoPlayOnLaunch.
   ///
   /// In en, this message translates to:
-  /// **'Auto-play on Launch'**
+  /// **'Auto-play on launch'**
   String get autoPlayOnLaunch;
 
   /// No description provided for @autoPlayOnLaunchSub.
   ///
   /// In en, this message translates to:
-  /// **'Start playing videos automatically'**
+  /// **'Start playback when the feed opens'**
   String get autoPlayOnLaunchSub;
 
   /// No description provided for @defaultFilter.
   ///
   /// In en, this message translates to:
-  /// **'Default Filter'**
+  /// **'Default filter'**
   String get defaultFilter;
 
   /// No description provided for @defaultFilterSub.
   ///
   /// In en, this message translates to:
-  /// **'Set your default video filter'**
+  /// **'Choose what opens in the feed'**
   String get defaultFilterSub;
 
   /// No description provided for @appearanceSection.
   ///
   /// In en, this message translates to:
-  /// **'APPEARANCE'**
+  /// **'Appearance'**
   String get appearanceSection;
 
   /// No description provided for @darkMode.
   ///
   /// In en, this message translates to:
-  /// **'Dark Mode'**
+  /// **'Dark mode'**
   String get darkMode;
 
   /// No description provided for @darkModeSub.
@@ -1215,7 +1215,7 @@ abstract class AppLocalizations {
   /// No description provided for @showDateLabels.
   ///
   /// In en, this message translates to:
-  /// **'Show Date Labels'**
+  /// **'Show date labels'**
   String get showDateLabels;
 
   /// No description provided for @showDateLabelsSub.
@@ -1227,7 +1227,7 @@ abstract class AppLocalizations {
   /// No description provided for @showDurationBadges.
   ///
   /// In en, this message translates to:
-  /// **'Show Duration Badges'**
+  /// **'Show duration badges'**
   String get showDurationBadges;
 
   /// No description provided for @showDurationBadgesSub.
@@ -1239,7 +1239,7 @@ abstract class AppLocalizations {
   /// No description provided for @privacySection.
   ///
   /// In en, this message translates to:
-  /// **'PRIVACY'**
+  /// **'Privacy'**
   String get privacySection;
 
   /// No description provided for @privacyVault.
@@ -1269,7 +1269,7 @@ abstract class AppLocalizations {
   /// No description provided for @aboutSection.
   ///
   /// In en, this message translates to:
-  /// **'ABOUT'**
+  /// **'About'**
   String get aboutSection;
 
   /// No description provided for @privacyPolicy.
@@ -1301,6 +1301,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Version'**
   String get version;
+
+  /// No description provided for @settingsFilterDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose which videos you see when you open the feed.'**
+  String get settingsFilterDescription;
+
+  /// No description provided for @settingsProDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Ad-free playback and Privacy Vault'**
+  String get settingsProDescription;
+
+  /// No description provided for @settingsProActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro is active'**
+  String get settingsProActive;
+
+  /// No description provided for @settingsVaultDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Open your private videos'**
+  String get settingsVaultDescription;
+
+  /// No description provided for @settingsRestoreComplete.
+  ///
+  /// In en, this message translates to:
+  /// **'Finished checking for past purchases.'**
+  String get settingsRestoreComplete;
+
+  /// No description provided for @settingsRestoreFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t restore purchases. Please try again.'**
+  String get settingsRestoreFailed;
 
   /// No description provided for @proCardSubtitle.
   ///

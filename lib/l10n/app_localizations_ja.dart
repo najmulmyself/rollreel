@@ -574,19 +574,19 @@ class AppLocalizationsJa extends AppLocalizations {
   String get loopShortVideos => 'ショート動画をループ再生';
 
   @override
-  String get loopShortVideosSub => 'Automatically loop to the next video';
+  String get loopShortVideosSub => '30秒未満のクリップを繰り返し再生';
 
   @override
   String get autoPlayOnLaunch => '起動時に自動再生';
 
   @override
-  String get autoPlayOnLaunchSub => 'Start playing videos automatically';
+  String get autoPlayOnLaunchSub => 'フィードを開くと再生を開始';
 
   @override
   String get defaultFilter => 'デフォルトのフィルタ';
 
   @override
-  String get defaultFilterSub => 'Set your default video filter';
+  String get defaultFilterSub => 'フィードに表示する動画を選ぶ';
 
   @override
   String get appearanceSection => '外観';
@@ -642,6 +642,24 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get version => 'バージョン';
+
+  @override
+  String get settingsFilterDescription => 'フィードを開いたときに表示する動画を選びます。';
+
+  @override
+  String get settingsProDescription => '広告なしの再生とプライバシー金庫';
+
+  @override
+  String get settingsProActive => 'Pro が有効です';
+
+  @override
+  String get settingsVaultDescription => 'プライベート動画を開く';
+
+  @override
+  String get settingsRestoreComplete => '過去の購入の確認が完了しました。';
+
+  @override
+  String get settingsRestoreFailed => '購入を復元できませんでした。もう一度お試しください。';
 
   @override
   String get proCardSubtitle => '広告なし · 金庫 · 倍速 · コレクション';

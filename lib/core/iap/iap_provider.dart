@@ -27,8 +27,9 @@ class _IsProNotifier extends StateNotifier<bool> {
   }
 }
 
-final isProProvider =
-    StateNotifierProvider<_IsProNotifier, bool>((ref) => _IsProNotifier());
+final isProProvider = StateNotifierProvider<_IsProNotifier, bool>(
+  (ref) => _IsProNotifier(),
+);
 
 // ─── IAP state ────────────────────────────────────────────────────────────────
 
@@ -51,55 +52,62 @@ class IAPState {
     Map<String, ProductDetails>? products,
     String? error,
     bool clearError = false,
-  }) =>
-      IAPState(
-        available: available ?? this.available,
-        loading: loading ?? this.loading,
-        products: products ?? this.products,
-        error: clearError ? null : (error ?? this.error),
-      );
+  }) => IAPState(
+    available: available ?? this.available,
+    loading: loading ?? this.loading,
+    products: products ?? this.products,
+    error: clearError ? null : (error ?? this.error),
+  );
 }
 
 // ─── IAP notifier ─────────────────────────────────────────────────────────────
 
 class IAPNotifier extends StateNotifier<IAPState> {
   IAPNotifier(this._ref) : super(const IAPState()) {
-    _init();
+    _ready = _init();
   }
 
   final Ref _ref;
+  late final Future<void> _ready;
   StreamSubscription<List<PurchaseDetails>>? _sub;
+  bool _restoring = false;
 
   Future<void> _init() async {
-    final available = await InAppPurchase.instance.isAvailable();
-    if (!available) {
-      state = const IAPState(available: false);
-      return;
-    }
-
-    _sub = InAppPurchase.instance.purchaseStream.listen(
-      _onPurchaseUpdate,
-      onError: (Object e) =>
-          state = state.copyWith(loading: false, error: e.toString()),
-    );
-
-    final response = await InAppPurchase.instance
-        .queryProductDetails({kProductLifetime, kProductMonthly});
-
-    debugPrint(
+    try {
+      final store = InAppPurchase.instance;
+      final available = await store.isAvailable();
+      if (!mounted || !available) return;
+      _sub ??= store.purchaseStream.listen(
+        _onPurchaseUpdate,
+        onError: (Object error) {
+          state = state.copyWith(loading: _restoring, error: error.toString());
+        },
+      );
+      state = state.copyWith(available: true);
+      final response = await store.queryProductDetails({
+        kProductLifetime,
+        kProductMonthly,
+      });
+      debugPrint(
         '[RollReel] IAP products found: ${response.productDetails.map((p) => p.id).toList()}, '
-        'not found: ${response.notFoundIDs}, error: ${response.error}');
-
-    state = IAPState(
-      available: true,
-      products: {for (final p in response.productDetails) p.id: p},
-    );
+        'not found: ${response.notFoundIDs}, error: ${response.error}',
+      );
+      if (!mounted) return;
+      state = state.copyWith(
+        products: {for (final p in response.productDetails) p.id: p},
+      );
+    } catch (error) {
+      debugPrint('[RollReel] Store initialization failed: $error');
+    }
   }
 
   Future<void> purchase(String productId) async {
+    if (state.loading) return;
     final product = state.products[productId];
     if (product == null) {
-      debugPrint('[RollReel] purchase() called for $productId but product not found');
+      debugPrint(
+        '[RollReel] purchase() called for $productId but product not found',
+      );
       state = state.copyWith(
         error: 'This plan isn\'t available right now. Please try again later.',
       );
@@ -110,9 +118,24 @@ class IAPNotifier extends StateNotifier<IAPState> {
     await InAppPurchase.instance.buyNonConsumable(purchaseParam: param);
   }
 
-  Future<void> restore() async {
+  Future<bool> restore() async {
+    if (state.loading) return false;
+    _restoring = true;
     state = state.copyWith(loading: true, clearError: true);
-    await InAppPurchase.instance.restorePurchases();
+    try {
+      await _ready;
+      if (!mounted) return false;
+      if (!state.available) await _init();
+      if (!mounted || !state.available) return false;
+      await InAppPurchase.instance.restorePurchases();
+      return mounted && state.error == null;
+    } catch (error) {
+      if (mounted) state = state.copyWith(error: error.toString());
+      return false;
+    } finally {
+      _restoring = false;
+      if (mounted) state = state.copyWith(loading: false);
+    }
   }
 
   Future<void> _onPurchaseUpdate(List<PurchaseDetails> purchases) async {
@@ -124,20 +147,23 @@ class IAPNotifier extends StateNotifier<IAPState> {
           await InAppPurchase.instance.completePurchase(purchase);
         case PurchaseStatus.error:
           state = state.copyWith(
-            loading: false,
+            loading: _restoring,
             error: purchase.error?.message ?? 'Purchase failed',
           );
         case PurchaseStatus.canceled:
-          state = state.copyWith(loading: false, clearError: true);
+          state = state.copyWith(loading: _restoring, clearError: true);
         case PurchaseStatus.pending:
           break;
       }
     }
-    if (purchases.every((p) =>
-        p.status == PurchaseStatus.purchased ||
-        p.status == PurchaseStatus.restored ||
-        p.status == PurchaseStatus.canceled ||
-        p.status == PurchaseStatus.error)) {
+    if (!_restoring &&
+        purchases.every(
+          (p) =>
+              p.status == PurchaseStatus.purchased ||
+              p.status == PurchaseStatus.restored ||
+              p.status == PurchaseStatus.canceled ||
+              p.status == PurchaseStatus.error,
+        )) {
       state = state.copyWith(loading: false);
     }
   }
@@ -149,5 +175,6 @@ class IAPNotifier extends StateNotifier<IAPState> {
   }
 }
 
-final iapProvider =
-    StateNotifierProvider<IAPNotifier, IAPState>((ref) => IAPNotifier(ref));
+final iapProvider = StateNotifierProvider<IAPNotifier, IAPState>(
+  (ref) => IAPNotifier(ref),
+);

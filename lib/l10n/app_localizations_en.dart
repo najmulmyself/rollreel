@@ -594,49 +594,49 @@ class AppLocalizationsEn extends AppLocalizations {
   String get favorites => 'Favorites';
 
   @override
-  String get playbackSection => 'PLAYBACK';
+  String get playbackSection => 'Playback';
 
   @override
-  String get loopShortVideos => 'Loop Short Videos';
+  String get loopShortVideos => 'Loop short videos';
 
   @override
-  String get loopShortVideosSub => 'Automatically loop to the next video';
+  String get loopShortVideosSub => 'Replay clips under 30 seconds';
 
   @override
-  String get autoPlayOnLaunch => 'Auto-play on Launch';
+  String get autoPlayOnLaunch => 'Auto-play on launch';
 
   @override
-  String get autoPlayOnLaunchSub => 'Start playing videos automatically';
+  String get autoPlayOnLaunchSub => 'Start playback when the feed opens';
 
   @override
-  String get defaultFilter => 'Default Filter';
+  String get defaultFilter => 'Default filter';
 
   @override
-  String get defaultFilterSub => 'Set your default video filter';
+  String get defaultFilterSub => 'Choose what opens in the feed';
 
   @override
-  String get appearanceSection => 'APPEARANCE';
+  String get appearanceSection => 'Appearance';
 
   @override
-  String get darkMode => 'Dark Mode';
+  String get darkMode => 'Dark mode';
 
   @override
   String get darkModeSub => 'Use dark theme for the app';
 
   @override
-  String get showDateLabels => 'Show Date Labels';
+  String get showDateLabels => 'Show date labels';
 
   @override
   String get showDateLabelsSub => 'Display date on video thumbnails';
 
   @override
-  String get showDurationBadges => 'Show Duration Badges';
+  String get showDurationBadges => 'Show duration badges';
 
   @override
   String get showDurationBadgesSub => 'Show video duration on thumbnails';
 
   @override
-  String get privacySection => 'PRIVACY';
+  String get privacySection => 'Privacy';
 
   @override
   String get privacyVault => 'Privacy Vault';
@@ -651,7 +651,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get proBadge => 'Pro';
 
   @override
-  String get aboutSection => 'ABOUT';
+  String get aboutSection => 'About';
 
   @override
   String get privacyPolicy => 'Privacy Policy';
@@ -668,6 +668,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get version => 'Version';
+
+  @override
+  String get settingsFilterDescription =>
+      'Choose which videos you see when you open the feed.';
+
+  @override
+  String get settingsProDescription => 'Ad-free playback and Privacy Vault';
+
+  @override
+  String get settingsProActive => 'Pro is active';
+
+  @override
+  String get settingsVaultDescription => 'Open your private videos';
+
+  @override
+  String get settingsRestoreComplete => 'Finished checking for past purchases.';
+
+  @override
+  String get settingsRestoreFailed =>
+      'Couldn’t restore purchases. Please try again.';
 
   @override
   String get proCardSubtitle => 'Ad-free · Vault · Speed · Collections';

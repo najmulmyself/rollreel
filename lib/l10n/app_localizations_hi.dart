@@ -587,19 +587,19 @@ class AppLocalizationsHi extends AppLocalizations {
   String get loopShortVideos => 'छोटे वीडियो लूप करें';
 
   @override
-  String get loopShortVideosSub => 'Automatically loop to the next video';
+  String get loopShortVideosSub => '30 सेकंड से छोटी क्लिप दोबारा चलाएँ';
 
   @override
   String get autoPlayOnLaunch => 'खुलते ही ऑटो-प्ले';
 
   @override
-  String get autoPlayOnLaunchSub => 'Start playing videos automatically';
+  String get autoPlayOnLaunchSub => 'फ़ीड खोलते ही वीडियो चलाएँ';
 
   @override
   String get defaultFilter => 'डिफ़ॉल्ट फ़िल्टर';
 
   @override
-  String get defaultFilterSub => 'Set your default video filter';
+  String get defaultFilterSub => 'चुनें कि फ़ीड में क्या दिखे';
 
   @override
   String get appearanceSection => 'दिखावट';
@@ -655,6 +655,27 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get version => 'संस्करण';
+
+  @override
+  String get settingsFilterDescription =>
+      'चुनें कि फ़ीड खोलने पर कौन से वीडियो दिखें।';
+
+  @override
+  String get settingsProDescription =>
+      'बिना विज्ञापन के वीडियो और प्राइवेसी वॉल्ट';
+
+  @override
+  String get settingsProActive => 'Pro चालू है';
+
+  @override
+  String get settingsVaultDescription => 'अपने निजी वीडियो खोलें';
+
+  @override
+  String get settingsRestoreComplete => 'पिछली खरीदारी की जाँच पूरी हुई।';
+
+  @override
+  String get settingsRestoreFailed =>
+      'खरीदारी बहाल नहीं हो सकी। फिर से कोशिश करें।';
 
   @override
   String get proCardSubtitle => 'विज्ञापन-मुक्त · वॉल्ट · स्पीड · कलेक्शन';

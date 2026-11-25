@@ -4,169 +4,127 @@ import 'package:flutter/material.dart';
 import '../core/theme/colors.dart';
 import '../l10n/app_localizations.dart';
 
-/// Shared bottom navigation for Home, Library, Play, Favorites, and Settings.
-/// Home, Library, and Favorites use a full-width bar. Settings uses a floating bar.
-/// [currentIndex] addresses the 4 real destinations (0=Home, 1=Library,
-/// 2=Favorites, 3=Settings) — the center button is a standalone action,
-/// not a tab.
+/// The center Play button opens the player without changing the selected tab.
 class MainNavBar extends StatelessWidget {
   const MainNavBar({
     super.key,
     required this.currentIndex,
+    required this.isDark,
     required this.onTap,
     required this.onCenterTap,
-    this.flat = false,
   });
 
   final int currentIndex;
+  final bool isDark;
   final ValueChanged<int> onTap;
   final VoidCallback onCenterTap;
-  final bool flat;
-
-  static const double _barHeight = 68;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final bottomInset = MediaQuery.paddingOf(context).bottom;
-    final isDark = RRColors.isDark.value;
-    final centerSize = flat ? 44.0 : (isDark ? 60.0 : 54.0);
-    final barHeight = flat ? 60.0 : _barHeight;
-    final bottom = bottomInset > 0 ? bottomInset : 12.0;
-    final barColor = isDark ? const Color(0xFF131320) : const Color(0xFFFBFDFF);
-    final outline = isDark
-        ? Colors.white.withValues(alpha: 0.06)
+    final darkSettings = isDark && currentIndex == 3;
+    final accent = darkSettings
+        ? const Color(0xFFA9DFFF)
+        : isDark
+        ? RRColors.accentViolet
+        : RRColors.brandBlue;
+    final muted = darkSettings
+        ? const Color(0xFFB0C4D5)
+        : isDark
+        ? const Color(0xFF7A7A8C)
+        : RRColors.brandMutedInk;
+    final background = darkSettings
+        ? const Color(0xFF0E1D2C)
+        : isDark
+        ? const Color(0xFF131320)
+        : const Color(0xFFFBFDFF);
+    final outline = darkSettings
+        ? const Color(0xFF2A3D52)
+        : isDark
+        ? const Color(0x0FFFFFFF)
         : const Color(0xFFDCE6ED);
+    final destinations = [
+      (CupertinoIcons.house, CupertinoIcons.house_fill, l10n.home),
+      (CupertinoIcons.folder, CupertinoIcons.folder_fill, l10n.library),
+      (CupertinoIcons.heart, CupertinoIcons.heart_fill, l10n.favorites),
+      (CupertinoIcons.gear_alt, CupertinoIcons.gear_alt_fill, l10n.settings),
+    ];
+
+    Widget destination(int index) {
+      final (icon, activeIcon, label) = destinations[index];
+      final active = currentIndex == index;
+      return Expanded(
+        child: _NavBtn(
+          icon: active ? activeIcon : icon,
+          label: label,
+          selected: active,
+          color: active ? accent : muted,
+          onTap: () => onTap(index),
+        ),
+      );
+    }
+
     return Container(
-      decoration: flat
-          ? BoxDecoration(
-              color: barColor,
-              border: Border(top: BorderSide(color: outline)),
-            )
-          : null,
-      padding: EdgeInsets.fromLTRB(flat ? 8 : 16, 0, flat ? 8 : 16, bottom),
+      decoration: BoxDecoration(
+        color: background,
+        border: Border(top: BorderSide(color: outline)),
+      ),
+      padding: EdgeInsets.fromLTRB(8, 0, 8, bottomInset > 0 ? bottomInset : 12),
       child: SizedBox(
-        height: barHeight + (flat ? 0 : 12),
-        child: Stack(
-          clipBehavior: Clip.none,
-          alignment: Alignment.bottomCenter,
+        height: 60,
+        child: Row(
           children: [
-            Container(
-              height: barHeight,
-              decoration: flat
-                  ? null
-                  : BoxDecoration(
-                      color: isDark ? const Color(0xF0131320) : Colors.white,
-                      borderRadius: BorderRadius.circular(_barHeight / 2),
-                      border: Border.all(
-                        color: isDark
-                            ? Colors.white.withValues(alpha: 0.06)
-                            : RRColors.brandOutline.withValues(alpha: 0.7),
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(
-                            alpha: isDark ? 0.45 : 0.08,
-                          ),
-                          blurRadius: isDark ? 24 : 12,
-                          offset: Offset(0, isDark ? 10 : 3),
-                        ),
-                      ],
-                    ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: _NavBtn(
-                      icon: CupertinoIcons.house,
-                      activeIcon: CupertinoIcons.house_fill,
-                      label: l10n.home,
-                      active: currentIndex == 0,
-                      onTap: () => onTap(0),
-                    ),
-                  ),
-                  Expanded(
-                    child: _NavBtn(
-                      icon: CupertinoIcons.folder,
-                      activeIcon: CupertinoIcons.folder_fill,
-                      label: l10n.library,
-                      active: currentIndex == 1,
-                      onTap: () => onTap(1),
-                    ),
-                  ),
-                  SizedBox(width: centerSize),
-                  Expanded(
-                    child: _NavBtn(
-                      icon: CupertinoIcons.heart,
-                      activeIcon: CupertinoIcons.heart_fill,
-                      label: l10n.favorites,
-                      active: currentIndex == 2,
-                      onTap: () => onTap(2),
-                    ),
-                  ),
-                  Expanded(
-                    child: _NavBtn(
-                      icon: CupertinoIcons.gear_alt,
-                      activeIcon: CupertinoIcons.gear_alt_fill,
-                      label: l10n.settings,
-                      active: currentIndex == 3,
-                      onTap: () => onTap(3),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Positioned(
-              bottom: (barHeight - centerSize) / 2,
-              child: Semantics(
-                label: l10n.feed,
-                button: true,
+            destination(0),
+            destination(1),
+            Semantics(
+              label: l10n.feed,
+              button: true,
+              onTap: onCenterTap,
+              excludeSemantics: true,
+              child: GestureDetector(
                 onTap: onCenterTap,
-                excludeSemantics: true,
-                child: GestureDetector(
-                  onTap: onCenterTap,
-                  child: Container(
-                    width: centerSize,
-                    height: centerSize,
-                    decoration: BoxDecoration(
-                      color: isDark ? null : RRColors.brandBlue,
-                      gradient: isDark
-                          ? const LinearGradient(
-                              colors: [
-                                RRColors.accentBlue,
-                                RRColors.accentViolet,
-                              ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            )
-                          : null,
-                      shape: BoxShape.circle,
-                      border: isDark
-                          ? Border.all(
-                              color: Colors.white.withValues(alpha: 0.25),
-                              width: 2,
-                            )
-                          : null,
-                      boxShadow: [
-                        if (isDark)
-                          BoxShadow(
-                            color: RRColors.accentViolet.withValues(
-                              alpha: 0.55,
-                            ),
-                            blurRadius: 22,
-                            spreadRadius: 1,
-                          ),
-                      ],
-                    ),
-                    alignment: Alignment.center,
-                    child: Icon(
-                      CupertinoIcons.play_fill,
-                      color: Colors.white,
-                      size: flat ? 17 : 24,
-                    ),
+                child: Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: accent,
+                    gradient: isDark && !darkSettings
+                        ? const LinearGradient(
+                            colors: [
+                              RRColors.accentBlue,
+                              RRColors.accentViolet,
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          )
+                        : null,
+                    shape: BoxShape.circle,
+                    border: isDark && !darkSettings
+                        ? Border.all(color: const Color(0x40FFFFFF), width: 2)
+                        : null,
+                    boxShadow: [
+                      if (isDark && !darkSettings)
+                        const BoxShadow(
+                          color: Color(0x8C8B5CF6),
+                          blurRadius: 22,
+                          spreadRadius: 1,
+                        ),
+                    ],
+                  ),
+                  alignment: Alignment.center,
+                  child: Icon(
+                    CupertinoIcons.play_fill,
+                    color: darkSettings
+                        ? const Color(0xFF092840)
+                        : Colors.white,
+                    size: 17,
                   ),
                 ),
               ),
             ),
+            destination(2),
+            destination(3),
           ],
         ),
       ),
@@ -177,44 +135,44 @@ class MainNavBar extends StatelessWidget {
 class _NavBtn extends StatelessWidget {
   const _NavBtn({
     required this.icon,
-    required this.activeIcon,
     required this.label,
-    required this.active,
+    required this.selected,
+    required this.color,
     required this.onTap,
   });
 
   final IconData icon;
-  final IconData activeIcon;
   final String label;
-  final bool active;
+  final bool selected;
+  final Color color;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final isDark = RRColors.isDark.value;
-    final color = isDark
-        ? (active ? RRColors.accentViolet : const Color(0xFF7A7A8C))
-        : (active ? RRColors.brandBlue : RRColors.brandMutedInk);
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(active ? activeIcon : icon, color: color, size: 22),
-          const SizedBox(height: 3),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: color,
-              fontSize: 11,
-              fontWeight: active ? FontWeight.w700 : FontWeight.w500,
+    return Semantics(
+      selected: selected,
+      button: true,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: color, size: 22),
+            const SizedBox(height: 3),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: color,
+                fontSize: 11,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

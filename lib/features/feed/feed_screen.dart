@@ -60,9 +60,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     if (!mounted || _filterInitialized || widget.initialAssetId != null) return;
     _filterInitialized = true;
     final defaultFilter = ref.read(settingsProvider).defaultFilter;
-    if (defaultFilter != FeedFilter.all) {
-      ref.read(feedFilterProvider.notifier).state = defaultFilter;
-    }
+    ref.read(feedFilterProvider.notifier).state = defaultFilter;
   }
 
   Future<void> _deleteCurrentVideo(List<AssetEntity> videos) async {

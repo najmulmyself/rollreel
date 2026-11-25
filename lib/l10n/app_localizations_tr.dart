@@ -582,28 +582,28 @@ class AppLocalizationsTr extends AppLocalizations {
   String get favorites => 'Favoriler';
 
   @override
-  String get playbackSection => 'OYNATMA';
+  String get playbackSection => 'Oynatma';
 
   @override
   String get loopShortVideos => 'Kısa Videoları Döngüye Al';
 
   @override
-  String get loopShortVideosSub => 'Automatically loop to the next video';
+  String get loopShortVideosSub => '30 saniyeden kısa klipleri tekrarla';
 
   @override
   String get autoPlayOnLaunch => 'Açılışta Otomatik Oynat';
 
   @override
-  String get autoPlayOnLaunchSub => 'Start playing videos automatically';
+  String get autoPlayOnLaunchSub => 'Akış açıldığında oynatmaya başla';
 
   @override
   String get defaultFilter => 'Varsayılan Filtre';
 
   @override
-  String get defaultFilterSub => 'Set your default video filter';
+  String get defaultFilterSub => 'Akışta nelerin görüneceğini seç';
 
   @override
-  String get appearanceSection => 'GÖRÜNÜM';
+  String get appearanceSection => 'Görünüm';
 
   @override
   String get darkMode => 'Koyu Mod';
@@ -624,7 +624,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get showDurationBadgesSub => 'Show video duration on thumbnails';
 
   @override
-  String get privacySection => 'GİZLİLİK';
+  String get privacySection => 'Gi̇zli̇li̇k';
 
   @override
   String get privacyVault => 'Gizli Kasa';
@@ -639,7 +639,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get proBadge => 'Pro';
 
   @override
-  String get aboutSection => 'HAKKINDA';
+  String get aboutSection => 'Hakkinda';
 
   @override
   String get privacyPolicy => 'Gizlilik Politikası';
@@ -656,6 +656,27 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get version => 'Sürüm';
+
+  @override
+  String get settingsFilterDescription =>
+      'Akışı açtığında hangi videoları göreceğini seç.';
+
+  @override
+  String get settingsProDescription => 'Reklamsız oynatma ve Gizli Kasa';
+
+  @override
+  String get settingsProActive => 'Pro etkin';
+
+  @override
+  String get settingsVaultDescription => 'Özel videolarını aç';
+
+  @override
+  String get settingsRestoreComplete =>
+      'Önceki satın alımların kontrolü tamamlandı.';
+
+  @override
+  String get settingsRestoreFailed =>
+      'Satın alımlar geri yüklenemedi. Tekrar dene.';
 
   @override
   String get proCardSubtitle => 'Reklamsız · Kasa · Hız · Koleksiyonlar';

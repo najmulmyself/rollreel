@@ -26,9 +26,8 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
       valueListenable: RRColors.isDark,
-      builder: (context, isDark, _) => MaterialApp(
+      builder: (context, _, _) => MaterialApp(
         debugShowCheckedModeBanner: false,
-        key: ValueKey(isDark),
         theme: RRAppTheme.dark(),
         darkTheme: RRAppTheme.dark(),
         themeMode: ThemeMode.dark,

@@ -569,19 +569,19 @@ class AppLocalizationsZh extends AppLocalizations {
   String get loopShortVideos => '循环播放短视频';
 
   @override
-  String get loopShortVideosSub => 'Automatically loop to the next video';
+  String get loopShortVideosSub => '循环播放不足 30 秒的短片';
 
   @override
   String get autoPlayOnLaunch => '启动时自动播放';
 
   @override
-  String get autoPlayOnLaunchSub => 'Start playing videos automatically';
+  String get autoPlayOnLaunchSub => '打开视频流时开始播放';
 
   @override
   String get defaultFilter => '默认筛选';
 
   @override
-  String get defaultFilterSub => 'Set your default video filter';
+  String get defaultFilterSub => '选择视频流中显示的内容';
 
   @override
   String get appearanceSection => '外观';
@@ -637,6 +637,24 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get version => '版本';
+
+  @override
+  String get settingsFilterDescription => '选择打开视频流时要显示的视频。';
+
+  @override
+  String get settingsProDescription => '无广告播放和隐私保险库';
+
+  @override
+  String get settingsProActive => 'Pro 已启用';
+
+  @override
+  String get settingsVaultDescription => '打开你的私密视频';
+
+  @override
+  String get settingsRestoreComplete => '已完成历史购买检查。';
+
+  @override
+  String get settingsRestoreFailed => '无法恢复购买。请重试。';
 
   @override
   String get proCardSubtitle => '无广告 · 保险库 · 倍速 · 合集';

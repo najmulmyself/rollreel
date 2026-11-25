@@ -584,19 +584,20 @@ class AppLocalizationsAr extends AppLocalizations {
   String get loopShortVideos => 'تكرار المقاطع القصيرة';
 
   @override
-  String get loopShortVideosSub => 'Automatically loop to the next video';
+  String get loopShortVideosSub =>
+      'أعد تشغيل المقاطع التي تقل مدتها عن 30 ثانية';
 
   @override
   String get autoPlayOnLaunch => 'تشغيل تلقائي عند الفتح';
 
   @override
-  String get autoPlayOnLaunchSub => 'Start playing videos automatically';
+  String get autoPlayOnLaunchSub => 'ابدأ التشغيل عند فتح موجز الفيديو';
 
   @override
   String get defaultFilter => 'الفلتر الافتراضي';
 
   @override
-  String get defaultFilterSub => 'Set your default video filter';
+  String get defaultFilterSub => 'اختر ما يظهر في موجز الفيديو';
 
   @override
   String get appearanceSection => 'المظهر';
@@ -652,6 +653,27 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get version => 'الإصدار';
+
+  @override
+  String get settingsFilterDescription =>
+      'اختر الفيديوهات التي تراها عند فتح موجز الفيديو.';
+
+  @override
+  String get settingsProDescription => 'تشغيل بلا إعلانات وخزنة الخصوصية';
+
+  @override
+  String get settingsProActive => 'اشتراك Pro نشط';
+
+  @override
+  String get settingsVaultDescription => 'افتح فيديوهاتك الخاصة';
+
+  @override
+  String get settingsRestoreComplete =>
+      'اكتمل التحقق من عمليات الشراء السابقة.';
+
+  @override
+  String get settingsRestoreFailed =>
+      'تعذّرت استعادة المشتريات. حاول مرة أخرى.';
 
   @override
   String get proCardSubtitle => 'بلا إعلانات · خزنة · سرعة · مجموعات';

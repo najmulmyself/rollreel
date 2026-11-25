@@ -108,13 +108,10 @@ class _MainShellState extends ConsumerState<MainShell> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = ref.watch(settingsProvider.select((s) => s.darkMode));
     return Scaffold(
       backgroundColor: RRColors.bgTint,
-      // The nav bar's floating center button overflows above its white
-      // bar into a transparent strip — without extendBody, that strip
-      // shows the Scaffold's flat background instead of the page content
-      // scrolling underneath it.
-      extendBody: true,
+      extendBody: _tab != 3,
       body: IndexedStack(
         index: _tab,
         children: [
@@ -131,7 +128,7 @@ class _MainShellState extends ConsumerState<MainShell> {
             onPlayAt: (assetId) => _openFeed(context, assetId: assetId),
           ),
           SettingsScreen(
-            onBack: () => _setTab(0),
+            active: _tab == 3,
             onOpenPaywall: widget.onOpenPaywall,
             onOpenVault: widget.onOpenVault,
           ),
@@ -139,7 +136,7 @@ class _MainShellState extends ConsumerState<MainShell> {
       ),
       bottomNavigationBar: MainNavBar(
         currentIndex: _tab,
-        flat: _tab != 3,
+        isDark: isDark,
         onTap: _setTab,
         onCenterTap: () => _openFeed(context),
       ),

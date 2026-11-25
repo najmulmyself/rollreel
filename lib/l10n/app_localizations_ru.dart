@@ -591,28 +591,29 @@ class AppLocalizationsRu extends AppLocalizations {
   String get favorites => 'Избранное';
 
   @override
-  String get playbackSection => 'ВОСПРОИЗВЕДЕНИЕ';
+  String get playbackSection => 'Воспроизведение';
 
   @override
   String get loopShortVideos => 'Повтор коротких видео';
 
   @override
-  String get loopShortVideosSub => 'Automatically loop to the next video';
+  String get loopShortVideosSub => 'Повторять ролики короче 30 секунд';
 
   @override
   String get autoPlayOnLaunch => 'Автовоспроизведение при запуске';
 
   @override
-  String get autoPlayOnLaunchSub => 'Start playing videos automatically';
+  String get autoPlayOnLaunchSub =>
+      'Запускать воспроизведение при открытии ленты';
 
   @override
   String get defaultFilter => 'Фильтр по умолчанию';
 
   @override
-  String get defaultFilterSub => 'Set your default video filter';
+  String get defaultFilterSub => 'Выберите, что показывать в ленте';
 
   @override
-  String get appearanceSection => 'ОФОРМЛЕНИЕ';
+  String get appearanceSection => 'Оформление';
 
   @override
   String get darkMode => 'Тёмная тема';
@@ -633,7 +634,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get showDurationBadgesSub => 'Show video duration on thumbnails';
 
   @override
-  String get privacySection => 'КОНФИДЕНЦИАЛЬНОСТЬ';
+  String get privacySection => 'Конфиденциальность';
 
   @override
   String get privacyVault => 'Личное хранилище';
@@ -648,7 +649,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get proBadge => 'Pro';
 
   @override
-  String get aboutSection => 'О ПРИЛОЖЕНИИ';
+  String get aboutSection => 'О приложении';
 
   @override
   String get privacyPolicy => 'Политика конфиденциальности';
@@ -665,6 +666,28 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get version => 'Версия';
+
+  @override
+  String get settingsFilterDescription =>
+      'Выберите, какие видео показывать при открытии ленты.';
+
+  @override
+  String get settingsProDescription =>
+      'Просмотр без рекламы и личное хранилище';
+
+  @override
+  String get settingsProActive => 'Pro активен';
+
+  @override
+  String get settingsVaultDescription => 'Откройте свои личные видео';
+
+  @override
+  String get settingsRestoreComplete =>
+      'Проверка предыдущих покупок завершена.';
+
+  @override
+  String get settingsRestoreFailed =>
+      'Не удалось восстановить покупки. Попробуйте ещё раз.';
 
   @override
   String get proCardSubtitle =>

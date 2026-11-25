@@ -1,541 +1,651 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_review/in_app_review.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/iap/iap_provider.dart';
 import '../../core/settings/settings_provider.dart';
 import '../../core/theme/colors.dart';
-import '../../core/theme/spacing.dart';
+import '../../core/theme/typography.dart';
 import '../../l10n/app_localizations.dart';
 
-class SettingsScreen extends ConsumerWidget {
+final _packageInfoProvider = FutureProvider((_) => PackageInfo.fromPlatform());
+
+Color get _background =>
+    RRColors.isDark.value ? const Color(0xFF0B1725) : const Color(0xFFF4FAFF);
+Color get _surface =>
+    RRColors.isDark.value ? const Color(0xFF142538) : Colors.white;
+Color get _line =>
+    RRColors.isDark.value ? const Color(0xFF2A3D52) : const Color(0xFFE0EBF2);
+Color get _ink =>
+    RRColors.isDark.value ? const Color(0xFFF1F7FC) : RRColors.brandInk;
+Color get _muted =>
+    RRColors.isDark.value ? const Color(0xFFB0C4D5) : RRColors.brandMutedInk;
+Color get _accent =>
+    RRColors.isDark.value ? const Color(0xFFA9DFFF) : RRColors.brandBlue;
+
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({
     super.key,
-    this.onBack,
+    required this.active,
     required this.onOpenPaywall,
     required this.onOpenVault,
   });
 
-  final VoidCallback? onBack;
+  final bool active;
   final VoidCallback onOpenPaywall;
   final VoidCallback onOpenVault;
 
-  static const String _version = '1.0.0';
-  static const String _build = '1';
+  @override
+  ConsumerState<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+  final _messenger = GlobalKey<ScaffoldMessengerState>();
+  bool _restoring = false;
+
+  Future<void> _restorePurchases() async {
+    if (_restoring) return;
+    HapticFeedback.selectionClick();
+    setState(() => _restoring = true);
+    final completed = await ref.read(iapProvider.notifier).restore();
+    if (!mounted) return;
+    setState(() => _restoring = false);
+    if (!widget.active) return;
+    final l10n = AppLocalizations.of(context)!;
+    final message = !completed
+        ? l10n.settingsRestoreFailed
+        : ref.read(isProProvider)
+        ? l10n.settingsProActive
+        : l10n.settingsRestoreComplete;
+    _messenger.currentState
+      ?..removeCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: RRColors.brandInk,
+          content: Text(
+            message,
+            style: RRTypography.subheadline.copyWith(color: Colors.white),
+          ),
+        ),
+      );
+  }
 
   Future<void> _rateApp() async {
     final review = InAppReview.instance;
     if (await review.isAvailable()) {
-      review.requestReview();
+      await review.requestReview();
     } else {
-      review.openStoreListing();
+      await review.openStoreListing(appStoreId: '6781843410');
     }
   }
 
-  // iPad shows the share sheet as a popover and requires an anchor rect —
-  // without one it renders at (0,0) and gets dismissed before it's visible.
-  // [btnContext] is the row's own BuildContext, captured at tap time via a
-  // Builder, so no GlobalKey is needed.
-  void _shareApp(BuildContext btnContext) {
-    final l10n = AppLocalizations.of(btnContext)!;
-    final box = btnContext.findRenderObject() as RenderBox?;
-    final origin =
-        box == null ? Rect.zero : (box.localToGlobal(Offset.zero) & box.size);
+  void _shareApp(BuildContext rowContext) {
+    final l10n = AppLocalizations.of(rowContext)!;
+    final box = rowContext.findRenderObject() as RenderBox?;
+    // The share sheet must be anchored to the row on iPad.
+    final origin = box == null
+        ? Rect.zero
+        : box.localToGlobal(Offset.zero) & box.size;
     Share.share(
-      '${l10n.shareAppMessage}\n'
-      'https://apps.apple.com/app/id6781843410',
+      '${l10n.shareAppMessage}\nhttps://apps.apple.com/app/id6781843410',
       sharePositionOrigin: origin,
     );
   }
 
-  Future<void> _openPrivacyPolicy(BuildContext context) async {
-    final uri = Uri.parse('https://najmulmyself.github.io/rollreel/privacy.html');
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
-      if (!context.mounted) return;
-      final l10n = AppLocalizations.of(context)!;
-      showCupertinoDialog<void>(
-        context: context,
-        builder: (_) => CupertinoAlertDialog(
-          title: Text(l10n.privacyPolicy),
-          content: Text(l10n.privacyPolicyBody),
-          actions: [
-            CupertinoDialogAction(
-              onPressed: () => Navigator.pop(context),
-              child: Text(l10n.ok),
-            ),
-          ],
-        ),
-      );
+  Future<void> _openPrivacyPolicy() async {
+    final uri = Uri.parse(
+      'https://najmulmyself.github.io/rollreel/privacy.html',
+    );
+    if (await canLaunchUrl(uri) &&
+        await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      return;
     }
-  }
-
-  static String _filterLabel(AppLocalizations l10n, FeedFilter f) {
-    switch (f) {
-      case FeedFilter.all:
-        return l10n.filterAll;
-      case FeedFilter.today:
-        return l10n.filterToday;
-      case FeedFilter.shorts:
-        return l10n.filterShorts;
-      case FeedFilter.long:
-        return l10n.filterLong;
-    }
-  }
-
-  Future<void> _showDefaultFilterPicker(
-      BuildContext context, AppSettings s, SettingsNotifier notifier) async {
+    if (!mounted) return;
     final l10n = AppLocalizations.of(context)!;
-    await showCupertinoModalPopup<void>(
+    await showCupertinoDialog<void>(
       context: context,
-      builder: (_) => CupertinoActionSheet(
-        title: Text(l10n.defaultFilter),
-        actions: FeedFilter.values.map((f) {
-          return CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(context);
-              notifier.setDefaultFilter(f);
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(_filterLabel(l10n, f)),
-                if (s.defaultFilter == f) ...[
-                  const SizedBox(width: 8),
-                  const Icon(CupertinoIcons.checkmark,
-                      size: 16, color: CupertinoColors.activeBlue),
-                ],
-              ],
-            ),
-          );
-        }).toList(),
-        cancelButton: CupertinoActionSheetAction(
-          isDefaultAction: true,
-          onPressed: () => Navigator.pop(context),
-          child: Text(l10n.cancel),
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
-    final s = ref.watch(settingsProvider);
-    final notifier = ref.read(settingsProvider.notifier);
-    final isPro = ref.watch(isProProvider);
-
-    return Scaffold(
-      backgroundColor: RRColors.bgTint,
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildTopNav(context),
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(
-                    RRSpace.sp16, RRSpace.sp12, RRSpace.sp16, 48),
-                children: [
-                  // ── RollReel Pro banner ──────────────────────────────────
-                  _buildProBanner(context),
-                  const SizedBox(height: RRSpace.sp24),
-
-                  // ── PLAYBACK ─────────────────────────────────────────────
-                  _SectionLabel(l10n.playbackSection),
-                  const SizedBox(height: RRSpace.sp8),
-                  _SettingsGroup(rows: [
-                    _ToggleRow(
-                      icon: const _SettingIcon(
-                          color: RRColors.iconOrange,
-                          icon: CupertinoIcons.arrow_2_circlepath),
-                      label: l10n.loopShortVideos,
-                      sublabel: l10n.loopShortVideosSub,
-                      value: s.loopShortVideos,
-                      onChanged: notifier.setLoopShortVideos,
-                    ),
-                    _ToggleRow(
-                      icon: const _SettingIcon(
-                          color: RRColors.iconGreen,
-                          icon: CupertinoIcons.play_fill),
-                      label: l10n.autoPlayOnLaunch,
-                      sublabel: l10n.autoPlayOnLaunchSub,
-                      value: s.autoPlay,
-                      onChanged: notifier.setAutoPlay,
-                    ),
-                    _NavRow(
-                      icon: const _SettingIcon(
-                          color: RRColors.iconRed,
-                          icon: CupertinoIcons.slider_horizontal_3),
-                      label: l10n.defaultFilter,
-                      sublabel: l10n.defaultFilterSub,
-                      trailingText: _filterLabel(l10n, s.defaultFilter),
-                      onTap: () =>
-                          _showDefaultFilterPicker(context, s, notifier),
-                    ),
-                  ]),
-                  const SizedBox(height: RRSpace.sp24),
-
-                  // ── APPEARANCE ───────────────────────────────────────────
-                  _SectionLabel(l10n.appearanceSection),
-                  const SizedBox(height: RRSpace.sp8),
-                  _SettingsGroup(rows: [
-                    _ToggleRow(
-                      icon: const _SettingIcon(
-                          color: RRColors.iconPurple,
-                          icon: CupertinoIcons.moon_stars_fill),
-                      label: l10n.darkMode,
-                      sublabel: l10n.darkModeSub,
-                      value: s.darkMode,
-                      onChanged: notifier.setDarkMode,
-                    ),
-                    _ToggleRow(
-                      icon: const _SettingIcon(
-                          color: RRColors.iconBlue,
-                          icon: CupertinoIcons.calendar),
-                      label: l10n.showDateLabels,
-                      sublabel: l10n.showDateLabelsSub,
-                      value: s.showDateLabels,
-                      onChanged: notifier.setShowDateLabels,
-                    ),
-                    _ToggleRow(
-                      icon: const _SettingIcon(
-                          color: RRColors.iconGreen,
-                          icon: CupertinoIcons.clock_fill),
-                      label: l10n.showDurationBadges,
-                      sublabel: l10n.showDurationBadgesSub,
-                      value: s.showDurationBadges,
-                      onChanged: notifier.setShowDurationBadges,
-                    ),
-                  ]),
-                  const SizedBox(height: RRSpace.sp24),
-
-                  // ── PRIVACY ──────────────────────────────────────────────
-                  _SectionLabel(l10n.privacySection),
-                  const SizedBox(height: RRSpace.sp8),
-                  _SettingsGroup(rows: [
-                    _NavRow(
-                      icon: const _SettingIcon(
-                          color: RRColors.iconBlue,
-                          icon: CupertinoIcons.shield_fill),
-                      label: l10n.privacySettingsTitle,
-                      sublabel: l10n.privacySettingsSub,
-                      onTap: isPro ? onOpenVault : onOpenPaywall,
-                    ),
-                  ]),
-                  const SizedBox(height: RRSpace.sp24),
-
-                  // ── ABOUT ────────────────────────────────────────────────
-                  _SectionLabel(l10n.aboutSection),
-                  const SizedBox(height: RRSpace.sp8),
-                  _SettingsGroup(rows: [
-                    _NavRow(
-                      icon: const _SettingIcon(
-                          color: RRColors.iconTeal,
-                          icon: CupertinoIcons.shield_fill),
-                      label: l10n.privacyPolicy,
-                      onTap: () => _openPrivacyPolicy(context),
-                    ),
-                    _NavRow(
-                      icon: const _SettingIcon(
-                          color: RRColors.iconOrange,
-                          icon: CupertinoIcons.star_fill),
-                      label: l10n.rateApp,
-                      onTap: _rateApp,
-                    ),
-                    Builder(
-                      builder: (btnContext) => _NavRow(
-                        icon: const _SettingIcon(
-                            color: RRColors.iconBlue,
-                            icon: CupertinoIcons.share),
-                        label: l10n.shareApp,
-                        onTap: () => _shareApp(btnContext),
-                      ),
-                    ),
-                    _NavRow(
-                      icon: const _SettingIcon(
-                          color: RRColors.iconPurple,
-                          icon: CupertinoIcons.info_circle_fill),
-                      label: l10n.version,
-                      trailingText: '$_version (Build $_build)',
-                      showChevron: false,
-                    ),
-                  ]),
-                  const SizedBox(height: RRSpace.sp24),
-                  Center(
-                    child: Text(
-                      'RollReel v$_version',
-                      style: TextStyle(
-                        color: RRColors.textDisabled,
-                        fontSize: 12,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ── Top nav ──────────────────────────────────────────────────────────────────
-
-  Widget _buildTopNav(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-          horizontal: RRSpace.sp4, vertical: RRSpace.sp4),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          if (onBack != null)
-          Align(
-            alignment: Alignment.centerLeft,
-            child: CupertinoButton(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: RRSpace.sp12, vertical: RRSpace.sp8),
-              onPressed: onBack,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(CupertinoIcons.chevron_left,
-                      color: RRColors.accentViolet, size: 18),
-                  const SizedBox(width: 2),
-                  Text(
-                    l10n.back,
-                    style: const TextStyle(
-                      color: RRColors.accentViolet,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          Text(
-            l10n.settings,
-            style: TextStyle(
-              color: RRColors.textPrimary,
-              fontSize: 20,
-              fontWeight: FontWeight.w800,
-            ),
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: Text(l10n.privacyPolicy),
+        content: Text(l10n.privacyPolicyBody),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: Text(l10n.ok),
           ),
         ],
       ),
     );
   }
 
-  // ── Pro banner ───────────────────────────────────────────────────────────────
-
-  Widget _buildProBanner(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final features = l10n.proCardSubtitle.split(' · ');
-    const featureIcons = [
-      CupertinoIcons.eye_slash,
-      CupertinoIcons.lock_fill,
-      CupertinoIcons.bolt_fill,
-      CupertinoIcons.folder_fill,
-    ];
-
-    return GestureDetector(
-      onTap: onOpenPaywall,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(RRSpace.radiusLg),
-            child: Container(
-              padding: const EdgeInsets.all(RRSpace.sp16),
-              decoration: const BoxDecoration(
-                image: DecorationImage(
-                  image: AssetImage('assets/images/settings_pro_card.webp'),
-                  fit: BoxFit.cover,
-                ),
-              ),
-              child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Badge image is layered on top via Positioned below —
-                    // this just reserves matching space so the title/
-                    // tagline text starts to its right.
-                    const SizedBox(width: 56, height: 56),
-                    const SizedBox(width: RRSpace.sp12),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 70),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 3),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.2),
-                                borderRadius:
-                                    BorderRadius.circular(RRSpace.radiusFull),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(Icons.workspace_premium_rounded,
-                                      color: Colors.white, size: 12),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    l10n.pro,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w800,
-                                      letterSpacing: 0.6,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              l10n.paywallTitle,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 22,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              l10n.proCardTagline,
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.85),
-                                fontSize: 13,
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: RRSpace.sp16),
-                Divider(height: 1, color: Colors.white.withValues(alpha: 0.18)),
-                const SizedBox(height: RRSpace.sp12),
-                Row(
-                  children: [
-                    for (var i = 0; i < features.length; i++) ...[
-                      Icon(featureIcons[i % featureIcons.length],
-                          color: Colors.white.withValues(alpha: 0.85),
-                          size: 13),
-                      const SizedBox(width: 5),
-                      Text(
-                        features[i],
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.85),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      if (i < features.length - 1) ...[
-                        const SizedBox(width: 8),
-                        Container(
-                          width: 1,
-                          height: 11,
-                          color: Colors.white.withValues(alpha: 0.3),
-                        ),
-                        const SizedBox(width: 8),
-                      ],
-                    ],
-                  ],
-                ),
-              ],
-            ),
-            ),
-          ),
-          Positioned(
-            top: RRSpace.sp16,
-            left: RRSpace.sp16,
-            child: Image.asset(
-              'assets/images/settings_pro_badge.png',
-              width: 56,
-              height: 56,
-            ),
-          ),
-          Positioned(
-            top: 4,
-            right: 8,
-            child: Image.asset(
-              'assets/images/settings_pro_trophy.png',
-              width: 78,
-              height: 78,
-            ),
-          ),
-        ],
+  Future<void> _pickDefaultFilter(FeedFilter current) async {
+    HapticFeedback.selectionClick();
+    final selection = await showModalBottomSheet<FeedFilter>(
+      context: context,
+      backgroundColor: _surface,
+      barrierColor: const Color(0x6A0B2033),
+      isScrollControlled: true,
+      useSafeArea: true,
+      showDragHandle: false,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
+      clipBehavior: Clip.antiAlias,
+      sheetAnimationStyle: MediaQuery.disableAnimationsOf(context)
+          ? AnimationStyle.noAnimation
+          : const AnimationStyle(
+              duration: Duration(milliseconds: 200),
+              reverseDuration: Duration(milliseconds: 160),
+            ),
+      builder: (_) => _DefaultFilterSheet(current: current),
     );
+    if (!mounted || selection == null || selection == current) return;
+    await ref.read(settingsProvider.notifier).setDefaultFilter(selection);
   }
-}
-
-// ─── Section label ────────────────────────────────────────────────────────────
-
-class _SectionLabel extends StatelessWidget {
-  const _SectionLabel(this.text);
-
-  final String text;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: RRSpace.sp4),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: RRColors.accentViolet.withValues(alpha: 0.65),
-          fontSize: 12,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.8,
+    final l10n = AppLocalizations.of(context)!;
+    final settings = ref.watch(settingsProvider);
+    final notifier = ref.read(settingsProvider.notifier);
+    final isPro = ref.watch(isProProvider);
+    final package = ref.watch(_packageInfoProvider).valueOrNull;
+
+    return AnnotatedRegion(
+      value:
+          (settings.darkMode
+                  ? SystemUiOverlayStyle.light
+                  : SystemUiOverlayStyle.dark)
+              .copyWith(statusBarColor: Colors.transparent),
+      child: ScaffoldMessenger(
+        key: _messenger,
+        child: Scaffold(
+          backgroundColor: _background,
+          body: SafeArea(
+            bottom: false,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _SettingsHeader(title: l10n.settings, active: widget.active),
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 640),
+                      child: ListView(
+                        key: const PageStorageKey('settings'),
+                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 22),
+                        children: [
+                          _SettingsGroup(
+                            children: [
+                              _ProBanner(
+                                isPro: isPro,
+                                onPressed: widget.onOpenPaywall,
+                              ),
+                              _SettingsRow(
+                                icon: CupertinoIcons.arrow_clockwise,
+                                label: l10n.restorePurchases,
+                                onTap: _restoring ? null : _restorePurchases,
+                                accessory: _restoring
+                                    ? CupertinoActivityIndicator(
+                                        color: _accent,
+                                        radius: 8,
+                                      )
+                                    : _chevron(),
+                              ),
+                            ],
+                          ),
+                          _SettingsSection(
+                            title: l10n.playbackSection,
+                            rows: [
+                              _SettingsToggle(
+                                icon: CupertinoIcons.arrow_2_circlepath,
+                                label: l10n.loopShortVideos,
+                                description: l10n.loopShortVideosSub,
+                                value: settings.loopShortVideos,
+                                onChanged: notifier.setLoopShortVideos,
+                              ),
+                              _SettingsToggle(
+                                icon: CupertinoIcons.play_circle,
+                                label: l10n.autoPlayOnLaunch,
+                                description: l10n.autoPlayOnLaunchSub,
+                                value: settings.autoPlay,
+                                onChanged: notifier.setAutoPlay,
+                              ),
+                              _SettingsRow(
+                                icon: CupertinoIcons.slider_horizontal_3,
+                                label: l10n.defaultFilter,
+                                description: l10n.defaultFilterSub,
+                                value: _filterLabel(
+                                  l10n,
+                                  settings.defaultFilter,
+                                ),
+                                onTap: () =>
+                                    _pickDefaultFilter(settings.defaultFilter),
+                              ),
+                            ],
+                          ),
+                          _SettingsSection(
+                            title: l10n.appearanceSection,
+                            rows: [
+                              _SettingsToggle(
+                                icon: CupertinoIcons.moon_stars,
+                                label: l10n.darkMode,
+                                value: settings.darkMode,
+                                onChanged: notifier.setDarkMode,
+                              ),
+                              _SettingsToggle(
+                                icon: CupertinoIcons.calendar,
+                                label: l10n.showDateLabels,
+                                value: settings.showDateLabels,
+                                onChanged: notifier.setShowDateLabels,
+                              ),
+                              _SettingsToggle(
+                                icon: CupertinoIcons.clock,
+                                label: l10n.showDurationBadges,
+                                value: settings.showDurationBadges,
+                                onChanged: notifier.setShowDurationBadges,
+                              ),
+                            ],
+                          ),
+                          _SettingsSection(
+                            title: l10n.privacySection,
+                            rows: [
+                              _SettingsRow(
+                                icon: CupertinoIcons.lock_shield,
+                                label: l10n.privacyVault,
+                                description: l10n.settingsVaultDescription,
+                                onTap: isPro
+                                    ? widget.onOpenVault
+                                    : widget.onOpenPaywall,
+                              ),
+                            ],
+                          ),
+                          _SettingsSection(
+                            title: l10n.aboutSection,
+                            rows: [
+                              _SettingsRow(
+                                icon: CupertinoIcons.doc_text,
+                                label: l10n.privacyPolicy,
+                                onTap: _openPrivacyPolicy,
+                              ),
+                              _SettingsRow(
+                                icon: CupertinoIcons.star,
+                                label: l10n.rateApp,
+                                onTap: _rateApp,
+                              ),
+                              Builder(
+                                builder: (rowContext) => _SettingsRow(
+                                  icon: CupertinoIcons.share,
+                                  label: l10n.shareApp,
+                                  onTap: () => _shareApp(rowContext),
+                                ),
+                              ),
+                              _SettingsRow(
+                                icon: CupertinoIcons.info_circle,
+                                label: l10n.version,
+                                value:
+                                    package == null ||
+                                        package.buildNumber.isEmpty
+                                    ? package?.version
+                                    : '${package.version} (${package.buildNumber})',
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 }
 
-// ─── Settings group ───────────────────────────────────────────────────────────
+String _filterLabel(AppLocalizations l10n, FeedFilter filter) =>
+    switch (filter) {
+      FeedFilter.all => l10n.filterAll,
+      FeedFilter.today => l10n.filterToday,
+      FeedFilter.shorts => l10n.filterShorts,
+      FeedFilter.long => l10n.filterLong,
+    };
 
-class _SettingsGroup extends StatelessWidget {
-  const _SettingsGroup({required this.rows});
+class _SettingsHeader extends StatefulWidget {
+  const _SettingsHeader({required this.title, required this.active});
 
+  final String title;
+  final bool active;
+
+  @override
+  State<_SettingsHeader> createState() => _SettingsHeaderState();
+}
+
+class _SettingsHeaderState extends State<_SettingsHeader> {
+  bool _visited = false;
+
+  @override
+  void didUpdateWidget(_SettingsHeader oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.active && !widget.active) _visited = true;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final wave =
+        widget.active &&
+        !_visited &&
+        TickerMode.of(context) &&
+        !MediaQuery.disableAnimationsOf(context);
+    final rtl = Directionality.of(context) == TextDirection.rtl;
+    final dark = RRColors.isDark.value;
+    final stacked =
+        MediaQuery.sizeOf(context).width < 420 &&
+        MediaQuery.textScalerOf(context).scale(38) > 54;
+    const resting = Image(
+      image: AssetImage('assets/images/onboarding-kingfisher.webp'),
+      excludeFromSemantics: true,
+      fit: BoxFit.contain,
+    );
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: _line)),
+      ),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 640),
+          child: Stack(
+            alignment: AlignmentDirectional.centerStart,
+            children: [
+              PositionedDirectional(
+                end: 0,
+                top: 0,
+                bottom: 0,
+                width: 176,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: RadialGradient(
+                      center: Alignment(rtl ? -.34 : .34, .17),
+                      radius: 1.45,
+                      colors: [
+                        dark
+                            ? const Color(0xFF1E4161)
+                            : const Color(0xFFD2EFFE),
+                        _background.withValues(alpha: 0),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              Container(
+                width: double.infinity,
+                constraints: const BoxConstraints(minHeight: 82),
+                alignment: AlignmentDirectional.centerStart,
+                padding: stacked
+                    ? const EdgeInsetsDirectional.fromSTEB(20, 13, 20, 53)
+                    : const EdgeInsetsDirectional.fromSTEB(20, 13, 94, 13),
+                child: Semantics(
+                  header: true,
+                  child: Text(
+                    widget.title,
+                    style: RRTypography.title1.copyWith(
+                      fontSize: 38,
+                      height: 1.05,
+                      letterSpacing: -1.5,
+                      color: _ink,
+                    ),
+                  ),
+                ),
+              ),
+              PositionedDirectional(
+                end: 24,
+                bottom: 4,
+                width: stacked ? 33 : 51,
+                height: stacked ? 49 : 77,
+                child: Transform.flip(
+                  flipX: rtl,
+                  child: wave
+                      ? Image.asset(
+                          'assets/images/onboarding-kingfisher-wave.webp',
+                          excludeFromSemantics: true,
+                          fit: BoxFit.contain,
+                          frameBuilder: (_, child, frame, _) =>
+                              frame == null ? resting : child,
+                          errorBuilder: (_, _, _) => resting,
+                        )
+                      : resting,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ProBanner extends StatelessWidget {
+  const _ProBanner({required this.isPro, required this.onPressed});
+
+  final bool isPro;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final dark = RRColors.isDark.value;
+    return Material(
+      color: Colors.transparent,
+      child: Ink(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: AlignmentDirectional.topStart,
+            end: AlignmentDirectional.bottomEnd,
+            colors: dark
+                ? const [Color(0xFF153858), Color(0xFF185782)]
+                : const [Color(0xFF0D3B67), Color(0xFF135D97)],
+          ),
+        ),
+        child: InkWell(
+          onTap: onPressed,
+          child: Container(
+            constraints: const BoxConstraints(minHeight: 78),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            child: Row(
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: Image.asset(
+                    'assets/icons/icon.png',
+                    width: 38,
+                    height: 38,
+                    cacheWidth: 114,
+                    fit: BoxFit.cover,
+                    excludeFromSemantics: true,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        l10n.paywallTitle,
+                        style: RRTypography.headline.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        isPro
+                            ? l10n.settingsProActive
+                            : l10n.settingsProDescription,
+                        style: RRTypography.caption.copyWith(
+                          color: const Color(0xFFD8ECF8),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                _chevron(color: const Color(0xFFE5F3FC)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SettingsSection extends StatelessWidget {
+  const _SettingsSection({required this.title, required this.rows});
+
+  final String title;
   final List<Widget> rows;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: RRColors.bgElevated,
-        borderRadius: BorderRadius.circular(RRSpace.radiusLg),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+    return Padding(
+      padding: const EdgeInsets.only(top: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Semantics(
+            header: true,
+            child: Text(
+              title,
+              style: RRTypography.title2.copyWith(
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+                color: _ink,
+              ),
+            ),
           ),
+          const SizedBox(height: 8),
+          _SettingsGroup(children: rows, divided: true),
         ],
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(RRSpace.radiusLg),
-        child: Column(
+    );
+  }
+}
+
+class _SettingsGroup extends StatelessWidget {
+  const _SettingsGroup({required this.children, this.divided = false});
+
+  final List<Widget> children;
+  final bool divided;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: _surface,
+      shape: RoundedRectangleBorder(
+        side: BorderSide(color: _line),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        children: [
+          for (var index = 0; index < children.length; index++) ...[
+            if (divided && index > 0) _settingsDivider(),
+            children[index],
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+Widget _settingsDivider() => Padding(
+  padding: const EdgeInsetsDirectional.only(start: 48, end: 12),
+  child: Divider(height: 1, thickness: 1, color: _line),
+);
+
+Widget _chevron({Color? color}) =>
+    Icon(CupertinoIcons.chevron_forward, size: 13, color: color ?? _accent);
+
+class _SettingsRow extends StatelessWidget {
+  const _SettingsRow({
+    required this.icon,
+    required this.label,
+    this.description,
+    this.value,
+    this.accessory,
+    this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final String? description;
+  final String? value;
+  final Widget? accessory;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final trailing = value;
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 53),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        child: Row(
           children: [
-            for (int i = 0; i < rows.length; i++) ...[
-              rows[i],
-              if (i < rows.length - 1)
-                Divider(height: 1, color: RRColors.divider, indent: 72),
+            SizedBox(width: 26, child: Icon(icon, size: 19, color: _accent)),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    label,
+                    style: RRTypography.headline.copyWith(
+                      color: _ink,
+                      fontSize: 15,
+                    ),
+                  ),
+                  if (description case final description?) ...[
+                    const SizedBox(height: 3),
+                    Text(
+                      description,
+                      style: RRTypography.caption.copyWith(
+                        color: _muted,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+            if (trailing != null) ...[
+              const SizedBox(width: 8),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 100),
+                child: Text(
+                  trailing,
+                  textAlign: TextAlign.end,
+                  style: RRTypography.caption.copyWith(
+                    color: _muted,
+                    fontSize: 13,
+                  ),
+                ),
+              ),
+            ],
+            if (accessory != null || onTap != null) ...[
+              const SizedBox(width: 8),
+              accessory ?? _chevron(),
             ],
           ],
         ),
@@ -544,153 +654,156 @@ class _SettingsGroup extends StatelessWidget {
   }
 }
 
-// ─── Rounded square icon ──────────────────────────────────────────────────────
-
-class _SettingIcon extends StatelessWidget {
-  const _SettingIcon({required this.color, required this.icon});
-
-  final Color color;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 44,
-      height: 44,
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      alignment: Alignment.center,
-      child: Icon(icon, color: Colors.white, size: 20),
-    );
-  }
-}
-
-// ─── Toggle row ───────────────────────────────────────────────────────────────
-
-class _ToggleRow extends StatelessWidget {
-  const _ToggleRow({
+class _SettingsToggle extends StatelessWidget {
+  const _SettingsToggle({
     required this.icon,
     required this.label,
     required this.value,
     required this.onChanged,
-    this.sublabel,
+    this.description,
   });
 
-  final Widget icon;
+  final IconData icon;
   final String label;
-  final String? sublabel;
+  final String? description;
   final bool value;
   final ValueChanged<bool> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-          horizontal: RRSpace.sp16, vertical: RRSpace.sp12),
-      child: Row(
-        children: [
-          icon,
-          const SizedBox(width: RRSpace.sp12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: RRColors.textPrimary,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                if (sublabel != null) ...[
-                  const SizedBox(height: 2),
-                  Text(
-                    sublabel!,
-                    style: TextStyle(color: RRColors.textSecond, fontSize: 13),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          CupertinoSwitch(
+    final dark = RRColors.isDark.value;
+    return MergeSemantics(
+      child: _SettingsRow(
+        icon: icon,
+        label: label,
+        description: description,
+        onTap: () {
+          HapticFeedback.selectionClick();
+          onChanged(!value);
+        },
+        accessory: Transform.scale(
+          scale: .82,
+          alignment: AlignmentDirectional.centerEnd,
+          child: CupertinoSwitch(
             value: value,
             onChanged: onChanged,
-            activeTrackColor: RRColors.accentViolet,
+            activeTrackColor: dark ? _accent : const Color(0xFF0C619E),
+            inactiveTrackColor: dark
+                ? const Color(0xFF4B6176)
+                : const Color(0xFFC1D1DC),
+            thumbColor: dark ? const Color(0xFF092840) : Colors.white,
+            inactiveThumbColor: Colors.white,
           ),
-        ],
+        ),
       ),
     );
   }
 }
 
-// ─── Nav row ──────────────────────────────────────────────────────────────────
+class _DefaultFilterSheet extends StatelessWidget {
+  const _DefaultFilterSheet({required this.current});
 
-class _NavRow extends StatelessWidget {
-  const _NavRow({
-    super.key,
-    required this.icon,
-    required this.label,
-    this.sublabel,
-    this.trailingText,
-    this.onTap,
-    this.showChevron = true,
-  });
-
-  final Widget icon;
-  final String label;
-  final String? sublabel;
-  final String? trailingText;
-  final VoidCallback? onTap;
-  final bool showChevron;
+  final FeedFilter current;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-            horizontal: RRSpace.sp16, vertical: 14),
-        child: Row(
+    final l10n = AppLocalizations.of(context)!;
+    return SafeArea(
+      top: false,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            icon,
-            const SizedBox(width: RRSpace.sp12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: TextStyle(
-                      color: RRColors.textPrimary,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  if (sublabel != null) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      sublabel!,
-                      style:
-                          TextStyle(color: RRColors.textSecond, fontSize: 13),
-                    ),
-                  ],
-                ],
+            Center(
+              child: Container(
+                width: 34,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: RRColors.isDark.value
+                      ? const Color(0xFF61758B)
+                      : const Color(0xFFB9CDDC),
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
             ),
-            if (trailingText != null) ...[
-              Text(
-                trailingText!,
-                style: TextStyle(
-                    color: RRColors.textSecond, fontSize: 15),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                Expanded(
+                  child: Semantics(
+                    header: true,
+                    child: Text(
+                      l10n.defaultFilter,
+                      style: RRTypography.title2.copyWith(
+                        fontSize: 25,
+                        color: _ink,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+                CupertinoButton(
+                  padding: const EdgeInsetsDirectional.only(start: 12),
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(
+                    l10n.libraryClose,
+                    style: RRTypography.subheadline.copyWith(
+                      color: _accent,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(
+              l10n.settingsFilterDescription,
+              style: RRTypography.body.copyWith(color: _muted, fontSize: 15),
+            ),
+            const SizedBox(height: 10),
+            for (final filter in FeedFilter.values) ...[
+              Semantics(
+                checked: filter == current,
+                inMutuallyExclusiveGroup: true,
+                child: InkWell(
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    Navigator.pop(context, filter);
+                  },
+                  child: Container(
+                    constraints: const BoxConstraints(minHeight: 47),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 2,
+                      vertical: 8,
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            _filterLabel(l10n, filter),
+                            style: RRTypography.body.copyWith(
+                              fontSize: 15,
+                              color: filter == current ? _accent : _ink,
+                              fontWeight: filter == current
+                                  ? FontWeight.w700
+                                  : FontWeight.w400,
+                            ),
+                          ),
+                        ),
+                        if (filter == current)
+                          Icon(
+                            CupertinoIcons.check_mark,
+                            size: 15,
+                            color: _accent,
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-              if (showChevron) const SizedBox(width: RRSpace.sp4),
+              Divider(height: 1, thickness: 1, color: _line),
             ],
-            if (showChevron)
-              Icon(CupertinoIcons.chevron_right,
-                  color: RRColors.textDisabled, size: 16),
           ],
         ),
       ),
