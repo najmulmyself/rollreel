@@ -18,10 +18,12 @@ class ProfileScreen extends ConsumerStatefulWidget {
     super.key,
     required this.onOpenLibrary,
     required this.onOpenMemories,
+    required this.onPlayAt,
   });
 
   final VoidCallback onOpenLibrary;
   final ValueChanged<String?> onOpenMemories;
+  final ValueChanged<String> onPlayAt;
 
   @override
   ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
@@ -132,7 +134,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                                     onSelectTab: _selectTab,
                                     reduceMotion: reduceMotion,
                                     child: _showActivity
-                                        ? const HomeDashboard()
+                                        ? HomeDashboard(
+                                            onPlayAt: widget.onPlayAt,
+                                          )
                                         : HomeVideoSections(
                                             onOpenLibrary: widget.onOpenLibrary,
                                             onOpenMemories:

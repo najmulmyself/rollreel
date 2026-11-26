@@ -205,6 +205,7 @@ class _MainShellState extends ConsumerState<MainShell> {
           ProfileScreen(
             onOpenLibrary: () => _setTab(1),
             onOpenMemories: _openMemories,
+            onPlayAt: (assetId) => _openFeed(context, assetId: assetId),
           ),
           BrowseScreen(
             onOpenMemories: () => _openMemories(null),

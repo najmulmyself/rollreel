@@ -17,6 +17,8 @@ import '../../core/settings/settings_provider.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
 import '../../core/vault/vault_provider.dart';
+import '../../core/video/watch_history_provider.dart';
+import '../../core/video/watch_playback_session.dart';
 import '../../l10n/app_localizations.dart';
 import 'dynamic_bg.dart';
 
@@ -60,6 +62,12 @@ class VideoFeedItem extends ConsumerStatefulWidget {
 
 class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
   VideoPlayerController? _controller;
+  late final _watchSession = WatchPlaybackSession(() {
+    if (mounted) {
+      ref.read(watchHistoryProvider.notifier).recordPlay(widget.asset.id);
+    }
+  });
+  VoidCallback? _removeWatchObserver;
   bool get _initialized => _controller != null;
   PMCancelToken? _sourceRequest;
   PMCancelToken? _thumbnailRequest;
@@ -204,6 +212,13 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
         _controller = controller;
         _loadFailed = false;
       });
+      _removeWatchObserver = _watchSession.observe(
+        controller,
+        isActive: () =>
+            mounted &&
+            widget.isActive &&
+            ModalRoute.isCurrentOf(context) != false,
+      );
       pending = null;
       if (widget.isActive) _syncPlaybackAfterBuild();
     } catch (error) {
@@ -270,6 +285,7 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
       if (widget.isActive) {
         _activatedByNavigation = true;
         _loadFailed = false;
+        _watchSession.reset();
       } else {
         _controlsHideTimer?.cancel();
         _controlsVisible = true;
@@ -308,6 +324,7 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
     _cancelPhotoRequest(_thumbnailRequest);
     _cancelPhotoRequest(_sourceRequest);
     _sourceRequest = null;
+    _removeWatchObserver?.call();
     _controller?.dispose();
     // Only touch the system brightness API if this item actually changed it —
     // an unconditional reset here fires a platform-channel call on every page
@@ -436,8 +453,11 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
     await navigator.push(
       MaterialPageRoute<void>(
         fullscreenDialog: true,
-        builder: (_) =>
-            _LandscapeVideoPage(asset: widget.asset, startPosition: position),
+        builder: (_) => _LandscapeVideoPage(
+          asset: widget.asset,
+          startPosition: position,
+          watchSession: _watchSession,
+        ),
       ),
     );
 
@@ -1400,8 +1420,13 @@ class _VideoSeekBar extends StatelessWidget {
 // ─── Landscape fullscreen page ────────────────────────────────────────────────
 
 class _LandscapeVideoPage extends StatefulWidget {
-  const _LandscapeVideoPage({required this.asset, this.startPosition});
+  const _LandscapeVideoPage({
+    required this.asset,
+    required this.watchSession,
+    this.startPosition,
+  });
   final AssetEntity asset;
+  final WatchPlaybackSession watchSession;
   final Duration? startPosition;
 
   @override
@@ -1410,6 +1435,7 @@ class _LandscapeVideoPage extends StatefulWidget {
 
 class _LandscapeVideoPageState extends State<_LandscapeVideoPage> {
   VideoPlayerController? _controller;
+  VoidCallback? _removeWatchObserver;
   bool _initialized = false;
   bool _showPlayIcon = false;
   bool _iconIsPlay = false;
@@ -1437,7 +1463,19 @@ class _LandscapeVideoPageState extends State<_LandscapeVideoPage> {
     if (widget.startPosition != null) {
       await ctrl.seekTo(widget.startPosition!);
     }
+    if (!mounted) {
+      await ctrl.dispose();
+      return;
+    }
+    _removeWatchObserver = widget.watchSession.observe(
+      ctrl,
+      isActive: () => mounted && ModalRoute.isCurrentOf(context) != false,
+    );
     await ctrl.play();
+    if (!mounted) {
+      await ctrl.dispose();
+      return;
+    }
     setState(() {
       _controller = ctrl;
       _initialized = true;
@@ -1448,6 +1486,7 @@ class _LandscapeVideoPageState extends State<_LandscapeVideoPage> {
   void dispose() {
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    _removeWatchObserver?.call();
     _controller?.dispose();
     super.dispose();
   }

@@ -39,12 +39,58 @@ class AppLocalizationsRu extends AppLocalizations {
   String get homeRecordedThisYear => 'Видео, снятые в этом году';
 
   @override
-  String get homeNoWatchHistory =>
-      'RollReel пока не записывает историю просмотров.';
+  String get homeWatchedToday => 'Просмотрено сегодня';
 
   @override
-  String get homeFolderDetailsUnavailable =>
-      'Сведения о папках для этой медиатеки недоступны.';
+  String get homeTopAlbums => 'Популярные альбомы';
+
+  @override
+  String get homeNoWatchHistory =>
+      'Посмотрите видео, чтобы начать историю просмотров.';
+
+  @override
+  String get homeNoVideoAlbums => 'Здесь появятся альбомы с видео.';
+
+  @override
+  String get homeNoVideoFolders => 'Здесь появятся папки с видео.';
+
+  @override
+  String get homeLimitedVideoCollections =>
+      'При ограниченном доступе некоторые альбомы или папки могут быть скрыты.';
+
+  @override
+  String homeWatchDays(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString дня',
+      many: '$countString дней',
+      few: '$countString дня',
+      one: '$countString день',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homePlayCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString просмотра',
+      many: '$countString просмотров',
+      few: '$countString просмотра',
+      one: '$countString просмотр',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get homeUnavailable => 'Недоступно';

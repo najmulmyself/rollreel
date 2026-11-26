@@ -39,10 +39,41 @@ class AppLocalizationsKo extends AppLocalizations {
   String get homeRecordedThisYear => '올해 촬영한 영상';
 
   @override
-  String get homeNoWatchHistory => 'RollReel은 아직 시청 기록을 저장하지 않습니다.';
+  String get homeWatchedToday => '오늘 본 영상';
 
   @override
-  String get homeFolderDetailsUnavailable => '이 보관함의 폴더 정보를 사용할 수 없습니다.';
+  String get homeTopAlbums => '주요 앨범';
+
+  @override
+  String get homeNoWatchHistory => '영상을 재생하면 시청 기록이 시작됩니다.';
+
+  @override
+  String get homeNoVideoAlbums => '영상이 있는 앨범이 여기에 표시됩니다.';
+
+  @override
+  String get homeNoVideoFolders => '영상이 있는 폴더가 여기에 표시됩니다.';
+
+  @override
+  String get homeLimitedVideoCollections =>
+      '접근 권한이 제한되면 일부 앨범이나 폴더가 표시되지 않을 수 있습니다.';
+
+  @override
+  String homeWatchDays(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '$countString일';
+  }
+
+  @override
+  String homePlayCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '재생 $countString회';
+  }
 
   @override
   String get homeUnavailable => '사용할 수 없음';

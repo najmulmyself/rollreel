@@ -1,3 +1,7 @@
+import 'dart:async';
+
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -7,7 +11,9 @@ import '../../core/favorites/favorites_provider.dart';
 import '../../core/permissions/permission_provider.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/typography.dart';
+import '../../core/video/video_collections_provider.dart';
 import '../../core/video/video_library_provider.dart';
+import '../../core/video/watch_history_provider.dart';
 import '../../l10n/app_localizations.dart';
 import 'home_video_sections.dart';
 
@@ -21,8 +27,18 @@ final _visibleFavoritesCountProvider = FutureProvider.autoDispose<int>((
   return (await videos).where((video) => favorites.contains(video.id)).length;
 });
 
+final _activityDateProvider = Provider.autoDispose<DateTime>((ref) {
+  final now = DateTime.now();
+  final tomorrow = DateTime(now.year, now.month, now.day + 1);
+  final timer = Timer(tomorrow.difference(now), ref.invalidateSelf);
+  ref.onDispose(timer.cancel);
+  return now;
+});
+
 class HomeDashboard extends ConsumerWidget {
-  const HomeDashboard({super.key});
+  const HomeDashboard({super.key, required this.onPlayAt});
+
+  final ValueChanged<String> onPlayAt;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -48,9 +64,18 @@ class HomeDashboard extends ConsumerWidget {
     final numbers = NumberFormat.decimalPattern(locale);
     final loading = permission.isLoading || library.isLoading;
     final videos = loading ? null : library.valueOrNull;
-    final summary = videos == null
+    final now = ref.watch(_activityDateProvider);
+    final summary = videos == null ? null : _LibrarySummary(videos, now);
+    final history = ref.watch(watchHistoryProvider);
+    final watchHistory = history.valueOrNull;
+    final watchLoading = loading || history.isLoading;
+    final watch = videos == null || watchHistory == null
         ? null
-        : _LibrarySummary(videos, DateTime.now());
+        : _WatchSummary(videos, watchHistory, now);
+    final collections = loading ? null : ref.watch(topVideoCollectionsProvider);
+    final showAlbums =
+        defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS;
 
     String valueLabel(int? value, {bool isLoading = false}) {
       if (loading || isLoading) return l10n.homeLoading;
@@ -78,19 +103,78 @@ class HomeDashboard extends ConsumerWidget {
         ),
         const SizedBox(height: 17),
         _ActivityHeading(l10n.homeWatchActivity),
-        const SizedBox(height: 6),
-        _ActivityNote(l10n.homeNoWatchHistory),
+        _ActivityRow(
+          label: l10n.homeWatchedToday,
+          value: valueLabel(watch?.watchedToday, isLoading: watchLoading),
+        ),
+        _ActivityRow(
+          label: l10n.homePlays,
+          value: valueLabel(watch?.plays, isLoading: watchLoading),
+        ),
+        _ActivityRow(
+          label: l10n.homeWatchStreak,
+          value: watchLoading
+              ? l10n.homeLoading
+              : watch == null
+              ? l10n.homeUnavailable
+              : l10n.homeWatchDays(watch.streak),
+        ),
         const SizedBox(height: 17),
-        _ActivityHeading(l10n.homeTopFolders),
-        if (loading)
+        _ActivityHeading(l10n.homeMostWatched),
+        const SizedBox(height: 6),
+        if (watchLoading)
+          _ActivityNote(l10n.homeLoading)
+        else if (watch == null)
+          _ActivityNote(l10n.homeUnavailable)
+        else if (watch.mostWatched.isEmpty) ...[
+          _ActivityNote(l10n.homeNoWatchHistory),
+          if (videos != null && videos.isNotEmpty)
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: TextButton(
+                onPressed: () => onPlayAt(videos.first.id),
+                child: Text(l10n.homePlay),
+              ),
+            ),
+        ] else
+          for (final entry in watch.mostWatched)
+            _MostWatchedRow(
+              asset: entry.asset,
+              plays: entry.plays,
+              onTap: () => onPlayAt(entry.asset.id),
+            ),
+        const SizedBox(height: 17),
+        _ActivityHeading(showAlbums ? l10n.homeTopAlbums : l10n.homeTopFolders),
+        if (collections == null || collections.isLoading)
           _ActivityNote(l10n.loadingLibrary)
-        else if (summary == null || summary.folders.isEmpty)
-          _ActivityNote(l10n.homeFolderDetailsUnavailable)
-        else
-          for (final folder in summary.folders)
+        else if (collections.hasError) ...[
+          _ActivityNote(l10n.homeUnavailable),
+          Align(
+            alignment: AlignmentDirectional.centerStart,
+            child: TextButton(
+              onPressed: () => ref.invalidate(topVideoCollectionsProvider),
+              child: Text(l10n.retry),
+            ),
+          ),
+        ] else if (collections.requireValue.isEmpty) ...[
+          if (permission.valueOrNull == PermissionState.limited) ...[
+            _ActivityNote(l10n.homeLimitedVideoCollections),
+            Align(
+              alignment: AlignmentDirectional.centerStart,
+              child: TextButton(
+                onPressed: PhotoManager.openSetting,
+                child: Text(l10n.openSettings),
+              ),
+            ),
+          ] else
+            _ActivityNote(
+              showAlbums ? l10n.homeNoVideoAlbums : l10n.homeNoVideoFolders,
+            ),
+        ] else
+          for (final collection in collections.requireValue)
             _ActivityRow(
-              label: folder.name,
-              value: l10n.videosCount(folder.count),
+              label: collection.name,
+              value: l10n.videosCount(collection.count),
             ),
         const SizedBox(height: 17),
         _ActivityHeading(l10n.homeVideoRecap),
@@ -105,40 +189,77 @@ class HomeDashboard extends ConsumerWidget {
 
 class _LibrarySummary {
   _LibrarySummary(List<AssetEntity> videos, DateTime today) {
-    final byPath = <String, ({String name, int count})>{};
-
     for (final video in videos) {
-      if (video.createDateSecond != null) {
-        final date = video.createDateTime;
-        if (date.year == today.year) {
-          year++;
-          if (date.month == today.month && date.day == today.day) {
-            this.today++;
-          }
-        }
-      }
-
-      final path = video.relativePath?.trim();
-      if (path == null || path.isEmpty) continue;
-      final parts = path
-          .split(RegExp(r'[/\\]+'))
-          .where((part) => part.isNotEmpty);
-      if (parts.isEmpty) continue;
-      final key = parts.join('/');
-      byPath[key] = (name: parts.last, count: (byPath[key]?.count ?? 0) + 1);
+      if (video.createDateSecond == null) continue;
+      final date = video.createDateTime;
+      if (date.year == today.year) year++;
+      if (DateUtils.isSameDay(date, today)) this.today++;
     }
-
-    final ranked = byPath.values.toList()
-      ..sort((a, b) {
-        final countOrder = b.count.compareTo(a.count);
-        return countOrder == 0 ? a.name.compareTo(b.name) : countOrder;
-      });
-    folders = ranked.take(3).toList();
   }
 
   int today = 0;
   int year = 0;
-  late final List<({String name, int count})> folders;
+}
+
+typedef _RankedVideo = ({AssetEntity asset, int plays});
+
+class _WatchSummary {
+  _WatchSummary(List<AssetEntity> videos, WatchHistory history, DateTime now) {
+    final today = watchDay(now);
+    final watchedDays = <String>{};
+    final ranked = <_RankedVideo>[];
+    for (final asset in videos) {
+      final days = history[asset.id];
+      if (days == null) continue;
+      final count = days.values.fold(0, (total, count) => total + count);
+      plays += count;
+      if (days.containsKey(today.toString())) watchedToday++;
+      watchedDays.addAll(days.keys);
+      ranked.add((asset: asset, plays: count));
+    }
+
+    var day = watchedDays.contains(today.toString()) ? today : today - 1;
+    while (watchedDays.contains(day.toString())) {
+      streak++;
+      day--;
+    }
+
+    ranked.sort((a, b) {
+      final byPlays = b.plays.compareTo(a.plays);
+      return byPlays != 0
+          ? byPlays
+          : b.asset.createDateTime.compareTo(a.asset.createDateTime);
+    });
+    mostWatched = ranked.take(3).toList();
+  }
+
+  int watchedToday = 0;
+  int plays = 0;
+  int streak = 0;
+  late final List<_RankedVideo> mostWatched;
+}
+
+class _MostWatchedRow extends ConsumerWidget {
+  const _MostWatchedRow({
+    required this.asset,
+    required this.plays,
+    required this.onTap,
+  });
+
+  final AssetEntity asset;
+  final int plays;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
+    final title = ref.watch(homeTitleProvider(asset)).valueOrNull;
+    return _ActivityRow(
+      label: title ?? l10n.videoFallbackTitle,
+      value: l10n.homePlayCount(plays),
+      onTap: onTap,
+    );
+  }
 }
 
 class _ActivityHeading extends StatelessWidget {
@@ -175,16 +296,17 @@ class _ActivityNote extends StatelessWidget {
 }
 
 class _ActivityRow extends StatelessWidget {
-  const _ActivityRow({required this.label, required this.value});
+  const _ActivityRow({required this.label, required this.value, this.onTap});
 
   final String label;
   final String value;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final style = RRTypography.body.copyWith(fontSize: 15, color: homeInk);
-    return Container(
-      constraints: const BoxConstraints(minHeight: 43),
+    final row = Container(
+      constraints: const BoxConstraints(minHeight: 44),
       padding: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
         border: Border(bottom: BorderSide(color: homeRule)),
@@ -200,8 +322,13 @@ class _ActivityRow extends StatelessWidget {
               style: style.copyWith(fontWeight: FontWeight.w700),
             ),
           ),
+          if (onTap != null) ...[
+            const SizedBox(width: 8),
+            Icon(CupertinoIcons.chevron_forward, size: 14, color: homeAccent),
+          ],
         ],
       ),
     );
+    return onTap == null ? row : InkWell(onTap: onTap, child: row);
   }
 }

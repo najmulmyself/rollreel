@@ -39,10 +39,41 @@ class AppLocalizationsJa extends AppLocalizations {
   String get homeRecordedThisYear => '今年撮影した動画';
 
   @override
-  String get homeNoWatchHistory => 'RollReel はまだ視聴履歴を記録していません。';
+  String get homeWatchedToday => '今日視聴した動画';
 
   @override
-  String get homeFolderDetailsUnavailable => 'このライブラリのフォルダ情報は利用できません。';
+  String get homeTopAlbums => '主なアルバム';
+
+  @override
+  String get homeNoWatchHistory => '動画を再生すると視聴履歴が始まります。';
+
+  @override
+  String get homeNoVideoAlbums => '動画が入っているアルバムがここに表示されます。';
+
+  @override
+  String get homeNoVideoFolders => '動画が入っているフォルダがここに表示されます。';
+
+  @override
+  String get homeLimitedVideoCollections =>
+      'アクセスが制限されていると、一部のアルバムやフォルダが表示されない場合があります。';
+
+  @override
+  String homeWatchDays(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '$countString日';
+  }
+
+  @override
+  String homePlayCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '$countString回再生';
+  }
 
   @override
   String get homeUnavailable => '利用できません';

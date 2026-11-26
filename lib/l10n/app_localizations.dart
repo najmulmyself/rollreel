@@ -180,17 +180,53 @@ abstract class AppLocalizations {
   /// **'Recorded this year'**
   String get homeRecordedThisYear;
 
+  /// No description provided for @homeWatchedToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Watched today'**
+  String get homeWatchedToday;
+
+  /// No description provided for @homeTopAlbums.
+  ///
+  /// In en, this message translates to:
+  /// **'Top albums'**
+  String get homeTopAlbums;
+
   /// No description provided for @homeNoWatchHistory.
   ///
   /// In en, this message translates to:
-  /// **'RollReel doesn’t track plays, watch streaks, or most-watched videos.'**
+  /// **'Watch a video to start your history.'**
   String get homeNoWatchHistory;
 
-  /// No description provided for @homeFolderDetailsUnavailable.
+  /// No description provided for @homeNoVideoAlbums.
   ///
   /// In en, this message translates to:
-  /// **'Folder details aren’t available for this library.'**
-  String get homeFolderDetailsUnavailable;
+  /// **'Albums with videos will appear here.'**
+  String get homeNoVideoAlbums;
+
+  /// No description provided for @homeNoVideoFolders.
+  ///
+  /// In en, this message translates to:
+  /// **'Folders with videos will appear here.'**
+  String get homeNoVideoFolders;
+
+  /// No description provided for @homeLimitedVideoCollections.
+  ///
+  /// In en, this message translates to:
+  /// **'Limited access can hide some albums or folders.'**
+  String get homeLimitedVideoCollections;
+
+  /// No description provided for @homeWatchDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} day} other{{count} days}}'**
+  String homeWatchDays(int count);
+
+  /// No description provided for @homePlayCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, one{{count} play} other{{count} plays}}'**
+  String homePlayCount(int count);
 
   /// No description provided for @homeUnavailable.
   ///

@@ -39,12 +39,42 @@ class AppLocalizationsTr extends AppLocalizations {
   String get homeRecordedThisYear => 'Bu yıl çekilen videolar';
 
   @override
-  String get homeNoWatchHistory =>
-      'RollReel henüz izleme geçmişini kaydetmiyor.';
+  String get homeWatchedToday => 'Bugün izlenenler';
 
   @override
-  String get homeFolderDetailsUnavailable =>
-      'Bu arşiv için klasör ayrıntıları kullanılamıyor.';
+  String get homeTopAlbums => 'Öne çıkan albümler';
+
+  @override
+  String get homeNoWatchHistory =>
+      'İzleme geçmişini başlatmak için bir video izle.';
+
+  @override
+  String get homeNoVideoAlbums => 'Video içeren albümler burada görünür.';
+
+  @override
+  String get homeNoVideoFolders => 'Video içeren klasörler burada görünür.';
+
+  @override
+  String get homeLimitedVideoCollections =>
+      'Sınırlı erişim bazı albümleri veya klasörleri gizleyebilir.';
+
+  @override
+  String homeWatchDays(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '$countString gün';
+  }
+
+  @override
+  String homePlayCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '$countString oynatma';
+  }
 
   @override
   String get homeUnavailable => 'Kullanılamıyor';

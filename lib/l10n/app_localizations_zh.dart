@@ -39,10 +39,40 @@ class AppLocalizationsZh extends AppLocalizations {
   String get homeRecordedThisYear => '今年拍摄的视频';
 
   @override
-  String get homeNoWatchHistory => 'RollReel 暂未记录观看历史。';
+  String get homeWatchedToday => '今天观看的视频';
 
   @override
-  String get homeFolderDetailsUnavailable => '此图库没有可用的文件夹信息。';
+  String get homeTopAlbums => '主要相册';
+
+  @override
+  String get homeNoWatchHistory => '观看一段视频即可开始记录观看历史。';
+
+  @override
+  String get homeNoVideoAlbums => '包含视频的相册会显示在这里。';
+
+  @override
+  String get homeNoVideoFolders => '包含视频的文件夹会显示在这里。';
+
+  @override
+  String get homeLimitedVideoCollections => '访问权限受限时，部分相册或文件夹可能不会显示。';
+
+  @override
+  String homeWatchDays(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '$countString 天';
+  }
+
+  @override
+  String homePlayCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '播放 $countString 次';
+  }
 
   @override
   String get homeUnavailable => '不可用';

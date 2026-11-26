@@ -39,12 +39,54 @@ class AppLocalizationsDe extends AppLocalizations {
   String get homeRecordedThisYear => 'Dieses Jahr aufgenommene Videos';
 
   @override
-  String get homeNoWatchHistory =>
-      'RollReel zeichnet noch keinen Wiedergabeverlauf auf.';
+  String get homeWatchedToday => 'Heute angesehen';
 
   @override
-  String get homeFolderDetailsUnavailable =>
-      'Für diese Mediathek sind keine Ordnerdetails verfügbar.';
+  String get homeTopAlbums => 'Top-Alben';
+
+  @override
+  String get homeNoWatchHistory =>
+      'Sieh dir ein Video an, um deinen Verlauf zu starten.';
+
+  @override
+  String get homeNoVideoAlbums => 'Alben mit Videos erscheinen hier.';
+
+  @override
+  String get homeNoVideoFolders => 'Ordner mit Videos erscheinen hier.';
+
+  @override
+  String get homeLimitedVideoCollections =>
+      'Bei eingeschränktem Zugriff können einige Alben oder Ordner fehlen.';
+
+  @override
+  String homeWatchDays(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString Tage',
+      one: '$countString Tag',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homePlayCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString Wiedergaben',
+      one: '$countString Wiedergabe',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get homeUnavailable => 'Nicht verfügbar';

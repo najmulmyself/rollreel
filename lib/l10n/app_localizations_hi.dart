@@ -39,12 +39,42 @@ class AppLocalizationsHi extends AppLocalizations {
   String get homeRecordedThisYear => 'इस साल रिकॉर्ड किए गए वीडियो';
 
   @override
-  String get homeNoWatchHistory =>
-      'RollReel अभी देखने का इतिहास रिकॉर्ड नहीं करता।';
+  String get homeWatchedToday => 'आज देखे गए वीडियो';
 
   @override
-  String get homeFolderDetailsUnavailable =>
-      'इस लाइब्रेरी के लिए फ़ोल्डर की जानकारी उपलब्ध नहीं है।';
+  String get homeTopAlbums => 'प्रमुख एल्बम';
+
+  @override
+  String get homeNoWatchHistory =>
+      'अपना इतिहास शुरू करने के लिए कोई वीडियो देखें।';
+
+  @override
+  String get homeNoVideoAlbums => 'वीडियो वाले एल्बम यहाँ दिखेंगे।';
+
+  @override
+  String get homeNoVideoFolders => 'वीडियो वाले फ़ोल्डर यहाँ दिखेंगे।';
+
+  @override
+  String get homeLimitedVideoCollections =>
+      'सीमित पहुँच के कारण कुछ एल्बम या फ़ोल्डर नहीं दिख सकते।';
+
+  @override
+  String homeWatchDays(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '$countString दिन';
+  }
+
+  @override
+  String homePlayCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    return '$countString बार चलाया गया';
+  }
 
   @override
   String get homeUnavailable => 'उपलब्ध नहीं';

@@ -55,7 +55,19 @@ Future<List<AssetEntity>> _fetchVideos({bool loadTitles = false}) async {
         : null,
   );
   if (paths.isEmpty) return [];
-  return paths.first.getAssetListRange(start: 0, end: 9999);
+  final library = paths.first;
+  final count = await library.assetCountAsync;
+  if (count == 0) return [];
+
+  const pageSize = 5000;
+  final videos = <String, AssetEntity>{};
+  for (var page = 0; page * pageSize < count; page++) {
+    final assets = await library.getAssetListPaged(page: page, size: pageSize);
+    for (final asset in assets) {
+      videos[asset.id] = asset;
+    }
+  }
+  return videos.values.toList();
 }
 
 /// Returns ALL videos from the device library (no filter applied).

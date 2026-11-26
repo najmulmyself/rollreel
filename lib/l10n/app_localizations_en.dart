@@ -39,12 +39,53 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeRecordedThisYear => 'Recorded this year';
 
   @override
-  String get homeNoWatchHistory =>
-      'RollReel doesn’t track plays, watch streaks, or most-watched videos.';
+  String get homeWatchedToday => 'Watched today';
 
   @override
-  String get homeFolderDetailsUnavailable =>
-      'Folder details aren’t available for this library.';
+  String get homeTopAlbums => 'Top albums';
+
+  @override
+  String get homeNoWatchHistory => 'Watch a video to start your history.';
+
+  @override
+  String get homeNoVideoAlbums => 'Albums with videos will appear here.';
+
+  @override
+  String get homeNoVideoFolders => 'Folders with videos will appear here.';
+
+  @override
+  String get homeLimitedVideoCollections =>
+      'Limited access can hide some albums or folders.';
+
+  @override
+  String homeWatchDays(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString days',
+      one: '$countString day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homePlayCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString plays',
+      one: '$countString play',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get homeUnavailable => 'Unavailable';

@@ -10,8 +10,24 @@
   "homeTopFolders": "Top folders",
   "homeVideoRecap": "Year in review",
   "homeRecordedThisYear": "Recorded this year",
-  "homeNoWatchHistory": "RollReel doesn’t track plays, watch streaks, or most-watched videos.",
-  "homeFolderDetailsUnavailable": "Folder details aren’t available for this library.",
+  "homeWatchedToday": "Watched today",
+  "homeTopAlbums": "Top albums",
+  "homeNoWatchHistory": "Watch a video to start your history.",
+  "homeNoVideoAlbums": "Albums with videos will appear here.",
+  "homeNoVideoFolders": "Folders with videos will appear here.",
+  "homeLimitedVideoCollections": "Limited access can hide some albums or folders.",
+  "homeWatchDays": "{count, plural, one{{count} day} other{{count} days}}",
+  "@homeWatchDays": {
+    "placeholders": {
+      "count": {"type": "int", "format": "decimalPattern"}
+    }
+  },
+  "homePlayCount": "{count, plural, one{{count} play} other{{count} plays}}",
+  "@homePlayCount": {
+    "placeholders": {
+      "count": {"type": "int", "format": "decimalPattern"}
+    }
+  },
   "homeUnavailable": "Unavailable",
   "homeLoading": "Loading…",
   "homeCameraRoll": "Your\ncamera roll.",

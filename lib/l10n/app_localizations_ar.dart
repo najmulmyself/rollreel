@@ -39,11 +39,63 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeRecordedThisYear => 'الفيديوهات المصوّرة هذا العام';
 
   @override
-  String get homeNoWatchHistory => 'لا يسجّل RollReel سجل المشاهدة حتى الآن.';
+  String get homeWatchedToday => 'شوهدت اليوم';
 
   @override
-  String get homeFolderDetailsUnavailable =>
-      'تفاصيل المجلدات غير متاحة لهذه المكتبة.';
+  String get homeTopAlbums => 'أهم الألبومات';
+
+  @override
+  String get homeNoWatchHistory => 'شاهد فيديو لبدء سجل المشاهدة.';
+
+  @override
+  String get homeNoVideoAlbums =>
+      'ستظهر هنا الألبومات التي تحتوي على فيديوهات.';
+
+  @override
+  String get homeNoVideoFolders =>
+      'ستظهر هنا المجلدات التي تحتوي على فيديوهات.';
+
+  @override
+  String get homeLimitedVideoCollections =>
+      'قد يؤدي الوصول المحدود إلى إخفاء بعض الألبومات أو المجلدات.';
+
+  @override
+  String homeWatchDays(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString يوم',
+      many: '$countString يومًا',
+      few: '$countString أيام',
+      two: 'يومان',
+      one: 'يوم واحد',
+      zero: '$countString يوم',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homePlayCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString تشغيل',
+      many: '$countString مرة تشغيل',
+      few: '$countString مرات تشغيل',
+      two: 'مرتا تشغيل',
+      one: 'تشغيل واحد',
+      zero: '$countString تشغيل',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get homeUnavailable => 'غير متاح';

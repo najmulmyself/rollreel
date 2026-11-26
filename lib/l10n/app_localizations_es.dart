@@ -39,12 +39,53 @@ class AppLocalizationsEs extends AppLocalizations {
   String get homeRecordedThisYear => 'Vídeos grabados este año';
 
   @override
-  String get homeNoWatchHistory =>
-      'RollReel todavía no guarda el historial de visualización.';
+  String get homeWatchedToday => 'Vistos hoy';
 
   @override
-  String get homeFolderDetailsUnavailable =>
-      'Los detalles de las carpetas no están disponibles para esta fototeca.';
+  String get homeTopAlbums => 'Álbumes destacados';
+
+  @override
+  String get homeNoWatchHistory => 'Mira un vídeo para empezar tu historial.';
+
+  @override
+  String get homeNoVideoAlbums => 'Aquí aparecerán los álbumes con vídeos.';
+
+  @override
+  String get homeNoVideoFolders => 'Aquí aparecerán las carpetas con vídeos.';
+
+  @override
+  String get homeLimitedVideoCollections =>
+      'El acceso limitado puede ocultar algunos álbumes o carpetas.';
+
+  @override
+  String homeWatchDays(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString días',
+      one: '$countString día',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String homePlayCount(int count) {
+    final intl.NumberFormat countNumberFormat =
+        intl.NumberFormat.decimalPattern(localeName);
+    final String countString = countNumberFormat.format(count);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$countString reproducciones',
+      one: '$countString reproducción',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get homeUnavailable => 'No disponible';

@@ -4,10 +4,13 @@ import 'dart:math' as math;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../core/theme/typography.dart';
+import '../../core/video/watch_history_provider.dart';
+import '../../core/video/watch_playback_session.dart';
 import '../../l10n/app_localizations.dart';
 
 String homeClipHeroTag(String id) => 'home-watch-next-$id';
@@ -37,7 +40,7 @@ class HomeClipPoster extends StatelessWidget {
   }
 }
 
-class HomeClipPlayer extends StatefulWidget {
+class HomeClipPlayer extends ConsumerStatefulWidget {
   const HomeClipPlayer({
     super.key,
     required this.asset,
@@ -50,11 +53,15 @@ class HomeClipPlayer extends StatefulWidget {
   final Uint8List? poster;
 
   @override
-  State<HomeClipPlayer> createState() => _HomeClipPlayerState();
+  ConsumerState<HomeClipPlayer> createState() => _HomeClipPlayerState();
 }
 
-class _HomeClipPlayerState extends State<HomeClipPlayer> {
+class _HomeClipPlayerState extends ConsumerState<HomeClipPlayer> {
   VideoPlayerController? _controller;
+  late final _watchSession = WatchPlaybackSession(
+    () => ref.read(watchHistoryProvider.notifier).recordPlay(widget.asset.id),
+  );
+  VoidCallback? _removeWatchObserver;
   Animation<double>? _routeAnimation;
   bool _failed = false;
   bool _transitionFinished = false;
@@ -101,6 +108,10 @@ class _HomeClipPlayerState extends State<HomeClipPlayer> {
       }
       setState(() => _controller = controller);
       controller.addListener(_onPlaybackChanged);
+      _removeWatchObserver = _watchSession.observe(
+        controller,
+        isActive: () => mounted && ModalRoute.isCurrentOf(context) != false,
+      );
       if (_transitionFinished) await _play(controller);
     } catch (error) {
       await controller?.dispose();
@@ -125,6 +136,8 @@ class _HomeClipPlayerState extends State<HomeClipPlayer> {
 
   void _retry() {
     final controller = _controller;
+    _removeWatchObserver?.call();
+    _removeWatchObserver = null;
     controller?.removeListener(_onPlaybackChanged);
     setState(() {
       _controller = null;
@@ -137,6 +150,7 @@ class _HomeClipPlayerState extends State<HomeClipPlayer> {
   @override
   void dispose() {
     _routeAnimation?.removeStatusListener(_onRouteStatus);
+    _removeWatchObserver?.call();
     _controller?.removeListener(_onPlaybackChanged);
     _controller?.dispose();
     super.dispose();

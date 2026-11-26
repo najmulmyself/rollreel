@@ -24,7 +24,7 @@ final _homeThumbnailProvider = FutureProvider.autoDispose
       }
     });
 
-final _homeTitleProvider = FutureProvider.autoDispose
+final homeTitleProvider = FutureProvider.autoDispose
     .family<String?, AssetEntity>((ref, asset) async {
       final title = asset.title?.trim();
       if (title != null && title.isNotEmpty) return title;
@@ -476,7 +476,7 @@ class _FeaturedVideoState extends ConsumerState<_FeaturedVideo> {
     final asset = widget.asset;
     final l10n = AppLocalizations.of(context)!;
     final title =
-        ref.watch(_homeTitleProvider(asset)).valueOrNull ??
+        ref.watch(homeTitleProvider(asset)).valueOrNull ??
         l10n.videoFallbackTitle;
     final poster = ref.watch(_homeThumbnailProvider(asset)).valueOrNull;
     final duration = Duration(seconds: asset.duration);
@@ -590,7 +590,7 @@ class _MemoryPreview extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final title =
-        ref.watch(_homeTitleProvider(asset)).valueOrNull ??
+        ref.watch(homeTitleProvider(asset)).valueOrNull ??
         l10n.videoFallbackTitle;
     final poster = ref.watch(_homeThumbnailProvider(asset)).valueOrNull;
     final years = DateTime.now().year - asset.createDateTime.year;
