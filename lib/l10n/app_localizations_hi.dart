@@ -1016,4 +1016,19 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get settingsLanguageSaveFailed =>
       'भाषा सहेजी नहीं जा सकी। फिर से कोशिश करें।';
+
+  @override
+  String get updateAvailableTitle => 'RollReel का नया संस्करण आ गया है';
+
+  @override
+  String updateAvailableBody(String version) {
+    return 'संस्करण $version App Store पर उपलब्ध है। जब चाहें अपडेट करें।';
+  }
+
+  @override
+  String get updateNow => 'अपडेट करें';
+
+  @override
+  String get updateStoreUnavailable =>
+      'App Store नहीं खुल सका। फिर से कोशिश करें।';
 }

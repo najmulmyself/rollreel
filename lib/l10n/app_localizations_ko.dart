@@ -993,4 +993,18 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get settingsLanguageSaveFailed => '언어를 저장하지 못했어요. 다시 시도해 주세요.';
+
+  @override
+  String get updateAvailableTitle => '새로운 RollReel이 나왔어요';
+
+  @override
+  String updateAvailableBody(String version) {
+    return 'App Store에서 $version 버전을 이용할 수 있어요. 원할 때 업데이트하세요.';
+  }
+
+  @override
+  String get updateNow => '업데이트';
+
+  @override
+  String get updateStoreUnavailable => 'App Store를 열지 못했어요. 다시 시도해 주세요.';
 }

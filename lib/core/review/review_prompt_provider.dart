@@ -52,6 +52,7 @@ class ReviewPromptController {
   /// Call when the app becomes active/foreground. Triggers the native
   /// review prompt at most once, when both conditions are satisfied.
   Future<void> maybeRequestReview() async {
+    if (_ref.read(isSystemPromptActiveProvider)) return;
     final prefs = await SharedPreferences.getInstance();
     if (prefs.getBool(_kRequested) ?? false) return;
 
@@ -65,9 +66,10 @@ class ReviewPromptController {
 
     final review = InAppReview.instance;
     if (await review.isAvailable()) {
-      await prefs.setBool(_kRequested, true);
+      if (_ref.read(isSystemPromptActiveProvider)) return;
       _ref.read(isSystemPromptActiveProvider.notifier).state = true;
       try {
+        await prefs.setBool(_kRequested, true);
         await review.requestReview();
       } finally {
         _ref.read(isSystemPromptActiveProvider.notifier).state = false;

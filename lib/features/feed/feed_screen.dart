@@ -291,6 +291,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   Widget build(BuildContext context) {
     final videosAsync = ref.watch(feedVideosProvider);
     final settings = ref.watch(settingsProvider);
+    final systemPromptActive = ref.watch(isSystemPromptActiveProvider);
     final activeFilter = ref.watch(feedFilterProvider);
     final safeTop = MediaQuery.paddingOf(context).top;
     final permission = ref.watch(permissionProvider).valueOrNull;
@@ -431,7 +432,10 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
               asset: videos[index],
               isActive: index == safeIndex && widget.isTabActive,
               playbackCovered:
-                  _checkingGuide || _pendingGuide != null || _playerOverlayOpen,
+                  _checkingGuide ||
+                  _pendingGuide != null ||
+                  _playerOverlayOpen ||
+                  systemPromptActive,
               preload: preload,
               onControllerReady: (controller) {
                 if (controller != null) _markPlaybackReady(videos[index].id);

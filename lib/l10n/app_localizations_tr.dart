@@ -1020,4 +1020,19 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get settingsLanguageSaveFailed =>
       'Dil kaydedilemedi. Lütfen tekrar deneyin.';
+
+  @override
+  String get updateAvailableTitle => 'RollReel’in yeni sürümü burada';
+
+  @override
+  String updateAvailableBody(String version) {
+    return '$version sürümü App Store’da mevcut. Hazır olduğunuzda güncelleyin.';
+  }
+
+  @override
+  String get updateNow => 'Güncelle';
+
+  @override
+  String get updateStoreUnavailable =>
+      'App Store açılamadı. Lütfen tekrar deneyin.';
 }

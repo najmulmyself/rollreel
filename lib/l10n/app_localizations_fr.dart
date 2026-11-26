@@ -1058,4 +1058,19 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get settingsLanguageSaveFailed =>
       'Impossible d’enregistrer la langue. Réessayez.';
+
+  @override
+  String get updateAvailableTitle => 'Une nouvelle version de RollReel est là';
+
+  @override
+  String updateAvailableBody(String version) {
+    return 'La version $version est disponible sur l’App Store. Mettez l’app à jour quand vous le souhaitez.';
+  }
+
+  @override
+  String get updateNow => 'Mettre à jour';
+
+  @override
+  String get updateStoreUnavailable =>
+      'Impossible d’ouvrir l’App Store. Réessayez.';
 }

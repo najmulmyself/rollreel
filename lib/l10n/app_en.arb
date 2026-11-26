@@ -462,5 +462,10 @@
   "retry": "Retry",
   "settingsLanguage": "Language",
   "settingsSystemLanguage": "System default",
-  "settingsLanguageSaveFailed": "Couldn’t save your language. Please try again."
+  "settingsLanguageSaveFailed": "Couldn’t save your language. Please try again.",
+  "updateAvailableTitle": "A new RollReel is here",
+  "updateAvailableBody": "Version {version} is available on the App Store. Update when you’re ready.",
+  "updateNow": "Update",
+  "updateStoreUnavailable": "Couldn’t open the App Store. Please try again.",
+  "@updateAvailableBody": {"placeholders": {"version": {"type": "String", "example": "2.1.0"}}}
 }

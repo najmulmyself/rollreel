@@ -992,4 +992,18 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get settingsLanguageSaveFailed => '言語を保存できませんでした。もう一度お試しください。';
+
+  @override
+  String get updateAvailableTitle => 'RollReelの新しいバージョン';
+
+  @override
+  String updateAvailableBody(String version) {
+    return 'バージョン$versionがApp Storeで公開されています。お好きなときにアップデートしてください。';
+  }
+
+  @override
+  String get updateNow => 'アップデート';
+
+  @override
+  String get updateStoreUnavailable => 'App Storeを開けませんでした。もう一度お試しください。';
 }

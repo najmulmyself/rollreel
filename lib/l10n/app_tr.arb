@@ -278,5 +278,9 @@
   "retry": "Tekrar Dene",
   "settingsLanguage": "Dil",
   "settingsSystemLanguage": "Sistem varsayılanı",
-  "settingsLanguageSaveFailed": "Dil kaydedilemedi. Lütfen tekrar deneyin."
+  "settingsLanguageSaveFailed": "Dil kaydedilemedi. Lütfen tekrar deneyin.",
+  "updateAvailableTitle": "RollReel’in yeni sürümü burada",
+  "updateAvailableBody": "{version} sürümü App Store’da mevcut. Hazır olduğunuzda güncelleyin.",
+  "updateNow": "Güncelle",
+  "updateStoreUnavailable": "App Store açılamadı. Lütfen tekrar deneyin."
 }

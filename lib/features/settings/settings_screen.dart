@@ -249,7 +249,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 onPressed: widget.onOpenPaywall,
                               ),
                               _SettingsRow(
-                                icon: CupertinoIcons.arrow_clockwise,
+                                icon: CupertinoIcons
+                                    .arrow_counterclockwise_circle_fill,
                                 label: l10n.restorePurchases,
                                 onTap: _restoring ? null : _restorePurchases,
                                 accessory: _restoring
@@ -265,21 +266,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             title: l10n.playbackSection,
                             rows: [
                               _SettingsToggle(
-                                icon: CupertinoIcons.arrow_2_circlepath,
+                                icon: CupertinoIcons.repeat_1,
                                 label: l10n.loopShortVideos,
                                 description: l10n.loopShortVideosSub,
                                 value: settings.loopShortVideos,
                                 onChanged: notifier.setLoopShortVideos,
                               ),
                               _SettingsToggle(
-                                icon: CupertinoIcons.play_circle,
+                                icon: CupertinoIcons.play_rectangle_fill,
                                 label: l10n.autoPlayOnLaunch,
                                 description: l10n.autoPlayOnLaunchSub,
                                 value: settings.autoPlay,
                                 onChanged: notifier.setAutoPlay,
                               ),
                               _SettingsRow(
-                                icon: CupertinoIcons.slider_horizontal_3,
+                                icon: CupertinoIcons
+                                    .line_horizontal_3_decrease_circle_fill,
                                 label: l10n.defaultFilter,
                                 description: l10n.defaultFilterSub,
                                 value: _filterLabel(
@@ -295,7 +297,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             title: l10n.appearanceSection,
                             rows: [
                               _SettingsRow(
-                                icon: CupertinoIcons.globe,
+                                icon: CupertinoIcons.textformat,
                                 label: l10n.settingsLanguage,
                                 value: locale == null
                                     ? l10n.settingsSystemLanguage
@@ -303,19 +305,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 onTap: _pickLanguage,
                               ),
                               _SettingsToggle(
-                                icon: CupertinoIcons.moon_stars,
+                                icon: CupertinoIcons.moon_fill,
                                 label: l10n.darkMode,
                                 value: settings.darkMode,
                                 onChanged: notifier.setDarkMode,
                               ),
                               _SettingsToggle(
-                                icon: CupertinoIcons.calendar,
+                                icon: CupertinoIcons.calendar_today,
                                 label: l10n.showDateLabels,
                                 value: settings.showDateLabels,
                                 onChanged: notifier.setShowDateLabels,
                               ),
                               _SettingsToggle(
-                                icon: CupertinoIcons.clock,
+                                icon: CupertinoIcons.timer_fill,
                                 label: l10n.showDurationBadges,
                                 value: settings.showDurationBadges,
                                 onChanged: notifier.setShowDurationBadges,
@@ -326,7 +328,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             title: l10n.privacySection,
                             rows: [
                               _SettingsRow(
-                                icon: CupertinoIcons.lock_shield,
+                                icon: CupertinoIcons.lock_shield_fill,
                                 label: l10n.privacyVault,
                                 description: l10n.settingsVaultDescription,
                                 onTap: widget.onOpenVault,
@@ -337,24 +339,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             title: l10n.aboutSection,
                             rows: [
                               _SettingsRow(
-                                icon: CupertinoIcons.doc_text,
+                                icon: CupertinoIcons.doc_text_fill,
                                 label: l10n.privacyPolicy,
                                 onTap: _openPrivacyPolicy,
                               ),
                               _SettingsRow(
-                                icon: CupertinoIcons.star,
+                                icon: CupertinoIcons.star_fill,
                                 label: l10n.rateApp,
                                 onTap: _rateApp,
                               ),
                               Builder(
                                 builder: (rowContext) => _SettingsRow(
-                                  icon: CupertinoIcons.share,
+                                  icon: CupertinoIcons.square_arrow_up_fill,
                                   label: l10n.shareApp,
                                   onTap: () => _shareApp(rowContext),
                                 ),
                               ),
                               _SettingsRow(
-                                icon: CupertinoIcons.info_circle,
+                                icon: CupertinoIcons.info_circle_fill,
                                 label: l10n.version,
                                 value:
                                     package == null ||
@@ -633,7 +635,7 @@ class _SettingsGroup extends StatelessWidget {
 }
 
 Widget _settingsDivider() => Padding(
-  padding: const EdgeInsetsDirectional.only(start: 48, end: 12),
+  padding: const EdgeInsetsDirectional.only(start: 52, end: 12),
   child: Divider(height: 1, thickness: 1, color: _line),
 );
 
@@ -667,7 +669,20 @@ class _SettingsRow extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         child: Row(
           children: [
-            SizedBox(width: 26, child: Icon(icon, size: 19, color: _accent)),
+            ExcludeSemantics(
+              child: Container(
+                width: 30,
+                height: 30,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: RRColors.isDark.value
+                      ? const Color(0xFF172D40)
+                      : const Color(0xFFEAF3FA),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, size: 19, color: _accent),
+              ),
+            ),
             const SizedBox(width: 10),
             Expanded(
               child: Column(
@@ -836,7 +851,7 @@ class _LanguageSheet extends StatelessWidget {
                       ),
                       trailing: selected
                           ? Icon(
-                              CupertinoIcons.check_mark,
+                              CupertinoIcons.checkmark_alt_circle_fill,
                               color: _accent,
                               size: 18,
                             )
@@ -950,7 +965,7 @@ class _DefaultFilterSheet extends StatelessWidget {
                         ),
                         if (filter == current)
                           Icon(
-                            CupertinoIcons.check_mark,
+                            CupertinoIcons.checkmark_alt_circle_fill,
                             size: 15,
                             color: _accent,
                           ),

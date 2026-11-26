@@ -1048,4 +1048,19 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get settingsLanguageSaveFailed =>
       'Не удалось сохранить язык. Попробуйте ещё раз.';
+
+  @override
+  String get updateAvailableTitle => 'Вышла новая версия RollReel';
+
+  @override
+  String updateAvailableBody(String version) {
+    return 'Версия $version доступна в App Store. Обновите приложение, когда вам будет удобно.';
+  }
+
+  @override
+  String get updateNow => 'Обновить';
+
+  @override
+  String get updateStoreUnavailable =>
+      'Не удалось открыть App Store. Попробуйте ещё раз.';
 }

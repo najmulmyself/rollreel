@@ -1035,4 +1035,18 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get settingsLanguageSaveFailed => 'تعذّر حفظ اللغة. حاول مرة أخرى.';
+
+  @override
+  String get updateAvailableTitle => 'إصدار جديد من RollReel';
+
+  @override
+  String updateAvailableBody(String version) {
+    return 'الإصدار $version متاح في App Store. حدّث التطبيق عندما تكون مستعدًا.';
+  }
+
+  @override
+  String get updateNow => 'تحديث';
+
+  @override
+  String get updateStoreUnavailable => 'تعذّر فتح App Store. حاول مرة أخرى.';
 }

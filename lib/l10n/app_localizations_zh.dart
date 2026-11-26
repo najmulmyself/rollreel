@@ -985,4 +985,18 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settingsLanguageSaveFailed => '无法保存语言，请重试。';
+
+  @override
+  String get updateAvailableTitle => 'RollReel 有新版本了';
+
+  @override
+  String updateAvailableBody(String version) {
+    return '版本 $version 已在 App Store 上架。你可以在方便时更新。';
+  }
+
+  @override
+  String get updateNow => '更新';
+
+  @override
+  String get updateStoreUnavailable => '无法打开 App Store，请重试。';
 }

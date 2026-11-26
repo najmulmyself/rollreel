@@ -1043,4 +1043,19 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingsLanguageSaveFailed =>
       'Couldn’t save your language. Please try again.';
+
+  @override
+  String get updateAvailableTitle => 'A new RollReel is here';
+
+  @override
+  String updateAvailableBody(String version) {
+    return 'Version $version is available on the App Store. Update when you’re ready.';
+  }
+
+  @override
+  String get updateNow => 'Update';
+
+  @override
+  String get updateStoreUnavailable =>
+      'Couldn’t open the App Store. Please try again.';
 }

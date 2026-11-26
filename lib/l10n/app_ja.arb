@@ -278,5 +278,9 @@
   "retry": "再試行",
   "settingsLanguage": "言語",
   "settingsSystemLanguage": "システムのデフォルト",
-  "settingsLanguageSaveFailed": "言語を保存できませんでした。もう一度お試しください。"
+  "settingsLanguageSaveFailed": "言語を保存できませんでした。もう一度お試しください。",
+  "updateAvailableTitle": "RollReelの新しいバージョン",
+  "updateAvailableBody": "バージョン{version}がApp Storeで公開されています。お好きなときにアップデートしてください。",
+  "updateNow": "アップデート",
+  "updateStoreUnavailable": "App Storeを開けませんでした。もう一度お試しください。"
 }

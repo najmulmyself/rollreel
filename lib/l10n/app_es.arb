@@ -278,5 +278,9 @@
   "retry": "Reintentar",
   "settingsLanguage": "Idioma",
   "settingsSystemLanguage": "Predeterminado del sistema",
-  "settingsLanguageSaveFailed": "No se pudo guardar el idioma. Inténtalo de nuevo."
+  "settingsLanguageSaveFailed": "No se pudo guardar el idioma. Inténtalo de nuevo.",
+  "updateAvailableTitle": "Hay una nueva versión de RollReel",
+  "updateAvailableBody": "La versión {version} está disponible en el App Store. Actualiza cuando quieras.",
+  "updateNow": "Actualizar",
+  "updateStoreUnavailable": "No se pudo abrir el App Store. Inténtalo de nuevo."
 }

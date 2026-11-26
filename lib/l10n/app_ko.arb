@@ -278,5 +278,9 @@
   "retry": "다시 시도",
   "settingsLanguage": "언어",
   "settingsSystemLanguage": "시스템 기본값",
-  "settingsLanguageSaveFailed": "언어를 저장하지 못했어요. 다시 시도해 주세요."
+  "settingsLanguageSaveFailed": "언어를 저장하지 못했어요. 다시 시도해 주세요.",
+  "updateAvailableTitle": "새로운 RollReel이 나왔어요",
+  "updateAvailableBody": "App Store에서 {version} 버전을 이용할 수 있어요. 원할 때 업데이트하세요.",
+  "updateNow": "업데이트",
+  "updateStoreUnavailable": "App Store를 열지 못했어요. 다시 시도해 주세요."
 }

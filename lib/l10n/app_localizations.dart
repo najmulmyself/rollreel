@@ -1955,6 +1955,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn’t save your language. Please try again.'**
   String get settingsLanguageSaveFailed;
+
+  /// No description provided for @updateAvailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'A new RollReel is here'**
+  String get updateAvailableTitle;
+
+  /// No description provided for @updateAvailableBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version} is available on the App Store. Update when you’re ready.'**
+  String updateAvailableBody(String version);
+
+  /// No description provided for @updateNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Update'**
+  String get updateNow;
+
+  /// No description provided for @updateStoreUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t open the App Store. Please try again.'**
+  String get updateStoreUnavailable;
 }
 
 class _AppLocalizationsDelegate
