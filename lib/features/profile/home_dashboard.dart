@@ -15,6 +15,7 @@ import '../../core/video/video_collections_provider.dart';
 import '../../core/video/video_library_provider.dart';
 import '../../core/video/watch_history_provider.dart';
 import '../../l10n/app_localizations.dart';
+import '../browse/library_widgets.dart' show LibraryThumbnail;
 import 'home_video_sections.dart';
 
 final _visibleFavoritesCountProvider = FutureProvider.autoDispose<int>((
@@ -255,7 +256,13 @@ class _MostWatchedRow extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final title = ref.watch(homeTitleProvider(asset)).valueOrNull;
     return _ActivityRow(
-      icon: CupertinoIcons.doc,
+      leading: LibraryThumbnail(
+        asset: asset,
+        width: 56,
+        height: 44,
+        radius: 7,
+        thumbnailSize: const ThumbnailSize(168, 132),
+      ),
       label: title ?? l10n.videoFallbackTitle,
       value: l10n.homePlayCount(plays),
       onTap: onTap,
@@ -300,13 +307,13 @@ class _ActivityRow extends StatelessWidget {
   const _ActivityRow({
     required this.label,
     required this.value,
-    this.icon,
+    this.leading,
     this.onTap,
   });
 
   final String label;
   final String value;
-  final IconData? icon;
+  final Widget? leading;
   final VoidCallback? onTap;
 
   @override
@@ -320,8 +327,8 @@ class _ActivityRow extends StatelessWidget {
       ),
       child: Row(
         children: [
-          if (icon case final symbol?) ...[
-            ExcludeSemantics(child: Icon(symbol, size: 22, color: homeAccent)),
+          if (leading case final thumbnail?) ...[
+            thumbnail,
             const SizedBox(width: 10),
           ],
           Expanded(child: Text(label, style: style)),
