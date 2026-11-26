@@ -11,6 +11,7 @@ import '../core/ads/system_prompt_coordinator.dart';
 import '../core/iap/iap_provider.dart';
 import '../core/settings/settings_provider.dart';
 import '../core/theme/colors.dart';
+import '../core/vault/vault_provider.dart';
 import '../core/video/video_library_provider.dart';
 import '../features/browse/browse_screen.dart';
 import '../features/favorites/favorites_screen.dart';
@@ -20,6 +21,7 @@ import '../features/paywall/paywall_screen.dart';
 import '../features/profile/profile_screen.dart';
 import '../features/settings/settings_screen.dart';
 import '../features/vault/vault_screen.dart';
+import '../l10n/app_localizations.dart';
 import 'main_nav_bar.dart';
 
 class MainShell extends ConsumerStatefulWidget {
@@ -87,14 +89,58 @@ class _MainShellState extends ConsumerState<MainShell> {
   }
 
   Future<void> _openVault() async {
-    if (!ref.read(isProProvider) && !await _openPaywall(PaywallEntry.vault)) {
+    await ref.read(vaultIdsProvider.notifier).ready;
+    if (!mounted) return;
+    await ref.read(isProProvider.notifier).ready;
+    if (!mounted) return;
+    final hasSavedClips = ref.read(vaultIdsProvider).isNotEmpty;
+    if (!hasSavedClips &&
+        !ref.read(isProProvider) &&
+        !await _openPaywall(PaywallEntry.vault)) {
       return;
     }
     if (!mounted) return;
-    await Navigator.of(context).push<void>(
-      MaterialPageRoute<void>(
-        builder: (vaultContext) =>
-            VaultScreen(onBack: () => Navigator.of(vaultContext).pop()),
+    final recovered = await Navigator.of(context).push<bool>(
+      MaterialPageRoute<bool>(
+        builder: (vaultContext) => VaultScreen(
+          onBack: () => Navigator.of(vaultContext).pop(),
+          onRecovered: () => Navigator.of(vaultContext).pop(true),
+        ),
+      ),
+    );
+    if (mounted && recovered == true) {
+      _setTab(1);
+      _showVaultMessage(AppLocalizations.of(context)!.vaultRecoveryDone);
+    }
+  }
+
+  Future<void> _changeVaultMembership(String assetId, bool add) async {
+    final vault = ref.read(vaultIdsProvider.notifier);
+    try {
+      if (!add) {
+        await vault.remove(assetId);
+        return;
+      }
+      if (await vault.add(assetId) || !mounted) return;
+      if (await _openPaywall(PaywallEntry.vault) && mounted) {
+        if (!await vault.add(assetId) && mounted) {
+          _showVaultMessage(AppLocalizations.of(context)!.vaultUpdateFailed);
+        }
+      }
+    } catch (error) {
+      debugPrint('[RollReel] Vault membership could not be changed: $error');
+      if (mounted) {
+        _showVaultMessage(AppLocalizations.of(context)!.vaultUpdateFailed);
+      }
+    }
+  }
+
+  void _showVaultMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: const TextStyle(color: Colors.white)),
+        backgroundColor: RRColors.brandInk,
+        behavior: SnackBarBehavior.floating,
       ),
     );
   }
@@ -112,6 +158,7 @@ class _MainShellState extends ConsumerState<MainShell> {
         builder: (_) => FeedScreen(
           initialAssetId: assetId,
           onOpenBrowse: () => Navigator.of(context).pop(),
+          onVaultChange: _changeVaultMembership,
           onOpenPaywall: () async {
             await _openPaywall(PaywallEntry.speed);
           },
@@ -128,7 +175,10 @@ class _MainShellState extends ConsumerState<MainShell> {
     if (!mounted) return;
     await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
-        builder: (_) => OnThisDayScreen(initialAssetId: assetId),
+        builder: (_) => OnThisDayScreen(
+          initialAssetId: assetId,
+          onVaultChange: _changeVaultMembership,
+        ),
       ),
     );
   }
@@ -149,6 +199,7 @@ class _MainShellState extends ConsumerState<MainShell> {
           BrowseScreen(
             onOpenMemories: () => _openMemories(null),
             onPlayAt: (assetId) => _openFeed(context, assetId: assetId),
+            onVaultChange: _changeVaultMembership,
           ),
           FavoritesScreen(
             onOpenLibrary: () => _setTab(1),

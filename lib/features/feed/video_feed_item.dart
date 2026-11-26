@@ -24,23 +24,29 @@ import 'dynamic_bg.dart';
 
 enum _DragType { none, volume, brightness }
 
+enum _VideoOption { info, vault, delete }
+
 class VideoFeedItem extends ConsumerStatefulWidget {
   const VideoFeedItem({
     super.key,
     required this.asset,
     required this.isActive,
     required this.onControllerReady,
+    this.preload = false,
     this.onDelete,
     this.onPlayStateChanged,
     this.onOpenPaywall,
+    this.onVaultChange,
   });
 
   final AssetEntity asset;
   final bool isActive;
+  final bool preload;
   final void Function(VideoPlayerController?) onControllerReady;
   final VoidCallback? onDelete;
   final ValueChanged<bool>? onPlayStateChanged;
   final Future<void> Function()? onOpenPaywall;
+  final Future<void> Function(String, bool)? onVaultChange;
 
   @override
   ConsumerState<VideoFeedItem> createState() => _VideoFeedItemState();
@@ -48,7 +54,14 @@ class VideoFeedItem extends ConsumerStatefulWidget {
 
 class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
   VideoPlayerController? _controller;
-  bool _initialized = false;
+  bool get _initialized => _controller != null;
+  PMCancelToken? _sourceRequest;
+  PMCancelToken? _thumbnailRequest;
+  Timer? _preloadTimer;
+  bool _activatedByNavigation = false;
+  bool _loadFailed = false;
+  bool _titleRequested = false;
+  bool _optionsOpen = false;
   Uint8List? _thumbnail;
   String? _title;
   bool _showPlayIcon = false;
@@ -91,68 +104,174 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
   void initState() {
     super.initState();
     _loadThumbnail();
-    _loadTitle();
-    _initController();
+    _preparePlayback();
   }
 
   Future<void> _loadThumbnail() async {
-    final bytes = await widget.asset
-        .thumbnailDataWithSize(const ThumbnailSize(400, 700));
-    if (mounted) setState(() => _thumbnail = bytes);
+    final request = PMCancelToken();
+    _thumbnailRequest = request;
+    try {
+      final bytes = await widget.asset.thumbnailDataWithSize(
+        const ThumbnailSize(320, 560),
+        cancelToken: request,
+      );
+      if (bytes != null && mounted) setState(() => _thumbnail = bytes);
+    } catch (_) {
+      // Playback can still start if Photos has no preview for this clip.
+    } finally {
+      _thumbnailRequest = null;
+    }
   }
 
   Future<void> _loadTitle() async {
-    final title = await widget.asset.titleAsync;
-    if (mounted && title.isNotEmpty) setState(() => _title = title);
+    if (_titleRequested || widget.asset.title?.trim().isNotEmpty == true)
+      return;
+    _titleRequested = true;
+    try {
+      final title = await widget.asset.titleAsync;
+      if (mounted && title.trim().isNotEmpty) setState(() => _title = title);
+    } catch (_) {
+      // The controls use the library's fallback title.
+    }
   }
 
-  Future<void> _initController() async {
-    final file = await widget.asset.file;
-    if (file == null || !mounted) return;
+  void _preparePlayback() {
+    _preloadTimer?.cancel();
+    if (widget.isActive) {
+      _loadTitle();
+      if (_controller != null) {
+        _syncPlaybackAfterBuild();
+      } else {
+        _initController();
+      }
+    } else if (widget.preload) {
+      // Previews can paint before an adjacent local asset opens its decoder.
+      if (_controller == null && _sourceRequest == null) {
+        _preloadTimer = Timer(
+          const Duration(milliseconds: 220),
+          _initController,
+        );
+      }
+    } else {
+      final request = _sourceRequest;
+      _sourceRequest = null;
+      _cancelPhotoRequest(request);
+    }
+  }
 
-    final ctrl = VideoPlayerController.file(file);
-    await ctrl.initialize();
-    if (!mounted) {
-      await ctrl.dispose();
+  bool _isCurrentRequest(PMCancelToken request) =>
+      mounted &&
+      identical(_sourceRequest, request) &&
+      (widget.isActive || widget.preload);
+
+  Future<void> _initController() async {
+    if (!mounted ||
+        _controller != null ||
+        _sourceRequest != null ||
+        !(widget.isActive || widget.preload))
+      return;
+    final request = PMCancelToken();
+    final asset = widget.asset;
+    _sourceRequest = request;
+    VideoPlayerController? pending;
+    try {
+      if (!widget.isActive) {
+        final locallyAvailable = await asset.isLocallyAvailable();
+        if (!locallyAvailable && !widget.isActive) return;
+      }
+      if (!_isCurrentRequest(request)) return;
+
+      final file = await asset.loadFile(isOrigin: false, cancelToken: request);
+      if (!_isCurrentRequest(request)) return;
+      if (file == null) throw StateError('Photos returned no playable file');
+
+      final controller = pending = VideoPlayerController.file(file);
+      await controller.initialize();
+      if (!_isCurrentRequest(request)) return;
+      await controller.setLooping(
+        ref.read(settingsProvider).loopShortVideos && asset.duration < 30,
+      );
+      if (!_isCurrentRequest(request)) return;
+
+      setState(() {
+        _controller = controller;
+        _loadFailed = false;
+      });
+      pending = null;
+      if (widget.isActive) _syncPlaybackAfterBuild();
+    } catch (error) {
+      if (_isCurrentRequest(request) && widget.isActive) {
+        debugPrint('[RollReel] Could not prepare video: $error');
+        setState(() => _loadFailed = true);
+      }
+    } finally {
+      if (identical(_sourceRequest, request)) _sourceRequest = null;
+      await pending?.dispose();
+    }
+  }
+
+  Future<void> _cancelPhotoRequest(PMCancelToken? request) async {
+    if (request == null) return;
+    try {
+      await request.cancelRequest();
+    } catch (_) {
+      // A completed request can be removed by Photos before cancellation.
+    }
+  }
+
+  void _syncPlaybackAfterBuild() {
+    final controller = _controller;
+    if (controller == null) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !identical(controller, _controller)) return;
+      if (!widget.isActive) {
+        if (controller.value.isPlaying) controller.pause();
+        return;
+      }
+      widget.onControllerReady(controller);
+      if (_activatedByNavigation || ref.read(settingsProvider).autoPlay) {
+        // A reversing swipe builds the new page before the old one. Let
+        // offscreen controllers pause during this frame before starting it.
+        scheduleMicrotask(() => _beginPlayback(controller));
+      }
+    });
+  }
+
+  Future<void> _beginPlayback(VideoPlayerController controller) async {
+    if (!mounted || !widget.isActive || !identical(controller, _controller)) {
       return;
     }
-
-    final settings = ref.read(settingsProvider);
-    ctrl.setLooping(settings.loopShortVideos && widget.asset.duration < 30);
-
-    setState(() {
-      _controller = ctrl;
-      _initialized = true;
-    });
-
-    if (widget.isActive) {
-      if (settings.autoPlay) {
-        await ctrl.play();
-        widget.onPlayStateChanged?.call(true);
-        _scheduleControlsAutoHide();
+    try {
+      await controller.play();
+      if (!mounted ||
+          !widget.isActive ||
+          !identical(controller, _controller) ||
+          !controller.value.isPlaying) {
+        return;
       }
-      widget.onControllerReady(ctrl);
+      widget.onPlayStateChanged?.call(true);
+      _scheduleControlsAutoHide();
+    } catch (error) {
+      debugPrint('[RollReel] Could not start video playback: $error');
     }
   }
 
   @override
   void didUpdateWidget(VideoFeedItem old) {
     super.didUpdateWidget(old);
-    if (widget.isActive == old.isActive) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
+    if (widget.isActive != old.isActive) {
       if (widget.isActive) {
-        _controller?.play();
-        widget.onPlayStateChanged?.call(true);
-        _scheduleControlsAutoHide();
-        if (_initialized && _controller != null) {
-          widget.onControllerReady(_controller);
-        }
+        _activatedByNavigation = true;
+        _loadFailed = false;
       } else {
-        _controller?.pause();
-        _showControls();
+        _controlsHideTimer?.cancel();
+        _controlsVisible = true;
+        _syncPlaybackAfterBuild();
       }
-    });
+    }
+    if (widget.isActive != old.isActive || widget.preload != old.preload) {
+      _preparePlayback();
+    }
   }
 
   void _seekBy(Duration offset) {
@@ -178,6 +297,10 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
   void dispose() {
     _controlsHideTimer?.cancel();
     _seekFlashTimer?.cancel();
+    _preloadTimer?.cancel();
+    _cancelPhotoRequest(_thumbnailRequest);
+    _cancelPhotoRequest(_sourceRequest);
+    _sourceRequest = null;
     _controller?.dispose();
     // Only touch the system brightness API if this item actually changed it —
     // an unconditional reset here fires a platform-channel call on every page
@@ -302,59 +425,92 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
     await _controller?.pause();
     if (!mounted) return;
 
-    await navigator.push(MaterialPageRoute<void>(
-      fullscreenDialog: true,
-      builder: (_) => _LandscapeVideoPage(
-        asset: widget.asset,
-        startPosition: position,
+    await navigator.push(
+      MaterialPageRoute<void>(
+        fullscreenDialog: true,
+        builder: (_) =>
+            _LandscapeVideoPage(asset: widget.asset, startPosition: position),
       ),
-    ));
+    );
 
     if (mounted && wasPlaying) _controller?.play();
   }
 
   Future<void> _showOptions(BuildContext context) async {
+    if (_optionsOpen) return;
+    _optionsOpen = true;
+    HapticFeedback.selectionClick();
     final inVault = ref.read(vaultIdsProvider).contains(widget.asset.id);
+    final change = widget.onVaultChange;
     final l10n = AppLocalizations.of(context)!;
-    await showCupertinoModalPopup<void>(
-      context: context,
-      builder: (_) => CupertinoActionSheet(
-        actions: [
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(context);
-              showModalBottomSheet<void>(
-                context: context,
-                backgroundColor: Colors.transparent,
-                isScrollControlled: true,
-                builder: (_) => VideoInfoSheet(asset: widget.asset),
-              );
-            },
-            child: Text(l10n.getInfo),
+    _VideoOption? selection;
+    try {
+      selection = await showCupertinoModalPopup<_VideoOption>(
+        context: context,
+        builder: (sheetContext) => CupertinoActionSheet(
+          actions: [
+            CupertinoActionSheetAction(
+              onPressed: () => Navigator.pop(sheetContext, _VideoOption.info),
+              child: Text(l10n.getInfo),
+            ),
+            if (change != null)
+              CupertinoActionSheetAction(
+                onPressed: () =>
+                    Navigator.pop(sheetContext, _VideoOption.vault),
+                child: Text(inVault ? l10n.removeFromVault : l10n.addToVault),
+              ),
+            CupertinoActionSheetAction(
+              isDestructiveAction: true,
+              onPressed: () => Navigator.pop(sheetContext, _VideoOption.delete),
+              child: Text(l10n.deleteVideo),
+            ),
+          ],
+          cancelButton: CupertinoActionSheetAction(
+            isDefaultAction: true,
+            onPressed: () => Navigator.pop(sheetContext),
+            child: Text(l10n.cancel),
           ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(context);
-              ref.read(vaultIdsProvider.notifier).toggle(widget.asset.id);
-            },
-            child: Text(inVault ? l10n.removeFromVault : l10n.addToVault),
-          ),
-          CupertinoActionSheetAction(
-            isDestructiveAction: true,
-            onPressed: () {
-              Navigator.pop(context);
-              widget.onDelete?.call();
-            },
-            child: Text(l10n.deleteVideo),
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          isDefaultAction: true,
-          onPressed: () => Navigator.pop(context),
-          child: Text(l10n.cancel),
         ),
-      ),
-    );
+      );
+    } finally {
+      _optionsOpen = false;
+    }
+    if (!context.mounted || selection == null) return;
+    switch (selection) {
+      case _VideoOption.info:
+        await showModalBottomSheet<void>(
+          context: context,
+          backgroundColor: Colors.transparent,
+          isScrollControlled: true,
+          builder: (_) => VideoInfoSheet(asset: widget.asset),
+        );
+      case _VideoOption.vault:
+        final controller = _controller;
+        final wasPlaying = controller?.value.isPlaying ?? false;
+        try {
+          if (wasPlaying) await controller?.pause();
+          if (mounted) await change?.call(widget.asset.id, !inVault);
+        } finally {
+          if (mounted &&
+              widget.isActive &&
+              wasPlaying &&
+              !ref.read(vaultIdsProvider).contains(widget.asset.id)) {
+            await controller?.play();
+          }
+        }
+      case _VideoOption.delete:
+        widget.onDelete?.call();
+    }
+  }
+
+  void _handleDoubleTap(TapDownDetails details) {
+    HapticFeedback.lightImpact();
+    final isForward =
+        details.localPosition.dx > MediaQuery.sizeOf(context).width / 2;
+    final offset = Duration(seconds: isForward ? 10 : -10);
+    final next = (_controller?.value.position ?? Duration.zero) + offset;
+    _controller?.seekTo(next.isNegative ? Duration.zero : next);
+    _flashSeek(isForward);
   }
 
   @override
@@ -363,185 +519,230 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
     // select() so this item only rebuilds when ITS OWN favorite flag flips,
     // not on every change to the favorites set.
     final isFavorited = ref.watch(
-        favoritesIdsProvider.select((ids) => ids.contains(widget.asset.id)));
+      favoritesIdsProvider.select((ids) => ids.contains(widget.asset.id)),
+    );
+
+    final edgeWidth = (MediaQuery.sizeOf(context).width * .13).clamp(
+      24.0,
+      44.0,
+    );
+    final controller = _controller;
 
     return DynamicBackground(
       thumbnailBytes: _thumbnail,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: _togglePlay,
-        onLongPressStart: (_) => _startFastForward(),
-        onLongPressEnd: (_) => _endFastForward(),
-        onDoubleTapDown: (d) {
-          HapticFeedback.lightImpact();
-          final half = MediaQuery.sizeOf(context).width / 2;
-          final isForward = d.localPosition.dx > half;
-          final offset = isForward
-              ? const Duration(seconds: 10)
-              : const Duration(seconds: -10);
-          final next =
-              (_controller?.value.position ?? Duration.zero) + offset;
-          _controller?.seekTo(next.isNegative ? Duration.zero : next);
-          _flashSeek(isForward);
-        },
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            // ── Video at native aspect ratio ───────────────────────────────────
-            if (_initialized && _controller != null)
-              Center(
-                child: AspectRatio(
-                  aspectRatio: _controller!.value.aspectRatio,
-                  child: VideoPlayer(_controller!),
+      active: widget.isActive,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          RepaintBoundary(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: widget.isActive ? _togglePlay : null,
+              onLongPressStart: widget.isActive
+                  ? (_) => _startFastForward()
+                  : null,
+              onLongPressEnd: widget.isActive ? (_) => _endFastForward() : null,
+              onDoubleTapDown: widget.isActive ? _handleDoubleTap : null,
+              child: switch ((widget.isActive, controller, _thumbnail)) {
+                (true, final controller?, _) => Center(
+                  child: AspectRatio(
+                    aspectRatio: controller.value.aspectRatio,
+                    child: VideoPlayer(controller),
+                  ),
                 ),
-              )
-            else if (_thumbnail != null)
-              Center(
-                child: Image.memory(_thumbnail!, fit: BoxFit.contain),
-              )
-            else
-              const ColoredBox(color: Colors.black),
+                (_, _, final thumbnail?) => Center(
+                  child: Image.memory(thumbnail, fit: BoxFit.contain),
+                ),
+                _ => const ColoredBox(color: Colors.black),
+              },
+            ),
+          ),
 
-            // ── Loading indicator ────────────────────────────────────────────
-            if (!_initialized)
-              const Center(
-                child: CupertinoActivityIndicator(color: Colors.white),
+          if (widget.isActive && !_initialized)
+            Center(
+              child: _loadFailed
+                  ? TextButton(
+                      onPressed: () {
+                        setState(() => _loadFailed = false);
+                        _initController();
+                      },
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: Colors.black54,
+                      ),
+                      child: Text(
+                        AppLocalizations.of(context)!.homePlaybackFailed +
+                            ' ' +
+                            AppLocalizations.of(context)!.retry,
+                      ),
+                    )
+                  : const CupertinoActivityIndicator(color: Colors.white),
+            ),
+
+          // ── Top vignette ─────────────────────────────────────────────────
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            height: 120,
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.black.withValues(alpha: 0.45),
+                      Colors.transparent,
+                    ],
+                  ),
+                ),
               ),
+            ),
+          ),
 
-            // ── Top vignette ─────────────────────────────────────────────────
+          // ── Bottom vignette ──────────────────────────────────────────────
+          const Positioned.fill(
+            child: IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.transparent, Color(0xCC000000)],
+                    stops: [0.5, 1.0],
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // ── Tap flash: play/pause icon ────────────────────────────────────
+          IgnorePointer(
+            child: AnimatedOpacity(
+              opacity: _showPlayIcon ? 1.0 : 0.0,
+              duration: const Duration(milliseconds: 180),
+              child: Center(
+                child: Container(
+                  width: 68,
+                  height: 68,
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.52),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    _iconIsPlay
+                        ? Icons.play_arrow_rounded
+                        : Icons.pause_rounded,
+                    color: Colors.white,
+                    size: 40,
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // ── Fast-forward badge ───────────────────────────────────────────
+          if (_fastForward)
             Positioned(
-              top: 0,
+              top: 72,
               left: 0,
               right: 0,
-              height: 120,
               child: IgnorePointer(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.black.withValues(alpha: 0.45),
-                        Colors.transparent,
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-
-            // ── Bottom vignette ──────────────────────────────────────────────
-            const Positioned.fill(
-              child: IgnorePointer(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [Colors.transparent, Color(0xCC000000)],
-                      stops: [0.5, 1.0],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-
-            // ── Tap flash: play/pause icon ────────────────────────────────────
-            IgnorePointer(
-              child: AnimatedOpacity(
-                opacity: _showPlayIcon ? 1.0 : 0.0,
-                duration: const Duration(milliseconds: 180),
                 child: Center(
                   child: Container(
-                    width: 68,
-                    height: 68,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.6),
+                      borderRadius: BorderRadius.circular(100),
+                    ),
+                    child: const Text(
+                      '2×',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+          // ── Double-tap seek flash ────────────────────────────────────────
+          Positioned(
+            top: 0,
+            bottom: 0,
+            left: _seekFlashIsForward
+                ? MediaQuery.sizeOf(context).width / 2
+                : 0,
+            width: MediaQuery.sizeOf(context).width / 2,
+            child: IgnorePointer(
+              child: AnimatedOpacity(
+                opacity: _showSeekFlash ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 150),
+                child: Center(
+                  child: Container(
+                    width: 64,
+                    height: 64,
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.52),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
-                      _iconIsPlay
-                          ? Icons.play_arrow_rounded
-                          : Icons.pause_rounded,
+                      _seekFlashIsForward
+                          ? CupertinoIcons.goforward_10
+                          : CupertinoIcons.gobackward_10,
                       color: Colors.white,
-                      size: 40,
+                      size: 30,
                     ),
                   ),
                 ),
               ),
             ),
+          ),
 
-            // ── Fast-forward badge ───────────────────────────────────────────
-            if (_fastForward)
-              Positioned(
-                top: 72,
-                left: 0,
-                right: 0,
-                child: IgnorePointer(
-                  child: Center(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.6),
-                        borderRadius: BorderRadius.circular(100),
-                      ),
-                      child: const Text(
-                        '2×',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
+          // ── Volume / brightness overlay ──────────────────────────────────
+          if (_showDragOverlay)
+            IgnorePointer(
+              child: _DragOverlay(type: _dragType, value: _dragValue),
+            ),
 
-            // ── Double-tap seek flash ────────────────────────────────────────
+          // ── Edge gesture zones: left = brightness, right = volume ─────────
+          // Narrow strips only, so vertical swipes in the rest of the screen
+          // are left free for the PageView to change videos.
+          if (widget.isActive)
             Positioned(
               top: 0,
               bottom: 0,
-              left: _seekFlashIsForward
-                  ? MediaQuery.sizeOf(context).width / 2
-                  : 0,
-              width: MediaQuery.sizeOf(context).width / 2,
-              child: IgnorePointer(
-                child: AnimatedOpacity(
-                  opacity: _showSeekFlash ? 1.0 : 0.0,
-                  duration: const Duration(milliseconds: 150),
-                  child: Center(
-                    child: Container(
-                      width: 64,
-                      height: 64,
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.52),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        _seekFlashIsForward
-                            ? CupertinoIcons.goforward_10
-                            : CupertinoIcons.gobackward_10,
-                        color: Colors.white,
-                        size: 30,
-                      ),
-                    ),
-                  ),
-                ),
+              left: 0,
+              width: edgeWidth,
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onVerticalDragStart: (d) =>
+                    _onDragStart(d, _DragType.brightness),
+                onVerticalDragUpdate: _onDragUpdate,
+                onVerticalDragEnd: _onDragEnd,
               ),
             ),
-
-            // ── Volume / brightness overlay ──────────────────────────────────
-            if (_showDragOverlay)
-              IgnorePointer(
-                child: _DragOverlay(
-                  type: _dragType,
-                  value: _dragValue,
-                ),
+          if (widget.isActive)
+            Positioned(
+              top: 0,
+              bottom: 0,
+              right: 0,
+              width: edgeWidth,
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onVerticalDragStart: (d) => _onDragStart(d, _DragType.volume),
+                onVerticalDragUpdate: _onDragUpdate,
+                onVerticalDragEnd: _onDragEnd,
               ),
-
-            // ── Right sidebar — sits above the info card ───────────────────────
+            ),
+          // ── Right sidebar — sits above the info card ───────────────────────
+          if (widget.isActive)
             Align(
               alignment: const Alignment(1, -0.05),
               child: Padding(
@@ -561,66 +762,34 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
               ),
             ),
 
-            // ── Info card: title/tag, date, seek bar, controls ─────────────────
-            if (_initialized)
-              Positioned(
-                left: RRSpace.sp16,
-                right: RRSpace.sp16,
-                bottom: safeBottom + 8,
-                child: IgnorePointer(
-                  ignoring: !_controlsVisible,
-                  child: AnimatedSlide(
+          // ── Info card: title/tag, date, seek bar, controls ─────────────────
+          if (widget.isActive && controller != null)
+            Positioned(
+              left: RRSpace.sp16,
+              right: RRSpace.sp16,
+              bottom: safeBottom + 8,
+              child: IgnorePointer(
+                ignoring: !_controlsVisible,
+                child: AnimatedSlide(
+                  duration: const Duration(milliseconds: 220),
+                  curve: Curves.easeOutCubic,
+                  offset: _controlsVisible ? Offset.zero : const Offset(0, 0.3),
+                  child: AnimatedOpacity(
                     duration: const Duration(milliseconds: 220),
-                    curve: Curves.easeOutCubic,
-                    offset:
-                        _controlsVisible ? Offset.zero : const Offset(0, 0.3),
-                    child: AnimatedOpacity(
-                      duration: const Duration(milliseconds: 220),
-                      opacity: _controlsVisible ? 1.0 : 0.0,
-                      child: _InfoCard(
-                        asset: widget.asset,
-                        title: _title,
-                        controller: _controller,
-                        isPlaying: _controller?.value.isPlaying ?? false,
-                        onTogglePlay: _togglePlay,
-                        onSeekPrev: () => _seekBy(const Duration(seconds: -10)),
-                        onSeekNext: () => _seekBy(const Duration(seconds: 10)),
-                      ),
+                    opacity: _controlsVisible ? 1.0 : 0.0,
+                    child: _InfoCard(
+                      asset: widget.asset,
+                      title: _title,
+                      controller: controller,
+                      onTogglePlay: _togglePlay,
+                      onSeekPrev: () => _seekBy(const Duration(seconds: -10)),
+                      onSeekNext: () => _seekBy(const Duration(seconds: 10)),
                     ),
                   ),
                 ),
               ),
-
-            // ── Edge gesture zones: left = brightness, right = volume ─────────
-            // Narrow strips only, so vertical swipes in the rest of the screen
-            // are left free for the PageView to change videos.
-            Positioned(
-              top: 0,
-              bottom: 0,
-              left: 0,
-              width: MediaQuery.sizeOf(context).width * 0.25,
-              child: GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onVerticalDragStart: (d) =>
-                    _onDragStart(d, _DragType.brightness),
-                onVerticalDragUpdate: _onDragUpdate,
-                onVerticalDragEnd: _onDragEnd,
-              ),
             ),
-            Positioned(
-              top: 0,
-              bottom: 0,
-              right: 0,
-              width: MediaQuery.sizeOf(context).width * 0.25,
-              child: GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onVerticalDragStart: (d) => _onDragStart(d, _DragType.volume),
-                onVerticalDragUpdate: _onDragUpdate,
-                onVerticalDragEnd: _onDragEnd,
-              ),
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -720,10 +889,7 @@ class _Sidebar extends StatelessWidget {
     final origin = box == null
         ? Rect.zero
         : (box.localToGlobal(Offset.zero) & box.size);
-    await Share.shareXFiles(
-      [XFile(file.path)],
-      sharePositionOrigin: origin,
-    );
+    await Share.shareXFiles([XFile(file.path)], sharePositionOrigin: origin);
   }
 
   @override
@@ -733,9 +899,7 @@ class _Sidebar extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         _SideBtn(
-          icon: isFavorited
-              ? CupertinoIcons.heart_fill
-              : CupertinoIcons.heart,
+          icon: isFavorited ? CupertinoIcons.heart_fill : CupertinoIcons.heart,
           color: Colors.white,
           bgColor: isFavorited
               ? RRColors.accentViolet
@@ -758,7 +922,13 @@ class _Sidebar extends StatelessWidget {
           onTap: onFullscreen,
         ),
         const SizedBox(height: 22),
-        _SideBtn(icon: CupertinoIcons.ellipsis, onTap: onOptions),
+        _SideBtn(
+          icon: CupertinoIcons.ellipsis,
+          semanticLabel: l10n.libraryVideoOptions(
+            asset.title ?? l10n.videoFallbackTitle,
+          ),
+          onTap: onOptions,
+        ),
       ],
     );
   }
@@ -766,49 +936,54 @@ class _Sidebar extends StatelessWidget {
 
 class _SideBtn extends StatelessWidget {
   const _SideBtn({
-    super.key,
     required this.icon,
     required this.onTap,
     this.color = Colors.white,
     this.bgColor,
     this.label,
+    this.semanticLabel,
   });
   final IconData icon;
   final VoidCallback onTap;
   final Color color;
   final Color? bgColor;
   final String? label;
+  final String? semanticLabel;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: bgColor ?? Colors.black.withValues(alpha: 0.32),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: color, size: 22),
-          ),
-          if (label != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              label!,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                shadows: [Shadow(blurRadius: 6, color: Colors.black54)],
+    return Semantics(
+      button: true,
+      label: semanticLabel,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: bgColor ?? Colors.black.withValues(alpha: 0.32),
+                shape: BoxShape.circle,
               ),
+              child: Icon(icon, color: color, size: 22),
             ),
+            if (label != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                label!,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  shadows: [Shadow(blurRadius: 6, color: Colors.black54)],
+                ),
+              ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -820,7 +995,6 @@ class _InfoCard extends StatelessWidget {
   const _InfoCard({
     required this.asset,
     required this.controller,
-    required this.isPlaying,
     required this.onTogglePlay,
     required this.onSeekPrev,
     required this.onSeekNext,
@@ -829,8 +1003,7 @@ class _InfoCard extends StatelessWidget {
 
   final AssetEntity asset;
   final String? title;
-  final VideoPlayerController? controller;
-  final bool isPlaying;
+  final VideoPlayerController controller;
   final VoidCallback onTogglePlay;
   final VoidCallback onSeekPrev;
   final VoidCallback onSeekNext;
@@ -851,7 +1024,8 @@ class _InfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final tag = asset.duration < 60 ? l10n.filterShorts : l10n.filterLong;
-    final resolvedTitle = title ??
+    final resolvedTitle =
+        title ??
         (asset.title != null && asset.title!.isNotEmpty
             ? asset.title!
             : l10n.videoFallbackTitle);
@@ -874,15 +1048,21 @@ class _InfoCard extends StatelessWidget {
         const SizedBox(height: 6),
         Row(
           children: [
-            const Icon(CupertinoIcons.calendar,
-                color: Colors.white60, size: 14),
+            const Icon(
+              CupertinoIcons.calendar,
+              color: Colors.white60,
+              size: 14,
+            ),
             const SizedBox(width: 6),
             Text(
               _fmtDay(context, asset.createDateTime),
               style: const TextStyle(color: Colors.white60, fontSize: 13),
             ),
             const SizedBox(width: 8),
-            Text('·', style: TextStyle(color: Colors.white.withValues(alpha: 0.4))),
+            Text(
+              '·',
+              style: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
+            ),
             const SizedBox(width: 8),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
@@ -902,76 +1082,98 @@ class _InfoCard extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16),
-        if (controller != null)
-          _VideoSeekBar(
-            controller: controller!,
+        RepaintBoundary(
+          child: _VideoSeekBar(
+            controller: controller,
             accentColor: RRColors.accentViolet,
             showThumb: true,
-          )
-        else
-          const SizedBox(height: 20),
+          ),
+        ),
         const SizedBox(height: 16),
-        controller != null
-            ? ValueListenableBuilder<VideoPlayerValue>(
-                valueListenable: controller!,
-                builder: (context, value, _) => _ControlsRow(
-                  controller: controller,
-                  isPlaying: value.isPlaying,
-                  playbackSpeed: value.playbackSpeed,
-                  onTogglePlay: onTogglePlay,
-                  onSeekPrev: onSeekPrev,
-                  onSeekNext: onSeekNext,
-                ),
-              )
-            : _ControlsRow(
-                controller: controller,
-                isPlaying: isPlaying,
-                playbackSpeed: 1.0,
-                onTogglePlay: onTogglePlay,
-                onSeekPrev: onSeekPrev,
-                onSeekNext: onSeekNext,
-              ),
+        _ControlsRow(
+          controller: controller,
+          onTogglePlay: onTogglePlay,
+          onSeekPrev: onSeekPrev,
+          onSeekNext: onSeekNext,
+        ),
       ],
     );
   }
 }
 
-class _ControlsRow extends StatelessWidget {
+class _ControlsRow extends StatefulWidget {
   const _ControlsRow({
     required this.controller,
-    required this.isPlaying,
-    required this.playbackSpeed,
     required this.onTogglePlay,
     required this.onSeekPrev,
     required this.onSeekNext,
   });
 
-  final VideoPlayerController? controller;
-  final bool isPlaying;
-  final double playbackSpeed;
+  final VideoPlayerController controller;
   final VoidCallback onTogglePlay;
   final VoidCallback onSeekPrev;
   final VoidCallback onSeekNext;
 
   @override
+  State<_ControlsRow> createState() => _ControlsRowState();
+}
+
+class _ControlsRowState extends State<_ControlsRow> {
+  late (bool, double) _playback;
+
+  (bool, double) get _currentPlayback {
+    final value = widget.controller.value;
+    return (value.isPlaying, value.playbackSpeed);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _playback = _currentPlayback;
+    widget.controller.addListener(_playbackChanged);
+  }
+
+  @override
+  void didUpdateWidget(_ControlsRow old) {
+    super.didUpdateWidget(old);
+    if (identical(old.controller, widget.controller)) return;
+    old.controller.removeListener(_playbackChanged);
+    _playback = _currentPlayback;
+    widget.controller.addListener(_playbackChanged);
+  }
+
+  void _playbackChanged() {
+    final playback = _currentPlayback;
+    if (playback != _playback) setState(() => _playback = playback);
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_playbackChanged);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final (isPlaying, playbackSpeed) = _playback;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         _SpeedBtn(
           label: '0.5x',
           active: playbackSpeed == 0.5,
-          onTap: () => controller
-              ?.setPlaybackSpeed(playbackSpeed == 0.5 ? 1.0 : 0.5),
+          onTap: () => widget.controller.setPlaybackSpeed(
+            playbackSpeed == 0.5 ? 1.0 : 0.5,
+          ),
         ),
         _CardIconBtn(
           icon: CupertinoIcons.backward_end_fill,
-          onTap: onSeekPrev,
+          onTap: widget.onSeekPrev,
           size: 40,
           iconSize: 18,
         ),
         GestureDetector(
-          onTap: onTogglePlay,
+          onTap: widget.onTogglePlay,
           behavior: HitTestBehavior.opaque,
           child: Container(
             width: 60,
@@ -989,14 +1191,14 @@ class _ControlsRow extends StatelessWidget {
         ),
         _CardIconBtn(
           icon: CupertinoIcons.forward_end_fill,
-          onTap: onSeekNext,
+          onTap: widget.onSeekNext,
           size: 40,
           iconSize: 18,
         ),
         _SpeedBtn(
           label: '1.0x',
           active: playbackSpeed == 1.0,
-          onTap: () => controller?.setPlaybackSpeed(1.0),
+          onTap: () => widget.controller.setPlaybackSpeed(1.0),
         ),
       ],
     );

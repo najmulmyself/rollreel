@@ -772,6 +772,28 @@ class AppLocalizationsEn extends AppLocalizations {
       'This video will return to your main library.';
 
   @override
+  String get vaultRecoveryLocked =>
+      'Unlock the Vault to return your videos to Library.';
+
+  @override
+  String get vaultReturnAll => 'Return videos to Library';
+
+  @override
+  String get vaultRecoveryBody =>
+      'You can return your vaulted videos to Library at any time.';
+
+  @override
+  String get vaultRecoveryConfirm =>
+      'All Vault videos will be visible again in your RollReel library.';
+
+  @override
+  String get vaultRecoveryDone => 'Videos returned to Library.';
+
+  @override
+  String get vaultUpdateFailed =>
+      'Couldn’t update the Vault. Please try again.';
+
+  @override
   String get paywallTitle => 'RollReel Pro';
 
   @override

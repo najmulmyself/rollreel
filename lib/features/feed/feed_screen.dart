@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:video_player/video_player.dart';
 
 import '../../core/ads/ads_provider.dart';
 import '../../core/permissions/permission_provider.dart';
@@ -18,6 +17,7 @@ import '../../l10n/app_localizations.dart';
 import '../states/loading_state.dart';
 import '../states/no_videos_state.dart';
 import '../../shared/widgets/date_label.dart';
+import 'settled_video_pager.dart';
 import 'video_feed_item.dart';
 
 class FeedScreen extends ConsumerStatefulWidget {
@@ -25,6 +25,7 @@ class FeedScreen extends ConsumerStatefulWidget {
     super.key,
     this.onOpenBrowse,
     this.onOpenPaywall,
+    this.onVaultChange,
     this.initialAssetId,
     this.onVideoChanged,
     this.isTabActive = true,
@@ -33,6 +34,7 @@ class FeedScreen extends ConsumerStatefulWidget {
 
   final VoidCallback? onOpenBrowse;
   final Future<void> Function()? onOpenPaywall;
+  final Future<void> Function(String, bool)? onVaultChange;
   final String? initialAssetId;
   final void Function(String assetId)? onVideoChanged;
   final bool isTabActive;
@@ -45,16 +47,18 @@ class FeedScreen extends ConsumerStatefulWidget {
 class _FeedScreenState extends ConsumerState<FeedScreen> {
   PageController? _controller;
   int _currentIndex = 0;
+  int _preloadDirection = 1;
 
   PageController get _pageController =>
       _controller ??= PageController(initialPage: _currentIndex);
   bool _awaitingDeletion = false;
   bool _showDateLabel = false;
   String _dateLabelText = '';
-  VideoPlayerController? _activeController;
+  String? _readyAssetId;
   bool _filterInitialized = false;
   bool _navVisible = true;
   Timer? _navHideTimer;
+  Timer? _dateLabelTimer;
 
   void _initializeDefaultFilter() {
     if (!mounted || _filterInitialized || widget.initialAssetId != null) return;
@@ -77,15 +81,18 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
         SnackBar(
           content: Text(l10n.videoDeleted),
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
           duration: const Duration(seconds: 2),
         ),
       );
     }
   }
 
-  void _handleControllerReady(VideoPlayerController? ctrl) {
-    if (mounted) setState(() => _activeController = ctrl);
+  void _markPlaybackReady(String assetId) {
+    if (!mounted || assetId == _readyAssetId) return;
+    setState(() => _readyAssetId = assetId);
   }
 
   void _handlePlayStateChanged(bool playing) {
@@ -95,42 +102,53 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       _navHideTimer = Timer(const Duration(milliseconds: 1200), () {
         if (mounted) setState(() => _navVisible = false);
       });
-    } else if (mounted) {
+    } else if (mounted && !_navVisible) {
       setState(() => _navVisible = true);
     }
   }
 
-  void _onPageChanged(int index, List<AssetEntity> videos) {
-    HapticFeedback.mediumImpact();
-    ref.read(adsProvider.notifier).registerSwipe();
-    ref.read(reviewPromptProvider).recordSwipe();
+  void _onPageSettled(int index) {
+    final videos = ref.read(feedVideosProvider).valueOrNull;
+    if (videos == null ||
+        videos.isEmpty ||
+        index >= videos.length ||
+        index == _currentIndex)
+      return;
 
-    final prev = videos[_currentIndex];
+    final previousIndex = _currentIndex.clamp(0, videos.length - 1);
+    final previousDay = videos[previousIndex].createDateTime;
     final next = videos[index];
-    final prevDay = prev.createDateTime;
-    final nextDay = next.createDateTime;
-    final sameDay = prevDay.year == nextDay.year &&
-        prevDay.month == nextDay.month &&
-        prevDay.day == nextDay.day;
+    final dayChanged = !DateUtils.isSameDay(previousDay, next.createDateTime);
+    final showDate = dayChanged && ref.read(settingsProvider).showDateLabels;
 
     _navHideTimer?.cancel();
     setState(() {
+      _preloadDirection = index < previousIndex ? -1 : 1;
       _currentIndex = index;
-      _activeController = null;
+      _readyAssetId = null;
       _navVisible = true;
-      if (!sameDay) {
+      if (showDate) {
         _showDateLabel = true;
-        _dateLabelText = _fmtDateLabel(nextDay);
+        _dateLabelText = _fmtDateLabel(next.createDateTime);
       }
     });
+    if (showDate) _scheduleDateLabelHide();
 
-    widget.onVideoChanged?.call(videos[index].id);
+    HapticFeedback.mediumImpact();
+    widget.onVideoChanged?.call(next.id);
+    ref.read(reviewPromptProvider).recordSwipe();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && ModalRoute.isCurrentOf(context) != false) {
+        ref.read(adsProvider.notifier).registerSwipe();
+      }
+    });
+  }
 
-    if (!sameDay) {
-      Future.delayed(const Duration(milliseconds: 1700), () {
-        if (mounted) setState(() => _showDateLabel = false);
-      });
-    }
+  void _scheduleDateLabelHide() {
+    _dateLabelTimer?.cancel();
+    _dateLabelTimer = Timer(const Duration(milliseconds: 1700), () {
+      if (mounted) setState(() => _showDateLabel = false);
+    });
   }
 
   void _showInitialDateLabel(List<AssetEntity> videos) {
@@ -141,22 +159,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       _showDateLabel = true;
       _dateLabelText = label;
     });
-    Future.delayed(const Duration(milliseconds: 1700), () {
-      if (mounted) setState(() => _showDateLabel = false);
-    });
-  }
-
-  @override
-  void didUpdateWidget(FeedScreen old) {
-    super.didUpdateWidget(old);
-    if (widget.isTabActive == old.isTabActive) return;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!widget.isTabActive) {
-        _activeController?.pause();
-      } else {
-        _activeController?.play();
-      }
-    });
+    _scheduleDateLabelHide();
   }
 
   String _fmtDateLabel(DateTime dt) {
@@ -174,6 +177,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   @override
   void dispose() {
     _navHideTimer?.cancel();
+    _dateLabelTimer?.cancel();
     _controller?.dispose();
     super.dispose();
   }
@@ -230,9 +234,11 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
           backgroundColor: Colors.black,
           body: Center(
             child: Text(
-                AppLocalizations.of(context)!
-                    .couldNotLoadVideos('${videosAsync.error}'),
-                style: const TextStyle(color: Colors.white)),
+              AppLocalizations.of(
+                context,
+              )!.couldNotLoadVideos('${videosAsync.error}'),
+              style: const TextStyle(color: Colors.white),
+            ),
           ),
         );
       }
@@ -242,10 +248,11 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
       );
     }
 
-    // Initialize default filter once videos are loaded
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _initializeDefaultFilter();
-    });
+    if (!_filterInitialized && widget.initialAssetId == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _initializeDefaultFilter();
+      });
+    }
 
     if (videos.isEmpty) {
       return Scaffold(
@@ -264,7 +271,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                   ref.read(feedFilterProvider.notifier).state = f;
                   setState(() {
                     _currentIndex = 0;
-                    _activeController = null;
+                    _readyAssetId = null;
                   });
                   if (_pageController.hasClients) {
                     _pageController.jumpToPage(0);
@@ -285,40 +292,38 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     }
 
     if (openingVideo) {
-      final index = videos.indexWhere((video) => video.id == widget.initialAssetId);
+      final index = videos.indexWhere(
+        (video) => video.id == widget.initialAssetId,
+      );
       _currentIndex = index < 0 ? 0 : index;
     }
 
     final safeIndex = _currentIndex.clamp(0, videos.length - 1);
 
-    // Show initial date label once when videos first become available
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!_showDateLabel && settings.showDateLabels && videos.isNotEmpty) {
-        // Only on first render — we rely on a flag set in _onPageChanged for subsequent
-      }
-    });
-
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          PageView.builder(
+          SettledVideoPager(
             controller: _pageController,
-            scrollDirection: Axis.vertical,
-            // Pre-builds the adjacent page so the next video's controller is
-            // already initializing before the swipe lands — removes the
-            // black-frame gap between pages.
-            allowImplicitScrolling: true,
             itemCount: videos.length,
-            onPageChanged: (i) => _onPageChanged(i, videos),
-            itemBuilder: (context, index) => VideoFeedItem(
+            selectedIndex: safeIndex,
+            preloadDirection: _preloadDirection,
+            allowPreload:
+                _readyAssetId == videos[safeIndex].id && widget.isTabActive,
+            onPageSettled: _onPageSettled,
+            itemBuilder: (context, index, preload) => VideoFeedItem(
               key: ValueKey(videos[index].id),
               asset: videos[index],
               isActive: index == safeIndex && widget.isTabActive,
-              onControllerReady: _handleControllerReady,
+              preload: preload,
+              onControllerReady: (controller) {
+                if (controller != null) _markPlaybackReady(videos[index].id);
+              },
               onDelete: () => _deleteCurrentVideo(videos),
               onPlayStateChanged: _handlePlayStateChanged,
               onOpenPaywall: widget.onOpenPaywall,
+              onVaultChange: widget.onVaultChange,
             ),
           ),
           // ── Filter tabs ────────────────────────────────────────────────────
@@ -339,7 +344,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                     ref.read(feedFilterProvider.notifier).state = f;
                     setState(() {
                       _currentIndex = 0;
-                      _activeController = null;
+                      _readyAssetId = null;
                     });
                     if (_pageController.hasClients) {
                       _pageController.jumpToPage(0);
@@ -347,7 +352,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                     // Show date label for first video after filter change
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       final updated = ref.read(feedVideosProvider).valueOrNull;
-                      if (updated != null && updated.isNotEmpty && settings.showDateLabels) {
+                      if (updated != null &&
+                          updated.isNotEmpty &&
+                          settings.showDateLabels) {
                         _showInitialDateLabel(updated);
                       }
                     });

@@ -779,6 +779,28 @@ class AppLocalizationsPt extends AppLocalizations {
       'Este vídeo voltará à sua biblioteca principal.';
 
   @override
+  String get vaultRecoveryLocked =>
+      'Desbloqueie o cofre para devolver seus vídeos à biblioteca.';
+
+  @override
+  String get vaultReturnAll => 'Devolver vídeos à biblioteca';
+
+  @override
+  String get vaultRecoveryBody =>
+      'Você pode devolver os vídeos do cofre à biblioteca a qualquer momento.';
+
+  @override
+  String get vaultRecoveryConfirm =>
+      'Todos os vídeos do cofre voltarão a aparecer na sua biblioteca do RollReel.';
+
+  @override
+  String get vaultRecoveryDone => 'Os vídeos voltaram à biblioteca.';
+
+  @override
+  String get vaultUpdateFailed =>
+      'Não foi possível atualizar o cofre. Tente novamente.';
+
+  @override
   String get paywallTitle => 'RollReel Pro';
 
   @override

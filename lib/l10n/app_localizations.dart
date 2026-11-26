@@ -1494,6 +1494,42 @@ abstract class AppLocalizations {
   /// **'This video will return to your main library.'**
   String get removeFromVaultBody;
 
+  /// No description provided for @vaultRecoveryLocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock the Vault to return your videos to Library.'**
+  String get vaultRecoveryLocked;
+
+  /// No description provided for @vaultReturnAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Return videos to Library'**
+  String get vaultReturnAll;
+
+  /// No description provided for @vaultRecoveryBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You can return your vaulted videos to Library at any time.'**
+  String get vaultRecoveryBody;
+
+  /// No description provided for @vaultRecoveryConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'All Vault videos will be visible again in your RollReel library.'**
+  String get vaultRecoveryConfirm;
+
+  /// No description provided for @vaultRecoveryDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Videos returned to Library.'**
+  String get vaultRecoveryDone;
+
+  /// No description provided for @vaultUpdateFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t update the Vault. Please try again.'**
+  String get vaultUpdateFailed;
+
   /// No description provided for @paywallTitle.
   ///
   /// In en, this message translates to:

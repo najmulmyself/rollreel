@@ -780,6 +780,28 @@ class AppLocalizationsEs extends AppLocalizations {
       'Este video volverá a tu biblioteca principal.';
 
   @override
+  String get vaultRecoveryLocked =>
+      'Desbloquea la bóveda para devolver tus vídeos a la biblioteca.';
+
+  @override
+  String get vaultReturnAll => 'Devolver vídeos a la biblioteca';
+
+  @override
+  String get vaultRecoveryBody =>
+      'Puedes devolver los vídeos de la bóveda a la biblioteca en cualquier momento.';
+
+  @override
+  String get vaultRecoveryConfirm =>
+      'Todos los vídeos de la bóveda volverán a verse en tu biblioteca de RollReel.';
+
+  @override
+  String get vaultRecoveryDone => 'Los vídeos han vuelto a la biblioteca.';
+
+  @override
+  String get vaultUpdateFailed =>
+      'No se pudo actualizar la bóveda. Inténtalo de nuevo.';
+
+  @override
   String get paywallTitle => 'RollReel Pro';
 
   @override

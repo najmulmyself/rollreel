@@ -742,6 +742,24 @@ class AppLocalizationsKo extends AppLocalizations {
   String get removeFromVaultBody => '이 동영상은 기본 보관함으로 돌아갑니다.';
 
   @override
+  String get vaultRecoveryLocked => '동영상을 보관함으로 되돌리려면 금고의 잠금을 해제하세요.';
+
+  @override
+  String get vaultReturnAll => '동영상을 보관함으로 되돌리기';
+
+  @override
+  String get vaultRecoveryBody => '금고의 동영상을 언제든 보관함으로 되돌릴 수 있습니다.';
+
+  @override
+  String get vaultRecoveryConfirm => '금고에 있는 모든 동영상이 RollReel 보관함에 다시 표시됩니다.';
+
+  @override
+  String get vaultRecoveryDone => '동영상을 보관함으로 되돌렸습니다.';
+
+  @override
+  String get vaultUpdateFailed => '금고를 업데이트할 수 없습니다. 다시 시도해 주세요.';
+
+  @override
   String get paywallTitle => 'RollReel Pro';
 
   @override

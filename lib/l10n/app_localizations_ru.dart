@@ -772,6 +772,28 @@ class AppLocalizationsRu extends AppLocalizations {
   String get removeFromVaultBody => 'Это видео вернётся в основную медиатеку.';
 
   @override
+  String get vaultRecoveryLocked =>
+      'Чтобы вернуть видео в медиатеку, разблокируйте хранилище.';
+
+  @override
+  String get vaultReturnAll => 'Вернуть видео в медиатеку';
+
+  @override
+  String get vaultRecoveryBody =>
+      'Видео из хранилища можно вернуть в медиатеку в любое время.';
+
+  @override
+  String get vaultRecoveryConfirm =>
+      'Все видео из хранилища снова появятся в медиатеке RollReel.';
+
+  @override
+  String get vaultRecoveryDone => 'Видео возвращены в медиатеку.';
+
+  @override
+  String get vaultUpdateFailed =>
+      'Не удалось обновить хранилище. Попробуйте ещё раз.';
+
+  @override
   String get paywallTitle => 'RollReel Pro';
 
   @override

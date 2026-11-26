@@ -736,6 +736,24 @@ class AppLocalizationsZh extends AppLocalizations {
   String get removeFromVaultBody => '此视频将返回你的主图库。';
 
   @override
+  String get vaultRecoveryLocked => '解锁保险库，即可将视频移回资料库。';
+
+  @override
+  String get vaultReturnAll => '将视频移回资料库';
+
+  @override
+  String get vaultRecoveryBody => '你可以随时将保险库中的视频移回资料库。';
+
+  @override
+  String get vaultRecoveryConfirm => '保险库中的所有视频都会重新显示在 RollReel 资料库中。';
+
+  @override
+  String get vaultRecoveryDone => '视频已移回资料库。';
+
+  @override
+  String get vaultUpdateFailed => '无法更新保险库，请重试。';
+
+  @override
   String get paywallTitle => 'RollReel Pro';
 
   @override

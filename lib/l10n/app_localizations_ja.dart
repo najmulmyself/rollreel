@@ -742,6 +742,24 @@ class AppLocalizationsJa extends AppLocalizations {
   String get removeFromVaultBody => 'この動画はメインライブラリに戻ります。';
 
   @override
+  String get vaultRecoveryLocked => '金庫のロックを解除すると、動画をライブラリに戻せます。';
+
+  @override
+  String get vaultReturnAll => '動画をライブラリに戻す';
+
+  @override
+  String get vaultRecoveryBody => '金庫の動画はいつでもライブラリに戻せます。';
+
+  @override
+  String get vaultRecoveryConfirm => '金庫にあるすべての動画がRollReelのライブラリに再表示されます。';
+
+  @override
+  String get vaultRecoveryDone => '動画をライブラリに戻しました。';
+
+  @override
+  String get vaultUpdateFailed => '金庫を更新できませんでした。もう一度お試しください。';
+
+  @override
   String get paywallTitle => 'RollReel Pro';
 
   @override

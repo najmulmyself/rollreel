@@ -45,6 +45,7 @@ class _AppRouterState extends ConsumerState<AppRouter>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     final review = ref.read(reviewPromptProvider);
     if (state == AppLifecycleState.resumed) {
+      ref.read(iapProvider.notifier).refreshEntitlements();
       review.maybeRequestReview();
       if (_route == RRRoute.permissionDenied) {
         _recheckPermission();

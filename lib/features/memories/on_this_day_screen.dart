@@ -6,15 +6,17 @@ import 'package:photo_manager/photo_manager.dart';
 import '../../core/memories/on_this_day_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/theme/colors.dart';
+import '../feed/settled_video_pager.dart';
 import '../feed/video_feed_item.dart';
 import '../states/loading_state.dart';
 
 /// Full-screen memories viewer: videos taken on today's month/day in
 /// previous years, swiped vertically like the main feed.
 class OnThisDayScreen extends ConsumerStatefulWidget {
-  const OnThisDayScreen({super.key, this.initialAssetId});
+  const OnThisDayScreen({super.key, this.initialAssetId, this.onVaultChange});
 
   final String? initialAssetId;
+  final Future<void> Function(String, bool)? onVaultChange;
 
   @override
   ConsumerState<OnThisDayScreen> createState() => _OnThisDayScreenState();
@@ -23,6 +25,8 @@ class OnThisDayScreen extends ConsumerStatefulWidget {
 class _OnThisDayScreenState extends ConsumerState<OnThisDayScreen> {
   PageController? _pageController;
   int _currentIndex = 0;
+  int _preloadDirection = 1;
+  String? _readyAssetId;
 
   @override
   void dispose() {
@@ -66,17 +70,35 @@ class _OnThisDayScreenState extends ConsumerState<OnThisDayScreen> {
 
           return Stack(
             children: [
-              PageView.builder(
-                controller: _pageController,
-                scrollDirection: Axis.vertical,
-                allowImplicitScrolling: true,
+              SettledVideoPager(
+                controller: _pageController!,
                 itemCount: videos.length,
-                onPageChanged: (i) => setState(() => _currentIndex = i),
-                itemBuilder: (context, index) => VideoFeedItem(
+                selectedIndex: safeIndex,
+                preloadDirection: _preloadDirection,
+                allowPreload: videos[safeIndex].id == _readyAssetId,
+                onPageSettled: (index) {
+                  if (index == _currentIndex) return;
+                  setState(() {
+                    _preloadDirection = index < _currentIndex ? -1 : 1;
+                    _currentIndex = index;
+                    _readyAssetId = null;
+                  });
+                },
+                itemBuilder: (context, index, preload) => VideoFeedItem(
                   key: ValueKey('otd_${videos[index].id}'),
                   asset: videos[index],
                   isActive: index == safeIndex,
-                  onControllerReady: (_) {},
+                  preload: preload,
+                  onControllerReady: (controller) {
+                    final assetId = videos[index].id;
+                    if (mounted &&
+                        controller != null &&
+                        index == safeIndex &&
+                        assetId != _readyAssetId) {
+                      setState(() => _readyAssetId = assetId);
+                    }
+                  },
+                  onVaultChange: widget.onVaultChange,
                 ),
               ),
               // ── Header: back button + "On This Day — N years ago" ─────────

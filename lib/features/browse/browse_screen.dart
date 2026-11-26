@@ -25,12 +25,14 @@ class BrowseScreen extends ConsumerStatefulWidget {
     this.initialScrollOffset = 0.0,
     this.onScrollChanged,
     this.onOpenMemories,
+    this.onVaultChange,
   });
 
   final ValueChanged<String>? onPlayAt;
   final double initialScrollOffset;
   final ValueChanged<double>? onScrollChanged;
   final VoidCallback? onOpenMemories;
+  final Future<void> Function(String, bool)? onVaultChange;
 
   @override
   ConsumerState<BrowseScreen> createState() => _BrowseScreenState();
@@ -115,10 +117,11 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
               ),
               for (final (action, label) in [
                 (_VideoAction.info, l10n.getInfo),
-                (
-                  _VideoAction.vault,
-                  inVault ? l10n.removeFromVault : l10n.addToVault,
-                ),
+                if (widget.onVaultChange != null)
+                  (
+                    _VideoAction.vault,
+                    inVault ? l10n.removeFromVault : l10n.addToVault,
+                  ),
                 (_VideoAction.delete, l10n.deleteVideo),
               ])
                 DecoratedBox(
@@ -153,7 +156,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
           builder: (_) => VideoInfoSheet(asset: asset),
         );
       case _VideoAction.vault:
-        await ref.read(vaultIdsProvider.notifier).toggle(asset.id);
+        await widget.onVaultChange?.call(asset.id, !inVault);
       case _VideoAction.delete:
         await _confirmDelete(asset, title);
     }

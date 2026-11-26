@@ -780,6 +780,28 @@ class AppLocalizationsIt extends AppLocalizations {
       'Questo video tornerà nella tua libreria principale.';
 
   @override
+  String get vaultRecoveryLocked =>
+      'Sblocca la cassaforte per riportare i video nella libreria.';
+
+  @override
+  String get vaultReturnAll => 'Riporta i video nella libreria';
+
+  @override
+  String get vaultRecoveryBody =>
+      'Puoi riportare i video dalla cassaforte alla libreria in qualsiasi momento.';
+
+  @override
+  String get vaultRecoveryConfirm =>
+      'Tutti i video nella cassaforte saranno di nuovo visibili nella tua libreria RollReel.';
+
+  @override
+  String get vaultRecoveryDone => 'I video sono tornati nella libreria.';
+
+  @override
+  String get vaultUpdateFailed =>
+      'Impossibile aggiornare la cassaforte. Riprova.';
+
+  @override
   String get paywallTitle => 'RollReel Pro';
 
   @override

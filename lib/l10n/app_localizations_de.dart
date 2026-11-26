@@ -784,6 +784,28 @@ class AppLocalizationsDe extends AppLocalizations {
       'Dieses Video kehrt in deine Hauptmediathek zurück.';
 
   @override
+  String get vaultRecoveryLocked =>
+      'Entsperre den Tresor, um deine Videos in die Mediathek zurückzuholen.';
+
+  @override
+  String get vaultReturnAll => 'Videos in die Mediathek zurückholen';
+
+  @override
+  String get vaultRecoveryBody =>
+      'Du kannst deine Videos jederzeit aus dem Tresor in die Mediathek zurückholen.';
+
+  @override
+  String get vaultRecoveryConfirm =>
+      'Alle Videos aus dem Tresor sind dann wieder in deiner RollReel-Mediathek sichtbar.';
+
+  @override
+  String get vaultRecoveryDone => 'Videos sind wieder in der Mediathek.';
+
+  @override
+  String get vaultUpdateFailed =>
+      'Der Tresor konnte nicht aktualisiert werden. Versuche es erneut.';
+
+  @override
   String get paywallTitle => 'RollReel Pro';
 
   @override

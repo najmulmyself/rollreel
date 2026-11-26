@@ -779,6 +779,29 @@ class AppLocalizationsFr extends AppLocalizations {
       'Cette vidéo reviendra dans votre bibliothèque principale.';
 
   @override
+  String get vaultRecoveryLocked =>
+      'Déverrouillez le coffre pour remettre vos vidéos dans la bibliothèque.';
+
+  @override
+  String get vaultReturnAll => 'Remettre les vidéos dans la bibliothèque';
+
+  @override
+  String get vaultRecoveryBody =>
+      'Vous pouvez remettre vos vidéos dans la bibliothèque à tout moment.';
+
+  @override
+  String get vaultRecoveryConfirm =>
+      'Toutes les vidéos du coffre seront de nouveau visibles dans votre bibliothèque RollReel.';
+
+  @override
+  String get vaultRecoveryDone =>
+      'Les vidéos sont de retour dans la bibliothèque.';
+
+  @override
+  String get vaultUpdateFailed =>
+      'Impossible de mettre à jour le coffre. Réessayez.';
+
+  @override
   String get paywallTitle => 'RollReel Pro';
 
   @override

@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:photo_manager/photo_manager.dart';
 
+import '../../core/iap/iap_provider.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
 import '../../core/theme/typography.dart';
@@ -15,9 +16,10 @@ import '../../shared/widgets/duration_badge.dart';
 import '../../shared/widgets/primary_button.dart';
 
 class VaultScreen extends ConsumerStatefulWidget {
-  const VaultScreen({super.key, required this.onBack});
+  const VaultScreen({super.key, required this.onBack, required this.onRecovered});
 
   final VoidCallback onBack;
+  final VoidCallback onRecovered;
 
   @override
   ConsumerState<VaultScreen> createState() => _VaultScreenState();
@@ -27,6 +29,7 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
   final _auth = LocalAuthentication();
   bool _unlocked = false;
   bool _authenticating = false;
+  bool _restoringAll = false;
 
   Future<void> _unlock() async {
     if (_authenticating) return;
@@ -101,8 +104,43 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
     );
   }
 
+  Future<void> _restoreAllVideos() async {
+    if (_restoringAll) return;
+    setState(() => _restoringAll = true);
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final confirmed = await showCupertinoDialog<bool>(
+        context: context,
+        builder: (dialogContext) => CupertinoAlertDialog(
+          title: Text(l10n.vaultReturnAll),
+          content: Text(l10n.vaultRecoveryConfirm),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(l10n.cancel),
+            ),
+            CupertinoDialogAction(
+              isDefaultAction: true,
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(l10n.vaultReturnAll),
+            ),
+          ],
+        ),
+      );
+      if (!mounted || !_unlocked || confirmed != true) return;
+      await ref.read(vaultIdsProvider.notifier).restoreAll();
+      if (mounted) widget.onRecovered();
+    } catch (error) {
+      debugPrint('[RollReel] Vault recovery could not finish: $error');
+      if (mounted) _showError(l10n.vaultUpdateFailed);
+    } finally {
+      if (mounted) setState(() => _restoringAll = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isPro = ref.watch(isProProvider);
     return Scaffold(
       backgroundColor: RRColors.bgTint,
       body: SafeArea(
@@ -110,7 +148,11 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
           children: [
             _buildNav(),
             Expanded(
-              child: _unlocked ? _buildUnlocked() : _buildLocked(),
+              child: !_unlocked
+                  ? _buildLocked(recoveryOnly: !isPro)
+                  : isPro
+                  ? _buildUnlocked()
+                  : _buildRecovery(),
             ),
           ],
         ),
@@ -201,7 +243,7 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
 
   // ── Locked state ───────────────────────────────────────────────────────────
 
-  Widget _buildLocked() {
+  Widget _buildLocked({required bool recoveryOnly}) {
     final l10n = AppLocalizations.of(context)!;
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: RRSpace.sp24),
@@ -217,7 +259,7 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
           ),
           const SizedBox(height: RRSpace.sp12),
           Text(
-            l10n.vaultLockedSubtitle,
+            recoveryOnly ? l10n.vaultRecoveryLocked : l10n.vaultLockedSubtitle,
             textAlign: TextAlign.center,
             style: TextStyle(
               color: RRColors.textSecond,
@@ -338,6 +380,47 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
   }
 
   // ── Unlocked state ─────────────────────────────────────────────────────────
+
+  Widget _buildRecovery() {
+    final l10n = AppLocalizations.of(context)!;
+    final hasVideos = ref.watch(vaultIdsProvider.select((ids) => ids.isNotEmpty));
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(RRSpace.sp24),
+        child: Column(
+          children: [
+            Icon(CupertinoIcons.folder, size: 38, color: RRColors.accentViolet),
+            const SizedBox(height: RRSpace.sp16),
+            Text(
+              hasVideos ? l10n.vaultReturnAll : l10n.vaultEmpty,
+              style: RRTypography.title2,
+              textAlign: TextAlign.center,
+            ),
+            if (hasVideos) ...[
+              const SizedBox(height: RRSpace.sp8),
+              Text(
+                l10n.vaultRecoveryBody,
+                style: RRTypography.body.copyWith(color: RRColors.textSecond),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: RRSpace.sp20),
+              FilledButton(
+                onPressed: _restoringAll ? null : _restoreAllVideos,
+                style: FilledButton.styleFrom(
+                  backgroundColor: RRColors.isDark.value
+                      ? const Color(0xFFA7DEFF) : RRColors.brandBlue,
+                  foregroundColor: RRColors.isDark.value ? RRColors.brandInk : Colors.white,
+                  minimumSize: const Size(44, 48),
+                  padding: const EdgeInsets.all(RRSpace.sp12),
+                ),
+                child: Text(l10n.vaultReturnAll, textAlign: TextAlign.center),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
 
   Widget _buildUnlocked() {
     final assetsAsync = ref.watch(vaultAssetsProvider);
@@ -813,9 +896,16 @@ class _VaultThumbState extends ConsumerState<_VaultThumb> {
         actions: [
           CupertinoDialogAction(
             isDestructiveAction: true,
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              ref.read(vaultIdsProvider.notifier).toggle(widget.asset.id);
+              try {
+                await ref.read(vaultIdsProvider.notifier).remove(widget.asset.id);
+              } catch (error) {
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(l10n.vaultUpdateFailed)),
+                );
+              }
             },
             child: Text(l10n.remove),
           ),

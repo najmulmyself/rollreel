@@ -3,36 +3,12 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'pro_entitlement.dart';
 
-const kProductLifetime = 'com.rollreel.pro.lifetime';
-const kProductMonthly = 'com.rollreel.plus.monthly';
+export 'pro_entitlement.dart'
+    show isProProvider, kProductLifetime, kProductMonthly;
+
 const _productIds = {kProductLifetime, kProductMonthly};
-
-// ─── is-pro provider ──────────────────────────────────────────────────────────
-
-class _IsProNotifier extends StateNotifier<bool> {
-  _IsProNotifier() : super(false) {
-    _load();
-  }
-
-  Future<void> _load() async {
-    final prefs = await SharedPreferences.getInstance();
-    state = prefs.getBool('is_pro') ?? false;
-  }
-
-  Future<void> setPro(bool value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('is_pro', value);
-    state = value;
-  }
-}
-
-final isProProvider = StateNotifierProvider<_IsProNotifier, bool>(
-  (ref) => _IsProNotifier(),
-);
-
-// ─── IAP state ────────────────────────────────────────────────────────────────
 
 class IAPState {
   const IAPState({
@@ -70,6 +46,7 @@ class IAPState {
 class IAPNotifier extends StateNotifier<IAPState> {
   IAPNotifier(this._ref) : super(const IAPState(catalogLoading: true)) {
     unawaited(refreshCatalog());
+    unawaited(refreshEntitlements());
   }
 
   final Ref _ref;
@@ -80,6 +57,9 @@ class IAPNotifier extends StateNotifier<IAPState> {
 
   Future<void> refreshCatalog() => _catalogRequest ??= _loadCatalog()
       .whenComplete(() => _catalogRequest = null);
+
+  Future<void> refreshEntitlements() =>
+      _ref.read(isProProvider.notifier).refresh();
 
   Future<void> _loadCatalog() async {
     state = state.copyWith(catalogLoading: true);
@@ -102,7 +82,12 @@ class IAPNotifier extends StateNotifier<IAPState> {
         },
       );
       state = state.copyWith(available: true);
-      final response = await store.queryProductDetails(_productIds);
+      final canSellMonthly = await _ref
+          .read(isProProvider.notifier)
+          .canSellMonthly;
+      final response = await store.queryProductDetails(
+        canSellMonthly ? _productIds : const {kProductLifetime},
+      );
       debugPrint(
         '[RollReel] IAP products found: ${response.productDetails.map((p) => p.id).toList()}, '
         'not found: ${response.notFoundIDs}, error: ${response.error}',
@@ -152,6 +137,10 @@ class IAPNotifier extends StateNotifier<IAPState> {
     _restoring = true;
     state = state.copyWith(loading: true, clearError: true);
     try {
+      if (await _ref.read(isProProvider.notifier).restoreFromStoreKit()) {
+        return mounted && state.error == null;
+      }
+      if (!mounted) return false;
       final catalog = _catalogRequest;
       if (catalog != null) await catalog;
       if (!mounted) return false;
@@ -178,7 +167,9 @@ class IAPNotifier extends StateNotifier<IAPState> {
       for (final purchase in matching) {
         if (purchase.status == PurchaseStatus.purchased ||
             purchase.status == PurchaseStatus.restored) {
-          await _ref.read(isProProvider.notifier).setPro(true);
+          await _ref
+              .read(isProProvider.notifier)
+              .applyPurchase(purchase.productID);
         } else if (purchase.status == PurchaseStatus.error && mounted) {
           state = state.copyWith(
             error: purchase.error?.message ?? 'Purchase failed',

@@ -760,6 +760,27 @@ class AppLocalizationsTr extends AppLocalizations {
   String get removeFromVaultBody => 'Bu video ana arşivine geri dönecek.';
 
   @override
+  String get vaultRecoveryLocked =>
+      'Videolarını arşive geri almak için kasanın kilidini aç.';
+
+  @override
+  String get vaultReturnAll => 'Videoları arşive geri al';
+
+  @override
+  String get vaultRecoveryBody =>
+      'Kasadaki videoları istediğin zaman arşive geri alabilirsin.';
+
+  @override
+  String get vaultRecoveryConfirm =>
+      'Kasadaki tüm videolar RollReel arşivinde tekrar görünecek.';
+
+  @override
+  String get vaultRecoveryDone => 'Videolar arşive geri alındı.';
+
+  @override
+  String get vaultUpdateFailed => 'Kasa güncellenemedi. Tekrar dene.';
+
+  @override
   String get paywallTitle => 'RollReel Pro';
 
   @override

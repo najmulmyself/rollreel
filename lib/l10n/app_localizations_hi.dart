@@ -759,6 +759,27 @@ class AppLocalizationsHi extends AppLocalizations {
       'यह वीडियो आपकी मुख्य लाइब्रेरी में वापस चला जाएगा।';
 
   @override
+  String get vaultRecoveryLocked =>
+      'अपने वीडियो लाइब्रेरी में वापस लाने के लिए वॉल्ट अनलॉक करें।';
+
+  @override
+  String get vaultReturnAll => 'वीडियो लाइब्रेरी में वापस लाएँ';
+
+  @override
+  String get vaultRecoveryBody =>
+      'आप वॉल्ट के वीडियो कभी भी लाइब्रेरी में वापस ला सकते हैं।';
+
+  @override
+  String get vaultRecoveryConfirm =>
+      'वॉल्ट के सभी वीडियो आपकी RollReel लाइब्रेरी में फिर दिखेंगे।';
+
+  @override
+  String get vaultRecoveryDone => 'वीडियो लाइब्रेरी में वापस आ गए हैं।';
+
+  @override
+  String get vaultUpdateFailed => 'वॉल्ट अपडेट नहीं हो सका। फिर से कोशिश करें।';
+
+  @override
   String get paywallTitle => 'RollReel Pro';
 
   @override

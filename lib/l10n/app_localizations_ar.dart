@@ -756,6 +756,26 @@ class AppLocalizationsAr extends AppLocalizations {
   String get removeFromVaultBody => 'سيعود هذا الفيديو إلى مكتبتك الرئيسية.';
 
   @override
+  String get vaultRecoveryLocked => 'افتح الخزنة لإعادة فيديوهاتك إلى المكتبة.';
+
+  @override
+  String get vaultReturnAll => 'إعادة الفيديوهات إلى المكتبة';
+
+  @override
+  String get vaultRecoveryBody =>
+      'يمكنك إعادة فيديوهات الخزنة إلى المكتبة في أي وقت.';
+
+  @override
+  String get vaultRecoveryConfirm =>
+      'ستظهر كل فيديوهات الخزنة مجددًا في مكتبة RollReel.';
+
+  @override
+  String get vaultRecoveryDone => 'أُعيدت الفيديوهات إلى المكتبة.';
+
+  @override
+  String get vaultUpdateFailed => 'تعذّر تحديث الخزنة. حاول مرة أخرى.';
+
+  @override
   String get paywallTitle => 'RollReel Pro';
 
   @override
