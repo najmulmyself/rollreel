@@ -775,6 +775,88 @@ class AppLocalizationsEn extends AppLocalizations {
   String get paywallTitle => 'RollReel Pro';
 
   @override
+  String get paywallPlaybackTitle => 'Keep watching.';
+
+  @override
+  String get paywallPlaybackBody => 'Your videos, without ad breaks.';
+
+  @override
+  String get paywallVaultTitle => 'Keep it to yourself.';
+
+  @override
+  String get paywallVaultBody => 'A locked space for your private videos.';
+
+  @override
+  String get paywallMemoriesTitle => 'See this\nday again.';
+
+  @override
+  String get paywallMemoriesBody => 'Find videos from this day in past years.';
+
+  @override
+  String get paywallSpeedTitle => 'Watch at your pace.';
+
+  @override
+  String get paywallAdFree => 'Ad-free playback';
+
+  @override
+  String get paywallAdFreeBody => 'Replay clips without ad breaks';
+
+  @override
+  String get paywallVaultBenefit => 'Lock the clips you choose';
+
+  @override
+  String get paywallSpeed => 'Hold to play at 2×';
+
+  @override
+  String get paywallSpeedBenefit => 'Fast-forward with a press and hold';
+
+  @override
+  String get paywallMemoriesBenefit => 'Rediscover clips from past years';
+
+  @override
+  String get paywallChoosePlan => 'Choose a plan';
+
+  @override
+  String get paywallLifetime => 'Lifetime';
+
+  @override
+  String get paywallMonthly => 'Monthly';
+
+  @override
+  String get paywallRenewsMonthly => 'Auto-renews monthly';
+
+  @override
+  String get paywallGetLifetime => 'Get Lifetime';
+
+  @override
+  String get paywallSubscribeMonthly => 'Subscribe monthly';
+
+  @override
+  String paywallMonthlyPrice(String price) {
+    return '$price/month';
+  }
+
+  @override
+  String paywallLifetimeBilling(String price) {
+    return '$price once. No subscription.';
+  }
+
+  @override
+  String paywallMonthlyBilling(String price) {
+    return '$price/month. Auto-renews monthly. Cancel in App Store settings.';
+  }
+
+  @override
+  String get paywallLoadingPrices => 'Loading prices…';
+
+  @override
+  String get paywallPricesUnavailable => 'Plans unavailable';
+
+  @override
+  String get paywallLinkUnavailable =>
+      'Couldn’t open this link. Please try again.';
+
+  @override
   String get paywallTagline => 'Watch more. Worry less.';
 
   @override
@@ -841,7 +923,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bulletFutureUpdates => 'Future updates';
 
   @override
-  String get termsOfUse => 'Terms of Use (EULA)';
+  String get termsOfUse => 'Terms of Use';
 
   @override
   String get lifetimeAccess => 'Lifetime Access';

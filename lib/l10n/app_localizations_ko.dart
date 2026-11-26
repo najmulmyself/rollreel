@@ -745,6 +745,87 @@ class AppLocalizationsKo extends AppLocalizations {
   String get paywallTitle => 'RollReel Pro';
 
   @override
+  String get paywallPlaybackTitle => '계속 감상하세요.';
+
+  @override
+  String get paywallPlaybackBody => '광고 없이 내 동영상을 감상하세요.';
+
+  @override
+  String get paywallVaultTitle => '나만 볼 수 있게.';
+
+  @override
+  String get paywallVaultBody => '비공개 동영상을 위한 잠금 공간입니다.';
+
+  @override
+  String get paywallMemoriesTitle => '그날을 다시 보세요.';
+
+  @override
+  String get paywallMemoriesBody => '지난해 오늘에 찍은 동영상을 찾아보세요.';
+
+  @override
+  String get paywallSpeedTitle => '원하는 속도로 감상하세요.';
+
+  @override
+  String get paywallAdFree => '광고 없는 재생';
+
+  @override
+  String get paywallAdFreeBody => '광고 없이 클립 다시 보기';
+
+  @override
+  String get paywallVaultBenefit => '고른 클립을 잠그세요';
+
+  @override
+  String get paywallSpeed => '길게 눌러 2배속 재생';
+
+  @override
+  String get paywallSpeedBenefit => '길게 눌러 빠르게 넘기세요';
+
+  @override
+  String get paywallMemoriesBenefit => '지난해의 클립을 다시 만나세요';
+
+  @override
+  String get paywallChoosePlan => '요금제 선택';
+
+  @override
+  String get paywallLifetime => '평생 이용';
+
+  @override
+  String get paywallMonthly => '월간';
+
+  @override
+  String get paywallRenewsMonthly => '매월 자동 갱신';
+
+  @override
+  String get paywallGetLifetime => '평생 이용권 구매';
+
+  @override
+  String get paywallSubscribeMonthly => '월간 구독';
+
+  @override
+  String paywallMonthlyPrice(String price) {
+    return '월 $price';
+  }
+
+  @override
+  String paywallLifetimeBilling(String price) {
+    return '$price 한 번 결제. 구독이 아닙니다.';
+  }
+
+  @override
+  String paywallMonthlyBilling(String price) {
+    return '월 $price. 매월 자동 갱신됩니다. App Store 설정에서 취소할 수 있습니다.';
+  }
+
+  @override
+  String get paywallLoadingPrices => '가격 불러오는 중…';
+
+  @override
+  String get paywallPricesUnavailable => '이용 가능한 요금제 없음';
+
+  @override
+  String get paywallLinkUnavailable => '링크를 열 수 없습니다. 다시 시도해 주세요.';
+
+  @override
   String get paywallTagline => '더 많이 보고, 걱정은 덜고.';
 
   @override

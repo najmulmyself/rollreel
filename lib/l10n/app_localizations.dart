@@ -1500,6 +1500,156 @@ abstract class AppLocalizations {
   /// **'RollReel Pro'**
   String get paywallTitle;
 
+  /// No description provided for @paywallPlaybackTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep watching.'**
+  String get paywallPlaybackTitle;
+
+  /// No description provided for @paywallPlaybackBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your videos, without ad breaks.'**
+  String get paywallPlaybackBody;
+
+  /// No description provided for @paywallVaultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep it to yourself.'**
+  String get paywallVaultTitle;
+
+  /// No description provided for @paywallVaultBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A locked space for your private videos.'**
+  String get paywallVaultBody;
+
+  /// No description provided for @paywallMemoriesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'See this\nday again.'**
+  String get paywallMemoriesTitle;
+
+  /// No description provided for @paywallMemoriesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Find videos from this day in past years.'**
+  String get paywallMemoriesBody;
+
+  /// No description provided for @paywallSpeedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch at your pace.'**
+  String get paywallSpeedTitle;
+
+  /// No description provided for @paywallAdFree.
+  ///
+  /// In en, this message translates to:
+  /// **'Ad-free playback'**
+  String get paywallAdFree;
+
+  /// No description provided for @paywallAdFreeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Replay clips without ad breaks'**
+  String get paywallAdFreeBody;
+
+  /// No description provided for @paywallVaultBenefit.
+  ///
+  /// In en, this message translates to:
+  /// **'Lock the clips you choose'**
+  String get paywallVaultBenefit;
+
+  /// No description provided for @paywallSpeed.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold to play at 2×'**
+  String get paywallSpeed;
+
+  /// No description provided for @paywallSpeedBenefit.
+  ///
+  /// In en, this message translates to:
+  /// **'Fast-forward with a press and hold'**
+  String get paywallSpeedBenefit;
+
+  /// No description provided for @paywallMemoriesBenefit.
+  ///
+  /// In en, this message translates to:
+  /// **'Rediscover clips from past years'**
+  String get paywallMemoriesBenefit;
+
+  /// No description provided for @paywallChoosePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a plan'**
+  String get paywallChoosePlan;
+
+  /// No description provided for @paywallLifetime.
+  ///
+  /// In en, this message translates to:
+  /// **'Lifetime'**
+  String get paywallLifetime;
+
+  /// No description provided for @paywallMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get paywallMonthly;
+
+  /// No description provided for @paywallRenewsMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-renews monthly'**
+  String get paywallRenewsMonthly;
+
+  /// No description provided for @paywallGetLifetime.
+  ///
+  /// In en, this message translates to:
+  /// **'Get Lifetime'**
+  String get paywallGetLifetime;
+
+  /// No description provided for @paywallSubscribeMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe monthly'**
+  String get paywallSubscribeMonthly;
+
+  /// No description provided for @paywallMonthlyPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'{price}/month'**
+  String paywallMonthlyPrice(String price);
+
+  /// No description provided for @paywallLifetimeBilling.
+  ///
+  /// In en, this message translates to:
+  /// **'{price} once. No subscription.'**
+  String paywallLifetimeBilling(String price);
+
+  /// No description provided for @paywallMonthlyBilling.
+  ///
+  /// In en, this message translates to:
+  /// **'{price}/month. Auto-renews monthly. Cancel in App Store settings.'**
+  String paywallMonthlyBilling(String price);
+
+  /// No description provided for @paywallLoadingPrices.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading prices…'**
+  String get paywallLoadingPrices;
+
+  /// No description provided for @paywallPricesUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Plans unavailable'**
+  String get paywallPricesUnavailable;
+
+  /// No description provided for @paywallLinkUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t open this link. Please try again.'**
+  String get paywallLinkUnavailable;
+
   /// No description provided for @paywallTagline.
   ///
   /// In en, this message translates to:
@@ -1629,7 +1779,7 @@ abstract class AppLocalizations {
   /// No description provided for @termsOfUse.
   ///
   /// In en, this message translates to:
-  /// **'Terms of Use (EULA)'**
+  /// **'Terms of Use'**
   String get termsOfUse;
 
   /// No description provided for @lifetimeAccess.

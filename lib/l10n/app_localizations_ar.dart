@@ -759,6 +759,88 @@ class AppLocalizationsAr extends AppLocalizations {
   String get paywallTitle => 'RollReel Pro';
 
   @override
+  String get paywallPlaybackTitle => 'واصل المشاهدة.';
+
+  @override
+  String get paywallPlaybackBody => 'فيديوهاتك من دون فواصل إعلانية.';
+
+  @override
+  String get paywallVaultTitle => 'احتفظ بها لنفسك.';
+
+  @override
+  String get paywallVaultBody => 'مساحة مقفلة لفيديوهاتك الخاصة.';
+
+  @override
+  String get paywallMemoriesTitle => 'عِش هذا اليوم مجددًا.';
+
+  @override
+  String get paywallMemoriesBody =>
+      'اعثر على فيديوهات صُوّرت في مثل هذا اليوم من أعوام سابقة.';
+
+  @override
+  String get paywallSpeedTitle => 'شاهد بالسرعة التي تناسبك.';
+
+  @override
+  String get paywallAdFree => 'تشغيل بلا إعلانات';
+
+  @override
+  String get paywallAdFreeBody => 'أعد مشاهدة المقاطع من دون فواصل إعلانية';
+
+  @override
+  String get paywallVaultBenefit => 'اقفل المقاطع التي تختارها';
+
+  @override
+  String get paywallSpeed => 'اضغط مطوّلًا للتشغيل بسرعة ٢×';
+
+  @override
+  String get paywallSpeedBenefit => 'اضغط مطوّلًا للتقديم السريع';
+
+  @override
+  String get paywallMemoriesBenefit => 'أعد اكتشاف مقاطع من أعوام سابقة';
+
+  @override
+  String get paywallChoosePlan => 'اختر خطة';
+
+  @override
+  String get paywallLifetime => 'مدى الحياة';
+
+  @override
+  String get paywallMonthly => 'شهريًا';
+
+  @override
+  String get paywallRenewsMonthly => 'يتجدد تلقائيًا كل شهر';
+
+  @override
+  String get paywallGetLifetime => 'احصل على وصول مدى الحياة';
+
+  @override
+  String get paywallSubscribeMonthly => 'اشترك شهريًا';
+
+  @override
+  String paywallMonthlyPrice(String price) {
+    return '$price شهريًا';
+  }
+
+  @override
+  String paywallLifetimeBilling(String price) {
+    return '$price لمرة واحدة. من دون اشتراك.';
+  }
+
+  @override
+  String paywallMonthlyBilling(String price) {
+    return '$price شهريًا. يتجدد تلقائيًا كل شهر. يمكنك الإلغاء من إعدادات App Store.';
+  }
+
+  @override
+  String get paywallLoadingPrices => 'جارٍ تحميل الأسعار…';
+
+  @override
+  String get paywallPricesUnavailable => 'الخطط غير متاحة';
+
+  @override
+  String get paywallLinkUnavailable => 'تعذّر فتح الرابط. حاول مرة أخرى.';
+
+  @override
   String get paywallTagline => 'شاهد أكثر. اطمئن أكثر.';
 
   @override

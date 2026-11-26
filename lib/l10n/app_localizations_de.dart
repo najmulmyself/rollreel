@@ -787,6 +787,90 @@ class AppLocalizationsDe extends AppLocalizations {
   String get paywallTitle => 'RollReel Pro';
 
   @override
+  String get paywallPlaybackTitle => 'Schau weiter.';
+
+  @override
+  String get paywallPlaybackBody => 'Deine Videos ohne Werbepausen.';
+
+  @override
+  String get paywallVaultTitle => 'Nur für dich.';
+
+  @override
+  String get paywallVaultBody =>
+      'Ein geschützter Ort für deine privaten Videos.';
+
+  @override
+  String get paywallMemoriesTitle => 'Erlebe den Tag erneut.';
+
+  @override
+  String get paywallMemoriesBody =>
+      'Finde Videos vom selben Tag aus früheren Jahren.';
+
+  @override
+  String get paywallSpeedTitle => 'Schau in deinem Tempo.';
+
+  @override
+  String get paywallAdFree => 'Werbefreie Wiedergabe';
+
+  @override
+  String get paywallAdFreeBody => 'Clips ohne Werbepausen ansehen';
+
+  @override
+  String get paywallVaultBenefit => 'Sperre die Clips deiner Wahl';
+
+  @override
+  String get paywallSpeed => 'Halten für 2× Tempo';
+
+  @override
+  String get paywallSpeedBenefit => 'Zum Vorspulen gedrückt halten';
+
+  @override
+  String get paywallMemoriesBenefit => 'Entdecke Clips aus früheren Jahren';
+
+  @override
+  String get paywallChoosePlan => 'Wähle einen Tarif';
+
+  @override
+  String get paywallLifetime => 'Lebenslang';
+
+  @override
+  String get paywallMonthly => 'Monatlich';
+
+  @override
+  String get paywallRenewsMonthly => 'Verlängert sich monatlich';
+
+  @override
+  String get paywallGetLifetime => 'Lebenslang freischalten';
+
+  @override
+  String get paywallSubscribeMonthly => 'Monatlich abonnieren';
+
+  @override
+  String paywallMonthlyPrice(String price) {
+    return '$price/Monat';
+  }
+
+  @override
+  String paywallLifetimeBilling(String price) {
+    return '$price einmalig. Ohne Abo.';
+  }
+
+  @override
+  String paywallMonthlyBilling(String price) {
+    return '$price/Monat. Verlängert sich automatisch. Kündigung in den App-Store-Einstellungen.';
+  }
+
+  @override
+  String get paywallLoadingPrices => 'Preise werden geladen…';
+
+  @override
+  String get paywallPricesUnavailable => 'Tarife nicht verfügbar';
+
+  @override
+  String get paywallLinkUnavailable =>
+      'Der Link konnte nicht geöffnet werden. Versuche es erneut.';
+
+  @override
   String get paywallTagline => 'Mehr sehen. Weniger sorgen.';
 
   @override

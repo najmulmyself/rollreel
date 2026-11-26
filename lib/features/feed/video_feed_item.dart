@@ -40,7 +40,7 @@ class VideoFeedItem extends ConsumerStatefulWidget {
   final void Function(VideoPlayerController?) onControllerReady;
   final VoidCallback? onDelete;
   final ValueChanged<bool>? onPlayStateChanged;
-  final VoidCallback? onOpenPaywall;
+  final Future<void> Function()? onOpenPaywall;
 
   @override
   ConsumerState<VideoFeedItem> createState() => _VideoFeedItemState();
@@ -61,6 +61,7 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
 
   // Long-press fast-forward state
   bool _fastForward = false;
+  bool _showingPaywall = false;
 
   // Volume / brightness gesture state
   bool _brightnessTouched = false;
@@ -213,10 +214,23 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
 
   // ── Long-press fast-forward (2×) ─────────────────────────────────────────────
 
-  void _startFastForward() {
-    if (!_initialized || _controller == null) return;
+  Future<void> _startFastForward() async {
+    final controller = _controller;
+    if (!_initialized || controller == null) return;
     if (!ref.read(isProProvider)) {
-      widget.onOpenPaywall?.call();
+      final openPaywall = widget.onOpenPaywall;
+      if (openPaywall == null || _showingPaywall) return;
+      _showingPaywall = true;
+      final wasPlaying = controller.value.isPlaying;
+      try {
+        if (wasPlaying) await controller.pause();
+        if (mounted) await openPaywall();
+      } finally {
+        _showingPaywall = false;
+        if (mounted && widget.isActive && wasPlaying) {
+          await controller.play();
+        }
+      }
       return;
     }
     HapticFeedback.heavyImpact();

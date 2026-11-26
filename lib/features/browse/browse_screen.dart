@@ -6,7 +6,6 @@ import 'package:intl/intl.dart' show DateFormat;
 import 'package:photo_manager/photo_manager.dart';
 
 import '../../core/ads/banner_ad_widget.dart';
-import '../../core/iap/iap_provider.dart';
 import '../../core/memories/on_this_day_provider.dart';
 import '../../core/permissions/permission_provider.dart';
 import '../../core/theme/colors.dart';
@@ -16,7 +15,6 @@ import '../../core/video/capture_video.dart';
 import '../../core/video/video_library_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../feed/video_feed_item.dart' show VideoInfoSheet;
-import '../memories/on_this_day_screen.dart';
 import 'filter_sheet.dart';
 import 'library_widgets.dart';
 
@@ -26,13 +24,13 @@ class BrowseScreen extends ConsumerStatefulWidget {
     this.onPlayAt,
     this.initialScrollOffset = 0.0,
     this.onScrollChanged,
-    this.onOpenPaywall,
+    this.onOpenMemories,
   });
 
   final ValueChanged<String>? onPlayAt;
   final double initialScrollOffset;
   final ValueChanged<double>? onScrollChanged;
-  final VoidCallback? onOpenPaywall;
+  final VoidCallback? onOpenMemories;
 
   @override
   ConsumerState<BrowseScreen> createState() => _BrowseScreenState();
@@ -466,7 +464,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
       slivers: [
         if (_query.isEmpty && !hasFilters)
           SliverToBoxAdapter(
-            child: _LibraryMemories(onOpenPaywall: widget.onOpenPaywall),
+            child: _LibraryMemories(onTap: widget.onOpenMemories),
           )
         else
           SliverToBoxAdapter(
@@ -706,8 +704,8 @@ class _LibraryControls extends StatelessWidget {
 }
 
 class _LibraryMemories extends ConsumerWidget {
-  const _LibraryMemories({required this.onOpenPaywall});
-  final VoidCallback? onOpenPaywall;
+  const _LibraryMemories({required this.onTap});
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -722,17 +720,7 @@ class _LibraryMemories extends ConsumerWidget {
         borderRadius: BorderRadius.circular(13),
         child: InkWell(
           borderRadius: BorderRadius.circular(13),
-          onTap: () {
-            if (ref.read(isProProvider)) {
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => const OnThisDayScreen(),
-                ),
-              );
-            } else {
-              onOpenPaywall?.call();
-            }
-          },
+          onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.all(8),
             child: Row(

@@ -783,6 +783,90 @@ class AppLocalizationsIt extends AppLocalizations {
   String get paywallTitle => 'RollReel Pro';
 
   @override
+  String get paywallPlaybackTitle => 'Continua a guardare.';
+
+  @override
+  String get paywallPlaybackBody =>
+      'I tuoi video, senza interruzioni pubblicitarie.';
+
+  @override
+  String get paywallVaultTitle => 'Tieni tutto per te.';
+
+  @override
+  String get paywallVaultBody =>
+      'Uno spazio protetto per i tuoi video privati.';
+
+  @override
+  String get paywallMemoriesTitle => 'Rivivi questo giorno.';
+
+  @override
+  String get paywallMemoriesBody =>
+      'Trova i video di questo giorno negli anni passati.';
+
+  @override
+  String get paywallSpeedTitle => 'Guarda al tuo ritmo.';
+
+  @override
+  String get paywallAdFree => 'Riproduzione senza pubblicità';
+
+  @override
+  String get paywallAdFreeBody => 'Riguarda i clip senza pubblicità';
+
+  @override
+  String get paywallVaultBenefit => 'Proteggi i clip che scegli';
+
+  @override
+  String get paywallSpeed => 'Tieni premuto per andare a 2×';
+
+  @override
+  String get paywallSpeedBenefit => 'Tieni premuto per avanzare rapidamente';
+
+  @override
+  String get paywallMemoriesBenefit => 'Riscopri i clip degli anni passati';
+
+  @override
+  String get paywallChoosePlan => 'Scegli un piano';
+
+  @override
+  String get paywallLifetime => 'A vita';
+
+  @override
+  String get paywallMonthly => 'Mensile';
+
+  @override
+  String get paywallRenewsMonthly => 'Rinnovo mensile automatico';
+
+  @override
+  String get paywallGetLifetime => 'Ottieni l’accesso a vita';
+
+  @override
+  String get paywallSubscribeMonthly => 'Abbonati al mese';
+
+  @override
+  String paywallMonthlyPrice(String price) {
+    return '$price/mese';
+  }
+
+  @override
+  String paywallLifetimeBilling(String price) {
+    return 'Un solo pagamento di $price. Senza abbonamento.';
+  }
+
+  @override
+  String paywallMonthlyBilling(String price) {
+    return '$price/mese. Rinnovo automatico. Annulla dalle impostazioni dell’App Store.';
+  }
+
+  @override
+  String get paywallLoadingPrices => 'Caricamento dei prezzi…';
+
+  @override
+  String get paywallPricesUnavailable => 'Piani non disponibili';
+
+  @override
+  String get paywallLinkUnavailable => 'Impossibile aprire il link. Riprova.';
+
+  @override
   String get paywallTagline => 'Guarda di più. Senza pensieri.';
 
   @override

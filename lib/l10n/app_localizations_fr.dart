@@ -782,6 +782,92 @@ class AppLocalizationsFr extends AppLocalizations {
   String get paywallTitle => 'RollReel Pro';
 
   @override
+  String get paywallPlaybackTitle => 'Continuez à regarder.';
+
+  @override
+  String get paywallPlaybackBody => 'Vos vidéos, sans coupures publicitaires.';
+
+  @override
+  String get paywallVaultTitle => 'Gardez-les pour vous.';
+
+  @override
+  String get paywallVaultBody =>
+      'Un espace verrouillé pour vos vidéos privées.';
+
+  @override
+  String get paywallMemoriesTitle => 'Revivez cette journée.';
+
+  @override
+  String get paywallMemoriesBody =>
+      'Retrouvez les vidéos de ce jour les années précédentes.';
+
+  @override
+  String get paywallSpeedTitle => 'Regardez à votre rythme.';
+
+  @override
+  String get paywallAdFree => 'Lecture sans publicité';
+
+  @override
+  String get paywallAdFreeBody =>
+      'Revoyez vos clips sans coupures publicitaires';
+
+  @override
+  String get paywallVaultBenefit => 'Verrouillez les clips de votre choix';
+
+  @override
+  String get paywallSpeed => 'Appui long pour lire à 2×';
+
+  @override
+  String get paywallSpeedBenefit => 'Maintenez appuyé pour avancer';
+
+  @override
+  String get paywallMemoriesBenefit =>
+      'Redécouvrez des clips des années passées';
+
+  @override
+  String get paywallChoosePlan => 'Choisissez une formule';
+
+  @override
+  String get paywallLifetime => 'À vie';
+
+  @override
+  String get paywallMonthly => 'Mensuel';
+
+  @override
+  String get paywallRenewsMonthly => 'Renouvellement mensuel';
+
+  @override
+  String get paywallGetLifetime => 'Obtenir l’accès à vie';
+
+  @override
+  String get paywallSubscribeMonthly => 'S’abonner au mois';
+
+  @override
+  String paywallMonthlyPrice(String price) {
+    return '$price/mois';
+  }
+
+  @override
+  String paywallLifetimeBilling(String price) {
+    return 'Un seul paiement de $price. Sans abonnement.';
+  }
+
+  @override
+  String paywallMonthlyBilling(String price) {
+    return '$price/mois. Renouvellement automatique. Résiliez dans les réglages de l’App Store.';
+  }
+
+  @override
+  String get paywallLoadingPrices => 'Chargement des tarifs…';
+
+  @override
+  String get paywallPricesUnavailable => 'Formules indisponibles';
+
+  @override
+  String get paywallLinkUnavailable =>
+      'Impossible d’ouvrir ce lien. Réessayez.';
+
+  @override
   String get paywallTagline => 'Regardez plus. Sans souci.';
 
   @override

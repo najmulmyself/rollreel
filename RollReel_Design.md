@@ -1075,52 +1075,32 @@ Section styling:
 
 ### S12 — Pro Upgrade / Paywall Screen
 
-**Appears as full-screen modal** (sheet presentation style: `.fullScreenCover` equivalent).
+#### Paywall and onboarding guidelines
 
-```
-Background:     bgDeep + animated gradient mesh (slow blobs: violet, cyan, coral)
-Dismiss:        xmark.circle.fill, top-right, 20pt, textSecond (after 2 second delay)
+These guidelines adapt the owner’s notes on Parlo, Headspace, Strava, and Calm to RollReel’s camera roll and App Store purchase flow. [Paywall Designer reference](https://www.tobiadonadon.com/projects/construct/material/skills/paywall-designer)
 
-HERO SECTION:
-  Gradient card (full-width, 220pt height, gradPro):
-    Center: ProBadge (large version, 48pt height)
-    Headline: "RollReel Pro" tsDisplay, white
-    Subhead:  "Watch more. Worry less." tsSubheadline, textSecond
+- **Show the value before the offer.** Let people try the camera-roll swipe during onboarding, then let them enter the free app. At a later upgrade, lead with the benefit they came for. Use ad-free playback for the general Settings entry, Privacy Vault for a Vault entry, On This Day for a memories entry, and 2× playback for a speed entry.
+- **Design the entry, the offer, and the return together.** Identify the question the person is likely to have at each step. Show an immediately available Close button and return people to the view they came from with their place intact. After confirmed activation, show the same plan or entitlement and a clear route back to their task. Keep Restore Purchases available to existing customers.
+- **Use verifiable prices and claims.** Show the localized price from StoreKit on each plan and beside the selected purchase action. Label the total due, billing frequency, renewal, and cancellation terms in readable type. When reviewing prices, compare equivalent real plans in the same storefront and record the billing term and date. Confirm catalog changes separately from visual design. Use only verified claims and real App Store offers.
+- **Explain trials only when offered.** Verify StoreKit eligibility first. If RollReel introduces a trial, put the exact charge date, amount, billing frequency, and cancellation path in the timeline and next to the CTA. Mention reminders only when the app can deliver them and the person has enabled delivery.
+- **Review the whole experience on a phone.** Compare three screen directions against the same plan facts. Check how quickly someone can explain the benefit, amount due, renewal, and way out. Review compact phones, larger text sizes, VoiceOver, and both themes. Check the active, loading, unavailable, restore, and purchase error states alongside the main offer.
 
-FEATURE LIST:
-  Each feature row (56pt height):
-    [Left]  checkmark.circle.fill (accentGreen, 24pt)
-    [Middle] Feature name — tsHeadline, white
-             Feature description — tsSubheadline, textSecond
-    
-    Features:
-    ✅ Ad-Free Experience — "No interruptions, ever"
-    ✅ Privacy Vault — "Lock sensitive videos with Face ID"
-    ✅ Playback Speed Control — "0.5× to 2× speed"
-    ✅ Smart Collections — "Auto-grouped by date and location"
-    ✅ Lock Screen Widget — "Today's video count at a glance"
-    ✅ Early Access — "First to get every new feature"
+#### RollReel concept
 
-PRICING OPTIONS (pill selector, two options):
+Use a full-screen presentation with the RollReel Pro wordmark and Close control at the top. Keep the approved kingfisher and its camcorder in the hero. Use four compact rows or tiles for the current benefits of ad-free playback, Privacy Vault, hold to play at 2×, and On This Day. Use the light Home palette and the shared near-black surfaces for dark mode. Use SF Pro and the app’s Cupertino icon family.
 
-  Option 1 — "One Time" (default selected):
-    Price: "$4.99" tsTitle1, white
-    Label: "Lifetime Access" tsSubheadline, textSecond
-    Badge: "Best Value" — accentAmber pill
-    
-  Option 2 — "Annual" (toggle):
-    Price: "$14.99/year" tsTitle1, white  
-    Equiv: "$1.25/month" tsSubheadline, textSecond
-    Badge: "Includes On This Day" — accentCyan pill
-    
-  Selector: Toggle pill (two-state), gradPro underline on selected
+| Direction | Entry | Hero |
+|---|---|---|
+| Keep watching | Settings or general upgrade | Kingfisher beside a short strip of camera-roll frames, with ad-free playback as the lead benefit |
+| Keep it to yourself | Privacy Vault | Kingfisher beside a locked viewfinder, with private clips as the lead benefit |
+| See this day again | On This Day | Kingfisher in front of overlapping memory frames, with rediscovery as the lead benefit |
+| Watch at your pace | Player 2× gesture | Playback artwork with 2× playback as the lead benefit |
 
-Primary CTA:    "Unlock RollReel Pro" — PrimaryButton (gradBrand)
-                Subtitle below: "One-time purchase · No subscription hidden"
+Show the existing Lifetime and Monthly products together. Select Lifetime by default when available and give both plans a readable name, price, and clear selected state. Match the CTA and billing detail to the selected plan. Lifetime is a one-time purchase. Monthly renews monthly and can be managed in App Store subscription settings. Place Restore Purchases, Terms of Use, and Privacy Policy within easy reach of the purchase action.
 
-Secondary CTA:  "Restore Purchases" — text button, textSecond
-Legal:          "Payment will be charged to your Apple ID..." tsCaption, textDisabled
-```
+Use a localized loading state while StoreKit retrieves prices. If a product is unavailable, show that state on the plan and disable its purchase action. Keep dismissal and recovery controls available during catalog errors. Confirm success from the active entitlement and surface purchase or restore errors with an appropriate retry path. A successful purchase or restore returns people to the action they came for.
+
+Follow [M8 — Paywall viewfinder entrance](#m8--paywall-viewfinder-entrance) for the hero motion and plan selection feedback.
 
 ---
 
@@ -1298,13 +1278,9 @@ Scroll:       scrollToCenter — active chip always centered in view
 
 The outer PageView follows a horizontal gesture. Next and Back move between pages in 240 ms with an ease-out curve. The persistent controls stay in place. Reduce Motion switches pages directly, and the swipe demo offers a static preview with manual navigation.
 
-#### M8 — Paywall Pro Badge Entrance
-```
-Type:         Scale + bounce
-Effect:       Badge enters from scale 0 → 1.15 → 1.0
-Duration:     500ms, curveSpring
-Delay:        200ms after sheet appears (stagger effect)
-```
+#### M8 — Paywall viewfinder entrance
+
+Show the resting mascot and readable offer immediately. On entry, ease the viewfinder into place once over roughly 900 ms and move the kingfisher by a few points as the frame settles. Slide the camera-roll strip into alignment for playback, settle the lock frame for Privacy Vault, or bring the front memory frame into focus for On This Day. Keep the close button, plan selections, and prices usable throughout. A plan tap shifts the selected outline and radio state in about 150 ms with light selection haptics. Use the still composition and immediate selection changes with Reduce Motion.
 
 #### M9 — Splash Logo Entrance
 ```

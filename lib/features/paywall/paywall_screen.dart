@@ -1,299 +1,363 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/iap/iap_provider.dart';
+import '../../core/settings/settings_provider.dart';
 import '../../core/theme/colors.dart';
-import '../../core/theme/spacing.dart';
+import '../../core/theme/typography.dart';
 import '../../l10n/app_localizations.dart';
+import 'paywall_artwork.dart';
 
-const String kTermsOfUseUrl =
+export 'paywall_artwork.dart' show PaywallEntry;
+
+const _termsUrl =
     'https://www.apple.com/legal/internet-services/itunes/dev/stdeula/';
-const String kPrivacyPolicyUrl =
-    'https://najmulmyself.github.io/rollreel/privacy.html';
+const _privacyUrl = 'https://najmulmyself.github.io/rollreel/privacy.html';
 
-// ─── Feature data ─────────────────────────────────────────────────────────────
+enum _Plan {
+  lifetime(kProductLifetime),
+  monthly(kProductMonthly);
 
-enum _FeatureId { adFree, vault, speed, onThisDay }
+  const _Plan(this.productId);
 
-class _FeatureData {
-  const _FeatureData({
-    required this.icon,
-    required this.color,
-    required this.id,
-    this.solid = false,
-  });
-
-  final IconData icon;
-  final Color color;
-  final _FeatureId id;
-  // Ad-Free renders as a solid-fill tile (white icon); the rest are
-  // light-tinted tiles with a colored icon, matching the reference.
-  final bool solid;
+  final String productId;
 }
-
-const List<_FeatureData> _kFeatures = [
-  _FeatureData(
-    icon: Icons.visibility_off_rounded,
-    color: RRColors.iconGreen,
-    id: _FeatureId.adFree,
-    solid: true,
-  ),
-  _FeatureData(
-    icon: CupertinoIcons.lock_fill,
-    color: RRColors.accentViolet,
-    id: _FeatureId.vault,
-  ),
-  _FeatureData(
-    icon: CupertinoIcons.clock_fill,
-    color: RRColors.accentBlue,
-    id: _FeatureId.speed,
-  ),
-  _FeatureData(
-    icon: CupertinoIcons.calendar_today,
-    color: RRColors.accentPink,
-    id: _FeatureId.onThisDay,
-  ),
-];
-
-// ─── Plan enum ────────────────────────────────────────────────────────────────
-
-enum _Plan { lifetime, monthly }
-
-extension _PlanX on _Plan {
-  String get productId =>
-      this == _Plan.lifetime ? kProductLifetime : kProductMonthly;
-}
-
-// ─── Screen ───────────────────────────────────────────────────────────────────
 
 class PaywallScreen extends ConsumerStatefulWidget {
-  const PaywallScreen({super.key, required this.onClose});
+  const PaywallScreen({super.key, this.entry = PaywallEntry.playback});
 
-  final VoidCallback onClose;
+  final PaywallEntry entry;
 
   @override
   ConsumerState<PaywallScreen> createState() => _PaywallScreenState();
 }
 
 class _PaywallScreenState extends ConsumerState<PaywallScreen> {
+  final _messenger = GlobalKey<ScaffoldMessengerState>();
   _Plan _selected = _Plan.lifetime;
+  bool _restoring = false;
 
-  void _purchase() {
-    final iap = ref.read(iapProvider.notifier);
-    iap.purchase(_selected.productId);
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final store = ref.read(iapProvider);
+      if (!store.catalogLoading && store.products.isEmpty) {
+        ref.read(iapProvider.notifier).refreshCatalog();
+      }
+    });
   }
 
-  void _restore() {
-    ref.read(iapProvider.notifier).restore();
+  void _showMessage(String message) {
+    _messenger.currentState
+      ?..removeCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: RRColors.isDark.value
+              ? RRColors.bgElevated
+              : RRColors.brandInk,
+          content: Text(
+            message,
+            style: RRTypography.subheadline.copyWith(color: Colors.white),
+          ),
+        ),
+      );
   }
 
-  Future<void> _openUrl(String url) async {
-    final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
+  Future<void> _restore() async {
+    if (_restoring) return;
+    HapticFeedback.selectionClick();
+    setState(() => _restoring = true);
+    final completed = await ref.read(iapProvider.notifier).restore();
+    if (!mounted) return;
+    setState(() => _restoring = false);
+    final l10n = AppLocalizations.of(context)!;
+    if (!completed) {
+      _showMessage(l10n.settingsRestoreFailed);
+    } else if (!ref.read(isProProvider)) {
+      _showMessage(l10n.settingsRestoreComplete);
     }
+  }
+
+  Future<void> _openLegal(String url) async {
+    try {
+      if (await launchUrl(
+        Uri.parse(url),
+        mode: LaunchMode.externalApplication,
+      )) {
+        return;
+      }
+    } on PlatformException catch (error) {
+      debugPrint('Could not open paywall link: $error');
+    }
+    if (mounted)
+      _showMessage(AppLocalizations.of(context)!.paywallLinkUnavailable);
+  }
+
+  _Plan _effectiveSelection(IAPState store) {
+    if (store.products.containsKey(_selected.productId)) return _selected;
+    for (final plan in _Plan.values) {
+      if (store.products.containsKey(plan.productId)) return plan;
+    }
+    return _selected;
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final iap = ref.watch(iapProvider);
-    final isPro = ref.watch(isProProvider);
+    final store = ref.watch(iapProvider);
+    final active = ref.watch(isProProvider);
+    final dark = ref.watch(
+      settingsProvider.select((settings) => settings.darkMode),
+    );
+    final colors = _PaywallColors(dark);
+    final plan = _effectiveSelection(store);
+    final product = store.products[plan.productId];
 
-    // Show error once via SnackBar
-    ref.listen<IAPState>(iapProvider, (prev, next) {
-      if (next.error != null && next.error != prev?.error) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(next.error!),
-            backgroundColor: RRColors.accentCoral,
-          ),
-        );
+    ref.listen<IAPState>(iapProvider, (previous, next) {
+      if (!_restoring && next.error != null && next.error != previous?.error) {
+        _showMessage(l10n.purchaseFailed);
+      }
+    });
+    ref.listen<bool>(isProProvider, (previous, next) {
+      if (previous == false && next && store.loading) {
+        HapticFeedback.mediumImpact();
       }
     });
 
-    return Scaffold(
-      backgroundColor: RRColors.bgTint,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.only(bottom: 48),
-        child: Column(
-          children: [
-            _buildHeader(context, isPro),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                  RRSpace.sp16, RRSpace.sp8, RRSpace.sp16, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // ── Feature list ─────────────────────────────────────────
-                  Container(
-                    decoration: BoxDecoration(
-                      color: RRColors.bgElevated,
-                      borderRadius: BorderRadius.circular(RRSpace.radiusLg),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.04),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: RRSpace.sp16),
-                    child: Column(
-                      children: [
-                        for (var i = 0; i < _kFeatures.length; i++) ...[
-                          _FeatureRow(data: _kFeatures[i]),
-                          if (i < _kFeatures.length - 1)
-                            Divider(height: 1, color: RRColors.divider),
-                        ],
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: RRSpace.sp20),
+    final String action;
+    final String? billing;
+    if (active) {
+      action = l10n.continueLabel;
+      billing = null;
+    } else if (store.catalogLoading) {
+      action = l10n.paywallLoadingPrices;
+      billing = null;
+    } else if (product == null) {
+      action = l10n.paywallPricesUnavailable;
+      billing = null;
+    } else if (plan == _Plan.lifetime) {
+      action = l10n.paywallGetLifetime;
+      billing = l10n.paywallLifetimeBilling(product.price);
+    } else {
+      action = l10n.paywallSubscribeMonthly;
+      billing = l10n.paywallMonthlyBilling(product.price);
+    }
 
-                  // ── Pricing cards ────────────────────────────────────────
-                  IntrinsicHeight(
-                    child: Row(
+    final checkout = _Checkout(
+      colors: colors,
+      action: action,
+      billing: billing,
+      busy: store.loading || _restoring,
+      restoring: _restoring,
+      onContinue: active
+          ? () => Navigator.of(context).pop(true)
+          : (store.loading ||
+                _restoring ||
+                store.catalogLoading ||
+                product == null)
+          ? null
+          : () {
+              HapticFeedback.selectionClick();
+              ref.read(iapProvider.notifier).purchase(plan.productId);
+            },
+      onRestore: store.loading || _restoring ? null : _restore,
+      onTerms: () => _openLegal(_termsUrl),
+      onPrivacy: () => _openLegal(_privacyUrl),
+    );
+
+    final content = active
+        ? _ActiveNotice(colors: colors)
+        : Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              PaywallArtwork(entry: widget.entry, dark: dark),
+              const SizedBox(height: 12),
+              _Benefits(entry: widget.entry, colors: colors),
+            ],
+          );
+    final plans = active
+        ? null
+        : Padding(
+            padding: EdgeInsets.only(
+              top: widget.entry == PaywallEntry.vault ? 12 : 18,
+            ),
+            child: _PlanSelector(
+              colors: colors,
+              entry: widget.entry,
+              store: store,
+              selected: plan,
+              restoring: _restoring,
+              onSelect: (next) {
+                if (next == plan) return;
+                HapticFeedback.selectionClick();
+                setState(() => _selected = next);
+              },
+              onRetry: ref.read(iapProvider.notifier).refreshCatalog,
+            ),
+          );
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: (dark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark)
+          .copyWith(statusBarColor: Colors.transparent),
+      child: ScaffoldMessenger(
+        key: _messenger,
+        child: Scaffold(
+          backgroundColor: colors.background,
+          body: SafeArea(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 480),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final scrollCheckout =
+                        constraints.maxHeight < 565 ||
+                        MediaQuery.textScalerOf(context).scale(16) > 22;
+                    return Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Expanded(
-                          child: _PricingCard(
-                            plan: _Plan.lifetime,
-                            selected: _selected == _Plan.lifetime,
-                            price: iap.products[kProductLifetime]?.price,
-                            onTap: () =>
-                                setState(() => _selected = _Plan.lifetime),
-                          ),
+                        _TopBar(
+                          colors: colors,
+                          onClose: () => Navigator.of(context).pop(),
                         ),
-                        const SizedBox(width: RRSpace.sp12),
                         Expanded(
-                          child: _PricingCard(
-                            plan: _Plan.monthly,
-                            selected: _selected == _Plan.monthly,
-                            price: iap.products[kProductMonthly]?.price,
-                            onTap: () =>
-                                setState(() => _selected = _Plan.monthly),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: RRSpace.sp20),
-
-                  // ── CTA button ───────────────────────────────────────────
-                  GestureDetector(
-                    onTap: (iap.loading || isPro) ? null : _purchase,
-                    child: Container(
-                      height: RRSpace.buttonHeight,
-                      decoration: BoxDecoration(
-                        gradient: RRColors.gradVioletPink,
-                        borderRadius:
-                            BorderRadius.circular(RRSpace.radiusFull),
-                        boxShadow: [
-                          BoxShadow(
-                            color: RRColors.accentViolet.withValues(alpha: 0.35),
-                            blurRadius: 20,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
-                      ),
-                      alignment: Alignment.center,
-                      child: iap.loading
-                          ? const CupertinoActivityIndicator(
-                              color: Colors.white)
-                          : Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(
-                                  Icons.workspace_premium_rounded,
-                                  color: Colors.white,
-                                  size: 18,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  isPro
-                                      ? l10n.youArePro
-                                      : l10n.unlockProForever,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.w700,
+                          child: LayoutBuilder(
+                            builder: (context, viewport) =>
+                                SingleChildScrollView(
+                                  child: ConstrainedBox(
+                                    constraints: BoxConstraints(
+                                      minHeight: viewport.maxHeight,
+                                    ),
+                                    child: Column(
+                                      mainAxisAlignment:
+                                          active && !scrollCheckout
+                                          ? MainAxisAlignment.center
+                                          : MainAxisAlignment.spaceBetween,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        Padding(
+                                          padding: const EdgeInsets.fromLTRB(
+                                            20,
+                                            4,
+                                            20,
+                                            16,
+                                          ),
+                                          child: content,
+                                        ),
+                                        if (plans != null || scrollCheckout)
+                                          Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.stretch,
+                                            children: [
+                                              if (plans != null)
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.fromLTRB(
+                                                        20,
+                                                        0,
+                                                        20,
+                                                        16,
+                                                      ),
+                                                  child: plans,
+                                                ),
+                                              if (scrollCheckout) checkout,
+                                            ],
+                                          ),
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ],
-                            ),
-                    ),
-                  ),
-                  const SizedBox(height: RRSpace.sp16),
-
-                  // ── Footer ───────────────────────────────────────────────
-                  _FooterBadges(text: l10n.lifetimeFooter),
-                  const SizedBox(height: RRSpace.sp16),
-                  GestureDetector(
-                    onTap: iap.loading ? null : _restore,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(CupertinoIcons.arrow_counterclockwise,
-                            color: RRColors.accentViolet, size: 15),
-                        const SizedBox(width: 6),
-                        Text(
-                          l10n.restorePurchases,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: RRColors.accentViolet,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
                           ),
                         ),
+                        if (!scrollCheckout) checkout,
                       ],
-                    ),
-                  ),
-                  const SizedBox(height: RRSpace.sp12),
-                  Text(
-                    l10n.oneTimeDisclaimer,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: RRColors.textDisabled,
-                      fontSize: 12,
-                      height: 1.5,
-                    ),
-                  ),
-                  const SizedBox(height: RRSpace.sp12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      GestureDetector(
-                        onTap: () => _openUrl(kTermsOfUseUrl),
-                        child: Text(
-                          l10n.termsOfUse,
-                          style: TextStyle(
-                            color: RRColors.textSecond,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: RRSpace.sp16),
-                      GestureDetector(
-                        onTap: () => _openUrl(kPrivacyPolicyUrl),
-                        child: Text(
-                          l10n.privacyPolicy,
-                          style: TextStyle(
-                            color: RRColors.textSecond,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            decoration: TextDecoration.underline,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                    );
+                  },
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PaywallColors {
+  const _PaywallColors(this.dark);
+
+  final bool dark;
+  Color get background => dark ? RRColors.bgDeep : const Color(0xFFF5FAFF);
+  Color get panel => dark ? RRColors.bgSurface : Colors.white;
+  Color get ink => dark ? RRColors.textPrimary : RRColors.brandInk;
+  Color get muted => dark ? RRColors.textSecond : RRColors.brandMutedInk;
+  Color get line => dark ? const Color(0xFF262635) : const Color(0xFFD9E6EE);
+  Color get selected =>
+      dark ? const Color(0xFF14283B) : const Color(0xFFE9F6FF);
+  Color get iconTile =>
+      dark ? const Color(0xFF182635) : const Color(0xFFE9F4FC);
+  Color get accent => dark ? const Color(0xFFA7DEFF) : RRColors.brandBlue;
+  Color get onAccent => dark ? RRColors.brandInk : Colors.white;
+}
+
+class _TopBar extends StatelessWidget {
+  const _TopBar({required this.colors, required this.onClose});
+
+  final _PaywallColors colors;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 52),
+      child: Padding(
+        padding: const EdgeInsetsDirectional.only(start: 20, end: 14),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(7),
+              child: Image.asset(
+                'assets/icons/icon.png',
+                width: 25,
+                height: 25,
+                cacheWidth: 75,
+                excludeFromSemantics: true,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                l10n.paywallTitle,
+                style: RRTypography.headline.copyWith(
+                  color: colors.ink,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+            IconButton(
+              tooltip: l10n.libraryClose,
+              onPressed: onClose,
+              color: colors.muted,
+              icon: Container(
+                width: 30,
+                height: 30,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: colors.panel,
+                  border: Border.all(color: colors.line),
+                ),
+                child: const Center(
+                  child: Icon(CupertinoIcons.xmark, size: 13),
+                ),
               ),
             ),
           ],
@@ -301,446 +365,514 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
       ),
     );
   }
+}
 
-  static const TextStyle _titleBaseStyle = TextStyle(
-    fontSize: 38,
-    fontWeight: FontWeight.w800,
-    letterSpacing: -0.5,
-  );
+class _Benefits extends StatelessWidget {
+  const _Benefits({required this.entry, required this.colors});
 
-  // Colors the last word (typically "Pro") violet; falls back to a solid
-  // title when the string has no separate last word to split.
-  List<TextSpan> _titleSpans(String title) {
-    final lastSpace = title.lastIndexOf(' ');
-    if (lastSpace < 0) {
-      return [
-        TextSpan(
-            text: title,
-            style: _titleBaseStyle.copyWith(color: RRColors.textPrimary)),
-      ];
-    }
-    return [
-      TextSpan(
-        text: '${title.substring(0, lastSpace)} ',
-        style: _titleBaseStyle.copyWith(color: RRColors.textPrimary),
-      ),
-      TextSpan(
-        text: title.substring(lastSpace + 1),
-        style: _titleBaseStyle.copyWith(color: RRColors.accentViolet),
-      ),
-    ];
-  }
+  final PaywallEntry entry;
+  final _PaywallColors colors;
 
-  // ── Header (badge + title + hero image) ──────────────────────────────────
-
-  Widget _buildHeader(BuildContext context, bool isPro) {
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final topPad = MediaQuery.of(context).padding.top;
-    return Container(
-      width: double.infinity,
-      padding:
-          EdgeInsets.fromLTRB(RRSpace.sp16, topPad + 12, RRSpace.sp16, 0),
-      child: Column(
-        children: [
-          // PRO/ACTIVE badge + close button
-          Row(
-            children: [
-              const Expanded(child: SizedBox.shrink()),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: RRSpace.sp16, vertical: RRSpace.sp8),
-                decoration: BoxDecoration(
-                  color: RRColors.bgElevated,
-                  borderRadius: BorderRadius.circular(RRSpace.radiusFull),
-                  border: Border.all(
-                      color: RRColors.accentViolet.withValues(alpha: 0.3)),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.workspace_premium_rounded,
-                        color: Color(0xFFFFB347), size: 15),
-                    const SizedBox(width: 6),
-                    Text(
-                      isPro ? l10n.active : l10n.pro,
-                      style: const TextStyle(
-                        color: RRColors.accentViolet,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 0.8,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: GestureDetector(
-                    onTap: widget.onClose,
-                    child: Container(
-                      width: 34,
-                      height: 34,
-                      decoration: BoxDecoration(
-                        color: RRColors.bgElevated,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                            color: Colors.black.withValues(alpha: 0.08)),
-                      ),
-                      alignment: Alignment.center,
-                      child: Icon(
-                        CupertinoIcons.xmark,
-                        color: RRColors.textPrimary,
-                        size: 15,
+    final playback = (
+      CupertinoIcons.eye_slash,
+      l10n.paywallAdFree,
+      l10n.paywallAdFreeBody,
+    );
+    final vault = (
+      CupertinoIcons.lock_shield,
+      l10n.privacyVault,
+      l10n.paywallVaultBenefit,
+    );
+    final speed = (
+      CupertinoIcons.gauge,
+      l10n.paywallSpeed,
+      l10n.paywallSpeedBenefit,
+    );
+    final memories = (
+      CupertinoIcons.calendar,
+      l10n.onThisDay,
+      l10n.paywallMemoriesBenefit,
+    );
+    final benefits = switch (entry) {
+      PaywallEntry.playback => [playback, vault, speed, memories],
+      PaywallEntry.vault => [vault, playback, speed, memories],
+      PaywallEntry.memories => [memories, playback, vault, speed],
+      PaywallEntry.speed => [speed, playback, vault, memories],
+    };
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final grid =
+            entry == PaywallEntry.vault &&
+            constraints.maxWidth >= 305 &&
+            MediaQuery.textScalerOf(context).scale(16) <= 20;
+        return Wrap(
+          spacing: 12,
+          children: [
+            for (final (icon, title, body) in benefits)
+              SizedBox(
+                width: grid
+                    ? (constraints.maxWidth - 12) / 2
+                    : constraints.maxWidth,
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    border: Border(bottom: BorderSide(color: colors.line)),
+                  ),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: grid ? 72 : 46),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: grid ? 12 : 5),
+                      child: Row(
+                        crossAxisAlignment: grid
+                            ? CrossAxisAlignment.start
+                            : CrossAxisAlignment.center,
+                        children: [
+                          Container(
+                            width: 30,
+                            height: 30,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              color: colors.iconTile,
+                            ),
+                            child: Icon(icon, color: colors.accent, size: 15),
+                          ),
+                          const SizedBox(width: 9),
+                          Expanded(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  title,
+                                  style: RRTypography.headline.copyWith(
+                                    color: colors.ink,
+                                    fontSize: 13.5,
+                                  ),
+                                ),
+                                Text(
+                                  body,
+                                  style: RRTypography.caption.copyWith(
+                                    color: colors.muted,
+                                    height: 1.24,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 ),
               ),
-            ],
-          ),
-          const SizedBox(height: RRSpace.sp20),
-          RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(children: _titleSpans(l10n.paywallTitle)),
-          ),
-          const SizedBox(height: RRSpace.sp8),
-          Text(
-            l10n.paywallTagline,
-            style: TextStyle(
-              color: RRColors.textSecond,
-              fontSize: 16,
-              fontWeight: FontWeight.w400,
-            ),
-          ),
-          Image.asset(
-            'assets/images/paywall_hero_light.png',
-            width: double.infinity,
-            height: 230,
-            fit: BoxFit.contain,
-          ),
-        ],
-      ),
+          ],
+        );
+      },
     );
   }
 }
 
-// ─── Footer badges (icon + label per "·"-separated segment, "|" between) ─────
+class _PlanSelector extends StatelessWidget {
+  const _PlanSelector({
+    required this.colors,
+    required this.entry,
+    required this.store,
+    required this.selected,
+    required this.restoring,
+    required this.onSelect,
+    required this.onRetry,
+  });
 
-class _FooterBadges extends StatelessWidget {
-  const _FooterBadges({required this.text});
-
-  final String text;
-
-  static const _icons = [
-    CupertinoIcons.checkmark_shield_fill,
-    CupertinoIcons.star_fill,
-    CupertinoIcons.arrow_2_circlepath,
-  ];
+  final _PaywallColors colors;
+  final PaywallEntry entry;
+  final IAPState store;
+  final _Plan selected;
+  final bool restoring;
+  final ValueChanged<_Plan> onSelect;
+  final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
-    final segments = text.split(' · ');
-    return Wrap(
-      alignment: WrapAlignment.center,
-      crossAxisAlignment: WrapCrossAlignment.center,
+    final l10n = AppLocalizations.of(context)!;
+    final showRetry =
+        !store.catalogLoading && store.products.length < _Plan.values.length;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        for (var i = 0; i < segments.length; i++) ...[
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(_icons[i % _icons.length],
-                  color: RRColors.accentViolet, size: 13),
-              const SizedBox(width: 5),
-              Text(
-                segments[i],
-                style: TextStyle(color: RRColors.textSecond, fontSize: 13),
+        Row(
+          children: [
+            Expanded(
+              child: Semantics(
+                header: true,
+                child: Text(
+                  l10n.paywallChoosePlan,
+                  style: RRTypography.headline.copyWith(
+                    color: colors.ink,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
-            ],
-          ),
-          if (i < segments.length - 1)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: RRSpace.sp12),
-              child: Text('|',
-                  style: TextStyle(color: RRColors.divider, fontSize: 13)),
             ),
-        ],
+            if (showRetry)
+              TextButton(
+                onPressed: store.loading || restoring ? null : onRetry,
+                style: TextButton.styleFrom(foregroundColor: colors.accent),
+                child: Text(l10n.retry),
+              ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final stacked =
+                entry == PaywallEntry.vault ||
+                constraints.maxWidth < 305 ||
+                MediaQuery.textScalerOf(context).scale(16) > 19;
+            return Wrap(
+              spacing: 8,
+              runSpacing: 7,
+              children: [
+                for (final plan in _Plan.values)
+                  SizedBox(
+                    width: stacked
+                        ? constraints.maxWidth
+                        : (constraints.maxWidth - 8) / 2,
+                    child: _PlanCard(
+                      plan: plan,
+                      product: store.products[plan.productId],
+                      catalogLoading: store.catalogLoading,
+                      enabled:
+                          !store.loading && !restoring && !store.catalogLoading,
+                      selected:
+                          selected == plan &&
+                          store.products.containsKey(plan.productId),
+                      stacked: stacked,
+                      colors: colors,
+                      onTap: () => onSelect(plan),
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
       ],
     );
   }
 }
 
-// ─── Feature row ──────────────────────────────────────────────────────────────
+class _PlanCard extends StatelessWidget {
+  const _PlanCard({
+    required this.plan,
+    required this.product,
+    required this.catalogLoading,
+    required this.enabled,
+    required this.selected,
+    required this.stacked,
+    required this.colors,
+    required this.onTap,
+  });
 
-class _FeatureRow extends StatelessWidget {
-  const _FeatureRow({required this.data});
-
-  final _FeatureData data;
-
-  static String _title(AppLocalizations l10n, _FeatureId id) {
-    switch (id) {
-      case _FeatureId.adFree:
-        return l10n.featureAdFree;
-      case _FeatureId.vault:
-        return l10n.featureVault;
-      case _FeatureId.speed:
-        return l10n.featureSpeed;
-      case _FeatureId.onThisDay:
-        return l10n.featureOnThisDay;
-    }
-  }
-
-  static String _subtitle(AppLocalizations l10n, _FeatureId id) {
-    switch (id) {
-      case _FeatureId.adFree:
-        return l10n.featureAdFreeSub;
-      case _FeatureId.vault:
-        return l10n.featureVaultSub;
-      case _FeatureId.speed:
-        return l10n.featureSpeedSub;
-      case _FeatureId.onThisDay:
-        return l10n.featureOnThisDaySub;
-    }
-  }
+  final _Plan plan;
+  final ProductDetails? product;
+  final bool catalogLoading;
+  final bool enabled;
+  final bool selected;
+  final bool stacked;
+  final _PaywallColors colors;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: RRSpace.sp12),
-      child: Row(
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color:
-                  data.solid ? data.color : data.color.withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(12),
+    final lifetime = plan == _Plan.lifetime;
+    final price = product?.price;
+    final name = Text(
+      lifetime ? l10n.paywallLifetime : l10n.paywallMonthly,
+      style: RRTypography.headline.copyWith(color: colors.ink, fontSize: 14),
+    );
+    final interval = Text(
+      lifetime ? l10n.onePaymentLabel : l10n.paywallRenewsMonthly,
+      style: RRTypography.caption.copyWith(color: colors.muted),
+    );
+    final priceLabel = _priceLabel(l10n, price, lifetime);
+    final indicator = Container(
+      width: 15,
+      height: 15,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: selected ? colors.accent : colors.muted,
+          width: selected ? 4 : 1,
+        ),
+      ),
+    );
+    final actionable = enabled && product != null;
+    return Semantics(
+      checked: selected,
+      inMutuallyExclusiveGroup: true,
+      enabled: actionable,
+      child: AnimatedContainer(
+        duration: MediaQuery.disableAnimationsOf(context)
+            ? Duration.zero
+            : const Duration(milliseconds: 150),
+        decoration: BoxDecoration(
+          color: selected ? colors.selected : colors.panel,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: selected ? colors.accent : colors.line),
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: actionable ? onTap : null,
+            child: Container(
+              constraints: BoxConstraints(minHeight: stacked ? 54 : 90),
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+              child: stacked
+                  ? LayoutBuilder(
+                      builder: (context, constraints) => Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                name,
+                                const SizedBox(height: 2),
+                                interval,
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 7),
+                          ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxWidth: constraints.maxWidth * .44,
+                            ),
+                            child: priceLabel,
+                          ),
+                          const SizedBox(width: 8),
+                          indicator,
+                        ],
+                      ),
+                    )
+                  : Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(child: name),
+                            indicator,
+                          ],
+                        ),
+                        const SizedBox(height: 3),
+                        priceLabel,
+                        const SizedBox(height: 3),
+                        interval,
+                      ],
+                    ),
             ),
-            alignment: Alignment.center,
-            child: Icon(data.icon,
-                color: data.solid ? Colors.white : data.color, size: 20),
           ),
-          const SizedBox(width: RRSpace.sp16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+        ),
+      ),
+    );
+  }
+
+  Widget _priceLabel(AppLocalizations l10n, String? price, bool lifetime) {
+    final alignment = stacked ? TextAlign.end : TextAlign.start;
+    if (catalogLoading || price == null) {
+      return Text(
+        catalogLoading ? l10n.homeLoading : l10n.homeUnavailable,
+        textAlign: alignment,
+        style: RRTypography.caption.copyWith(color: colors.muted, fontSize: 13),
+      );
+    }
+    final amount = TextSpan(
+      text: price,
+      style: RRTypography.headline.copyWith(
+        fontSize: stacked ? 18 : 21,
+        color: colors.ink,
+        fontWeight: FontWeight.w700,
+      ),
+    );
+    if (lifetime) return Text.rich(amount, textAlign: alignment);
+
+    final monthly = l10n.paywallMonthlyPrice(price);
+    final start = monthly.indexOf(price);
+    return Text.rich(
+      TextSpan(
+        style: RRTypography.caption.copyWith(color: colors.muted),
+        children: [
+          TextSpan(text: monthly.substring(0, start)),
+          amount,
+          TextSpan(text: monthly.substring(start + price.length)),
+        ],
+      ),
+      textAlign: alignment,
+    );
+  }
+}
+
+class _Checkout extends StatelessWidget {
+  const _Checkout({
+    required this.colors,
+    required this.action,
+    required this.billing,
+    required this.busy,
+    required this.restoring,
+    required this.onContinue,
+    required this.onRestore,
+    required this.onTerms,
+    required this.onPrivacy,
+  });
+
+  final _PaywallColors colors;
+  final String action;
+  final String? billing;
+  final bool busy;
+  final bool restoring;
+  final VoidCallback? onContinue;
+  final VoidCallback? onRestore;
+  final VoidCallback onTerms;
+  final VoidCallback onPrivacy;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final enabled = onContinue != null && !busy;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: colors.background,
+        border: Border(top: BorderSide(color: colors.line)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 10, 20, 1),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            FilledButton(
+              onPressed: enabled ? onContinue : null,
+              style: FilledButton.styleFrom(
+                visualDensity: VisualDensity.standard,
+                backgroundColor: colors.accent,
+                foregroundColor: colors.onAccent,
+                disabledBackgroundColor: colors.accent.withValues(alpha: .24),
+                disabledForegroundColor: colors.ink,
+                minimumSize: const Size.fromHeight(48),
+                padding: const EdgeInsets.all(10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(11),
+                ),
+                textStyle: RRTypography.headline.copyWith(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Flexible(
+                    child: Text(
+                      busy ? l10n.homeLoading : action,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  if (busy) ...[
+                    const SizedBox(width: 8),
+                    CupertinoActivityIndicator(color: colors.ink, radius: 8),
+                  ] else if (enabled) ...[
+                    const SizedBox(width: 7),
+                    const Icon(CupertinoIcons.arrow_right, size: 14),
+                  ],
+                ],
+              ),
+            ),
+            if (billing case final text?)
+              Padding(
+                padding: const EdgeInsets.only(top: 7, bottom: 3),
+                child: Semantics(
+                  liveRegion: true,
+                  child: Text(
+                    text,
+                    textAlign: TextAlign.center,
+                    style: RRTypography.caption.copyWith(
+                      color: colors.muted,
+                      height: 1.3,
+                    ),
+                  ),
+                ),
+              ),
+            Wrap(
+              alignment: WrapAlignment.center,
               children: [
-                Text(
-                  _title(l10n, data.id),
-                  style: TextStyle(
-                    color: RRColors.textPrimary,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
+                for (final (label, callback) in [
+                  (
+                    restoring ? l10n.homeLoading : l10n.restorePurchases,
+                    onRestore,
                   ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  _subtitle(l10n, data.id),
-                  style: TextStyle(
-                    color: RRColors.textSecond,
-                    fontSize: 13,
+                  (l10n.termsOfUse, onTerms),
+                  (l10n.privacyPolicy, onPrivacy),
+                ])
+                  TextButton(
+                    onPressed: callback,
+                    style: TextButton.styleFrom(
+                      foregroundColor: colors.accent,
+                      minimumSize: const Size(44, 44),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 4,
+                      ),
+                      textStyle: RRTypography.caption.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    child: Text(label),
                   ),
-                ),
               ],
             ),
-          ),
-          const SizedBox(width: RRSpace.sp12),
-          Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              color: RRColors.accentViolet.withValues(alpha: 0.14),
-              shape: BoxShape.circle,
-            ),
-            alignment: Alignment.center,
-            child: const Icon(CupertinoIcons.check_mark,
-                color: RRColors.accentViolet, size: 15),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 }
 
-// ─── Pricing card ─────────────────────────────────────────────────────────────
+class _ActiveNotice extends StatelessWidget {
+  const _ActiveNotice({required this.colors});
 
-class _PricingCard extends StatelessWidget {
-  const _PricingCard({
-    required this.plan,
-    required this.selected,
-    required this.onTap,
-    this.price,
-  });
-
-  final _Plan plan;
-  final bool selected;
-  final VoidCallback onTap;
-  final String? price;
-
-  bool get _isLifetime => plan == _Plan.lifetime;
-
-  String get _displayPrice {
-    if (price != null) return price!;
-    return _isLifetime ? '\$4.99' : '\$0.99';
-  }
-
-  List<String> _bullets(AppLocalizations l10n) {
-    return _isLifetime
-        ? [l10n.bulletLifetimeAccess, l10n.bulletAllProFeatures, l10n.bulletFutureUpdates]
-        : [l10n.bulletAllProFeatures, l10n.bulletFutureUpdates];
-  }
+  final _PaywallColors colors;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final accent = _isLifetime ? RRColors.accentViolet : RRColors.accentBlue;
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: double.infinity,
-        padding: const EdgeInsets.fromLTRB(
-            RRSpace.sp16, RRSpace.sp12, RRSpace.sp16, RRSpace.sp16),
-        decoration: BoxDecoration(
-          color: RRColors.bgElevated,
-          borderRadius: BorderRadius.circular(RRSpace.radiusLg),
-          border: Border.all(
-              color: selected ? accent : Colors.transparent, width: 2),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 44),
+      child: Column(
+        children: [
+          Image.asset(
+            'assets/images/home_kingfisher.webp',
+            width: 104,
+            height: 156,
+            excludeFromSemantics: true,
+          ),
+          const SizedBox(height: 12),
+          Semantics(
+            header: true,
+            child: Text(
+              l10n.settingsProActive,
+              textAlign: TextAlign.center,
+              style: RRTypography.title1.copyWith(color: colors.ink),
             ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                if (_isLifetime)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 3),
-                    decoration: BoxDecoration(
-                      color: RRColors.accentViolet,
-                      borderRadius: BorderRadius.circular(RRSpace.radiusFull),
-                    ),
-                    child: Text(
-                      l10n.bestValue,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  )
-                else
-                  const SizedBox.shrink(),
-                if (selected)
-                  Container(
-                    width: 22,
-                    height: 22,
-                    decoration: BoxDecoration(
-                      color: accent,
-                      shape: BoxShape.circle,
-                    ),
-                    alignment: Alignment.center,
-                    child: const Icon(CupertinoIcons.check_mark,
-                        color: Colors.white, size: 13),
-                  ),
-              ],
-            ),
-            const SizedBox(height: RRSpace.sp8),
-            Center(
-              child: Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: accent.withValues(alpha: 0.14),
-                  shape: BoxShape.circle,
-                ),
-                alignment: Alignment.center,
-                child: Icon(
-                  _isLifetime
-                      ? CupertinoIcons.money_dollar_circle_fill
-                      : CupertinoIcons.star_fill,
-                  color: accent,
-                  size: 20,
-                ),
-              ),
-            ),
-            const SizedBox(height: RRSpace.sp8),
-            Center(
-              child: Text(
-                _isLifetime ? 'RollReel Pro' : 'RollReel Plus',
-                style: TextStyle(
-                  color: RRColors.textPrimary,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-            const SizedBox(height: 4),
-            Center(
-              child: Text(
-                _displayPrice,
-                maxLines: 1,
-                style: TextStyle(
-                  color: accent,
-                  fontSize: 26,
-                  fontWeight: FontWeight.w800,
-                ),
-              ),
-            ),
-            const SizedBox(height: 2),
-            Center(
-              child: Text(
-                l10n.onePaymentLabel,
-                style: TextStyle(
-                  color: RRColors.textSecond,
-                  fontSize: 13,
-                ),
-              ),
-            ),
-            const SizedBox(height: RRSpace.sp12),
-            Divider(height: 1, color: RRColors.divider),
-            const SizedBox(height: RRSpace.sp8),
-            for (final bullet in _bullets(l10n))
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 3),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 16,
-                      height: 16,
-                      decoration: BoxDecoration(
-                        color: accent,
-                        shape: BoxShape.circle,
-                      ),
-                      alignment: Alignment.center,
-                      child: const Icon(CupertinoIcons.check_mark,
-                          color: Colors.white, size: 10),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        bullet,
-                        style: TextStyle(
-                          color: RRColors.textPrimary,
-                          fontSize: 13,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            l10n.bulletAllProFeatures,
+            textAlign: TextAlign.center,
+            style: RRTypography.body.copyWith(color: colors.muted),
+          ),
+        ],
       ),
     );
   }

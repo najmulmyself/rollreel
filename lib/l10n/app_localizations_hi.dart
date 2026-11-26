@@ -762,6 +762,87 @@ class AppLocalizationsHi extends AppLocalizations {
   String get paywallTitle => 'RollReel Pro';
 
   @override
+  String get paywallPlaybackTitle => 'देखते रहें।';
+
+  @override
+  String get paywallPlaybackBody => 'आपके वीडियो, बिना विज्ञापन के।';
+
+  @override
+  String get paywallVaultTitle => 'बस आपके लिए।';
+
+  @override
+  String get paywallVaultBody => 'आपके निजी वीडियो के लिए एक सुरक्षित जगह।';
+
+  @override
+  String get paywallMemoriesTitle => 'इस दिन को फिर जीएँ।';
+
+  @override
+  String get paywallMemoriesBody => 'पिछले सालों में इसी दिन के वीडियो ढूँढें।';
+
+  @override
+  String get paywallSpeedTitle => 'अपनी रफ़्तार से देखें।';
+
+  @override
+  String get paywallAdFree => 'बिना विज्ञापन के प्लेबैक';
+
+  @override
+  String get paywallAdFreeBody => 'क्लिप बिना विज्ञापन के फिर देखें';
+
+  @override
+  String get paywallVaultBenefit => 'अपनी चुनी हुई क्लिप लॉक करें';
+
+  @override
+  String get paywallSpeed => '2× पर चलाने के लिए दबाए रखें';
+
+  @override
+  String get paywallSpeedBenefit => 'तेज़ी से आगे बढ़ने के लिए दबाए रखें';
+
+  @override
+  String get paywallMemoriesBenefit => 'पिछले सालों की क्लिप फिर देखें';
+
+  @override
+  String get paywallChoosePlan => 'प्लान चुनें';
+
+  @override
+  String get paywallLifetime => 'आजीवन';
+
+  @override
+  String get paywallMonthly => 'मासिक';
+
+  @override
+  String get paywallRenewsMonthly => 'हर महीने अपने आप रिन्यू होता है';
+
+  @override
+  String get paywallGetLifetime => 'आजीवन ऐक्सेस लें';
+
+  @override
+  String get paywallSubscribeMonthly => 'मासिक सदस्यता लें';
+
+  @override
+  String paywallMonthlyPrice(String price) {
+    return '$price/माह';
+  }
+
+  @override
+  String paywallLifetimeBilling(String price) {
+    return 'एक बार $price का भुगतान। कोई सदस्यता नहीं।';
+  }
+
+  @override
+  String paywallMonthlyBilling(String price) {
+    return '$price/माह। हर महीने अपने आप रिन्यू होता है। App Store की सेटिंग में रद्द करें।';
+  }
+
+  @override
+  String get paywallLoadingPrices => 'कीमतें लोड हो रही हैं…';
+
+  @override
+  String get paywallPricesUnavailable => 'प्लान उपलब्ध नहीं हैं';
+
+  @override
+  String get paywallLinkUnavailable => 'लिंक नहीं खुल सका। फिर से कोशिश करें।';
+
+  @override
   String get paywallTagline => 'ज़्यादा देखें। बेफ़िक्र रहें।';
 
   @override

@@ -263,9 +263,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 icon: CupertinoIcons.lock_shield,
                                 label: l10n.privacyVault,
                                 description: l10n.settingsVaultDescription,
-                                onTap: isPro
-                                    ? widget.onOpenVault
-                                    : widget.onOpenPaywall,
+                                onTap: widget.onOpenVault,
                               ),
                             ],
                           ),

@@ -32,7 +32,7 @@ class FeedScreen extends ConsumerStatefulWidget {
   });
 
   final VoidCallback? onOpenBrowse;
-  final VoidCallback? onOpenPaywall;
+  final Future<void> Function()? onOpenPaywall;
   final String? initialAssetId;
   final void Function(String assetId)? onVideoChanged;
   final bool isTabActive;

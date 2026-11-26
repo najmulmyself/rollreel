@@ -763,6 +763,89 @@ class AppLocalizationsTr extends AppLocalizations {
   String get paywallTitle => 'RollReel Pro';
 
   @override
+  String get paywallPlaybackTitle => 'İzlemeye devam et.';
+
+  @override
+  String get paywallPlaybackBody => 'Videolarını reklam arası olmadan izle.';
+
+  @override
+  String get paywallVaultTitle => 'Sadece sana özel.';
+
+  @override
+  String get paywallVaultBody => 'Özel videoların için kilitli bir alan.';
+
+  @override
+  String get paywallMemoriesTitle => 'Bugünü yeniden yaşa.';
+
+  @override
+  String get paywallMemoriesBody =>
+      'Geçmiş yıllarda bugün çektiğin videoları bul.';
+
+  @override
+  String get paywallSpeedTitle => 'Kendi hızında izle.';
+
+  @override
+  String get paywallAdFree => 'Reklamsız oynatma';
+
+  @override
+  String get paywallAdFreeBody => 'Klipleri reklam arası olmadan tekrar izle';
+
+  @override
+  String get paywallVaultBenefit => 'Seçtiğin klipleri kilitle';
+
+  @override
+  String get paywallSpeed => '2× hız için basılı tut';
+
+  @override
+  String get paywallSpeedBenefit => 'İleri sarmak için basılı tut';
+
+  @override
+  String get paywallMemoriesBenefit =>
+      'Geçmiş yıllardan klipleri yeniden keşfet';
+
+  @override
+  String get paywallChoosePlan => 'Bir plan seç';
+
+  @override
+  String get paywallLifetime => 'Ömür boyu';
+
+  @override
+  String get paywallMonthly => 'Aylık';
+
+  @override
+  String get paywallRenewsMonthly => 'Her ay otomatik yenilenir';
+
+  @override
+  String get paywallGetLifetime => 'Ömür boyu erişim al';
+
+  @override
+  String get paywallSubscribeMonthly => 'Aylık abone ol';
+
+  @override
+  String paywallMonthlyPrice(String price) {
+    return '$price/ay';
+  }
+
+  @override
+  String paywallLifetimeBilling(String price) {
+    return 'Tek seferlik $price ödemesi. Abonelik yok.';
+  }
+
+  @override
+  String paywallMonthlyBilling(String price) {
+    return '$price/ay. Her ay otomatik yenilenir. App Store ayarlarından iptal edebilirsin.';
+  }
+
+  @override
+  String get paywallLoadingPrices => 'Fiyatlar yükleniyor…';
+
+  @override
+  String get paywallPricesUnavailable => 'Planlar kullanılamıyor';
+
+  @override
+  String get paywallLinkUnavailable => 'Bağlantı açılamadı. Tekrar dene.';
+
+  @override
   String get paywallTagline => 'Daha fazla izle. Dert etme.';
 
   @override

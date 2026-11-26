@@ -3,17 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../core/iap/iap_provider.dart';
 import '../core/permissions/permission_provider.dart';
 import '../core/review/review_prompt_provider.dart';
 import '../core/video/video_library_provider.dart';
 import '../features/onboarding/onboarding_screen.dart';
-import '../features/paywall/paywall_screen.dart';
 import '../features/permission/permission_denied_screen.dart';
 import '../features/splash/splash_screen.dart';
-import '../features/vault/vault_screen.dart';
 import 'main_shell.dart';
 
-enum RRRoute { splash, onboarding, main, paywall, vault, permissionDenied }
+enum RRRoute { splash, onboarding, main, permissionDenied }
 
 class AppRouter extends ConsumerStatefulWidget {
   const AppRouter({super.key});
@@ -25,12 +24,12 @@ class AppRouter extends ConsumerStatefulWidget {
 class _AppRouterState extends ConsumerState<AppRouter>
     with WidgetsBindingObserver {
   RRRoute _route = RRRoute.splash;
-  int _mainTab = 0;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    ref.read(iapProvider);
     ref.read(reviewPromptProvider).ensureInstallDateRecorded();
   }
 
@@ -121,16 +120,7 @@ class _AppRouterState extends ConsumerState<AppRouter>
       case RRRoute.onboarding:
         return OnboardingScreen(onDone: _finishOnboarding);
       case RRRoute.main:
-        return MainShell(
-          initialTab: _mainTab,
-          onTabChanged: (tab) => _mainTab = tab,
-          onOpenPaywall: () => _go(RRRoute.paywall),
-          onOpenVault: () => _go(RRRoute.vault),
-        );
-      case RRRoute.paywall:
-        return PaywallScreen(onClose: () => _go(RRRoute.main));
-      case RRRoute.vault:
-        return VaultScreen(onBack: () => _go(RRRoute.main));
+        return const MainShell();
       case RRRoute.permissionDenied:
         return PermissionDeniedScreen(
           onTryAgain: () => PhotoManager.openSetting(),

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:app_tracking_transparency/app_tracking_transparency.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,23 +16,16 @@ import '../features/browse/browse_screen.dart';
 import '../features/favorites/favorites_screen.dart';
 import '../features/feed/feed_screen.dart';
 import '../features/memories/on_this_day_screen.dart';
+import '../features/paywall/paywall_screen.dart';
 import '../features/profile/profile_screen.dart';
 import '../features/settings/settings_screen.dart';
+import '../features/vault/vault_screen.dart';
 import 'main_nav_bar.dart';
 
 class MainShell extends ConsumerStatefulWidget {
-  const MainShell({
-    super.key,
-    required this.onOpenPaywall,
-    required this.onOpenVault,
-    this.initialTab = 0,
-    this.onTabChanged,
-  });
+  const MainShell({super.key, this.initialTab = 0});
 
-  final VoidCallback onOpenPaywall;
-  final VoidCallback onOpenVault;
   final int initialTab;
-  final ValueChanged<int>? onTabChanged;
 
   @override
   ConsumerState<MainShell> createState() => _MainShellState();
@@ -39,6 +33,7 @@ class MainShell extends ConsumerStatefulWidget {
 
 class _MainShellState extends ConsumerState<MainShell> {
   late int _tab = widget.initialTab;
+  bool _paywallPresented = false;
 
   @override
   void initState() {
@@ -73,7 +68,35 @@ class _MainShellState extends ConsumerState<MainShell> {
     FocusManager.instance.primaryFocus?.unfocus();
     HapticFeedback.selectionClick();
     setState(() => _tab = index);
-    widget.onTabChanged?.call(index);
+  }
+
+  Future<bool> _openPaywall(PaywallEntry entry) async {
+    if (_paywallPresented || !mounted) return false;
+    _paywallPresented = true;
+    try {
+      final activated = await Navigator.of(context).push<bool>(
+        CupertinoPageRoute<bool>(
+          fullscreenDialog: true,
+          builder: (_) => PaywallScreen(entry: entry),
+        ),
+      );
+      return activated == true;
+    } finally {
+      _paywallPresented = false;
+    }
+  }
+
+  Future<void> _openVault() async {
+    if (!ref.read(isProProvider) && !await _openPaywall(PaywallEntry.vault)) {
+      return;
+    }
+    if (!mounted) return;
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (vaultContext) =>
+            VaultScreen(onBack: () => Navigator.of(vaultContext).pop()),
+      ),
+    );
   }
 
   // The video player is a full-screen route pushed from the floating center
@@ -89,18 +112,21 @@ class _MainShellState extends ConsumerState<MainShell> {
         builder: (_) => FeedScreen(
           initialAssetId: assetId,
           onOpenBrowse: () => Navigator.of(context).pop(),
-          onOpenPaywall: widget.onOpenPaywall,
+          onOpenPaywall: () async {
+            await _openPaywall(PaywallEntry.speed);
+          },
         ),
       ),
     );
   }
 
-  void _openMemories(BuildContext context, String? assetId) {
-    if (!ref.read(isProProvider)) {
-      widget.onOpenPaywall();
+  Future<void> _openMemories(String? assetId) async {
+    if (!ref.read(isProProvider) &&
+        !await _openPaywall(PaywallEntry.memories)) {
       return;
     }
-    Navigator.of(context).push(
+    if (!mounted) return;
+    await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
         builder: (_) => OnThisDayScreen(initialAssetId: assetId),
       ),
@@ -118,10 +144,10 @@ class _MainShellState extends ConsumerState<MainShell> {
         children: [
           ProfileScreen(
             onOpenLibrary: () => _setTab(1),
-            onOpenMemories: (assetId) => _openMemories(context, assetId),
+            onOpenMemories: _openMemories,
           ),
           BrowseScreen(
-            onOpenPaywall: widget.onOpenPaywall,
+            onOpenMemories: () => _openMemories(null),
             onPlayAt: (assetId) => _openFeed(context, assetId: assetId),
           ),
           FavoritesScreen(
@@ -130,8 +156,8 @@ class _MainShellState extends ConsumerState<MainShell> {
           ),
           SettingsScreen(
             active: _tab == 3,
-            onOpenPaywall: widget.onOpenPaywall,
-            onOpenVault: widget.onOpenVault,
+            onOpenPaywall: () => _openPaywall(PaywallEntry.playback),
+            onOpenVault: _openVault,
           ),
         ],
       ),

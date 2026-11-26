@@ -775,6 +775,89 @@ class AppLocalizationsRu extends AppLocalizations {
   String get paywallTitle => 'RollReel Pro';
 
   @override
+  String get paywallPlaybackTitle => 'Смотрите дальше.';
+
+  @override
+  String get paywallPlaybackBody => 'Ваши видео без рекламных пауз.';
+
+  @override
+  String get paywallVaultTitle => 'Только для вас.';
+
+  @override
+  String get paywallVaultBody => 'Закрытое хранилище для личных видео.';
+
+  @override
+  String get paywallMemoriesTitle => 'Проживите этот день снова.';
+
+  @override
+  String get paywallMemoriesBody =>
+      'Найдите видео, снятые в этот день в прошлые годы.';
+
+  @override
+  String get paywallSpeedTitle => 'Смотрите в своём темпе.';
+
+  @override
+  String get paywallAdFree => 'Просмотр без рекламы';
+
+  @override
+  String get paywallAdFreeBody => 'Смотрите ролики без рекламы';
+
+  @override
+  String get paywallVaultBenefit => 'Закройте выбранные ролики';
+
+  @override
+  String get paywallSpeed => 'Удерживайте для скорости 2×';
+
+  @override
+  String get paywallSpeedBenefit => 'Нажмите и удерживайте для перемотки';
+
+  @override
+  String get paywallMemoriesBenefit => 'Найдите ролики прошлых лет';
+
+  @override
+  String get paywallChoosePlan => 'Выберите тариф';
+
+  @override
+  String get paywallLifetime => 'Навсегда';
+
+  @override
+  String get paywallMonthly => 'Ежемесячно';
+
+  @override
+  String get paywallRenewsMonthly => 'Автопродление каждый месяц';
+
+  @override
+  String get paywallGetLifetime => 'Купить навсегда';
+
+  @override
+  String get paywallSubscribeMonthly => 'Подписаться на месяц';
+
+  @override
+  String paywallMonthlyPrice(String price) {
+    return '$price/мес.';
+  }
+
+  @override
+  String paywallLifetimeBilling(String price) {
+    return '$price одним платежом. Без подписки.';
+  }
+
+  @override
+  String paywallMonthlyBilling(String price) {
+    return '$price/мес. Автопродление каждый месяц. Отмена в настройках App Store.';
+  }
+
+  @override
+  String get paywallLoadingPrices => 'Загружаем цены…';
+
+  @override
+  String get paywallPricesUnavailable => 'Тарифы недоступны';
+
+  @override
+  String get paywallLinkUnavailable =>
+      'Не удалось открыть ссылку. Попробуйте ещё раз.';
+
+  @override
   String get paywallTagline => 'Смотрите больше. Волнуйтесь меньше.';
 
   @override

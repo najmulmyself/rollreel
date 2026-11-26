@@ -739,6 +739,87 @@ class AppLocalizationsZh extends AppLocalizations {
   String get paywallTitle => 'RollReel Pro';
 
   @override
+  String get paywallPlaybackTitle => '继续看。';
+
+  @override
+  String get paywallPlaybackBody => '没有广告打断，尽情看自己的视频。';
+
+  @override
+  String get paywallVaultTitle => '只给自己看。';
+
+  @override
+  String get paywallVaultBody => '为私密视频留一个可以上锁的空间。';
+
+  @override
+  String get paywallMemoriesTitle => '重温这一天。';
+
+  @override
+  String get paywallMemoriesBody => '找到往年今天拍摄的视频。';
+
+  @override
+  String get paywallSpeedTitle => '按自己的节奏观看。';
+
+  @override
+  String get paywallAdFree => '无广告播放';
+
+  @override
+  String get paywallAdFreeBody => '回看视频，无广告打断';
+
+  @override
+  String get paywallVaultBenefit => '锁定你选中的视频';
+
+  @override
+  String get paywallSpeed => '长按以 2 倍速播放';
+
+  @override
+  String get paywallSpeedBenefit => '按住画面即可快进';
+
+  @override
+  String get paywallMemoriesBenefit => '重温往年拍摄的视频';
+
+  @override
+  String get paywallChoosePlan => '选择方案';
+
+  @override
+  String get paywallLifetime => '终身';
+
+  @override
+  String get paywallMonthly => '按月';
+
+  @override
+  String get paywallRenewsMonthly => '每月自动续订';
+
+  @override
+  String get paywallGetLifetime => '购买终身使用权';
+
+  @override
+  String get paywallSubscribeMonthly => '按月订阅';
+
+  @override
+  String paywallMonthlyPrice(String price) {
+    return '$price/月';
+  }
+
+  @override
+  String paywallLifetimeBilling(String price) {
+    return '一次性支付 $price，无订阅。';
+  }
+
+  @override
+  String paywallMonthlyBilling(String price) {
+    return '$price/月。每月自动续订，可在 App Store 设置中取消。';
+  }
+
+  @override
+  String get paywallLoadingPrices => '正在加载价格…';
+
+  @override
+  String get paywallPricesUnavailable => '方案暂不可用';
+
+  @override
+  String get paywallLinkUnavailable => '无法打开链接，请重试。';
+
+  @override
   String get paywallTagline => '多看一点，少操点心。';
 
   @override
