@@ -54,11 +54,7 @@ class ProEntitlementNotifier extends StateNotifier<bool> {
   }
 
   late final Future<void> ready;
-  late final Future<bool> _supportsStoreKit2 = _isIOS
-      ? _channel
-            .invokeMethod<bool>('isSupported')
-            .then((value) => value == true)
-      : Future.value(false);
+  Future<bool>? _storeKit2Support;
 
   _StoreKitSnapshot _snapshot = const _StoreKitSnapshot();
   Timer? _nextCheck;
@@ -67,12 +63,32 @@ class ProEntitlementNotifier extends StateNotifier<bool> {
   Future<bool> get canSellMonthly async {
     if (!_isIOS) return true;
     try {
-      return await _supportsStoreKit2;
+      return await _supportsStoreKit2();
     } on PlatformException catch (error) {
       debugPrint('[RollReel] StoreKit capability unavailable: $error');
       return false;
     } on MissingPluginException {
+      debugPrint('[RollReel] Native StoreKit entitlement channel is missing.');
       return false;
+    }
+  }
+
+  Future<bool> _supportsStoreKit2() {
+    if (!_isIOS) return Future.value(false);
+    return _storeKit2Support ??= _probeStoreKit2();
+  }
+
+  Future<bool> _probeStoreKit2() async {
+    try {
+      final supported = await _channel.invokeMethod<bool>('isSupported');
+      if (supported == null) {
+        throw PlatformException(code: 'storekit_capability_unavailable');
+      }
+      return supported;
+    } catch (_) {
+      // Retry transient channel failures. A real unsupported OS can be cached.
+      _storeKit2Support = null;
+      rethrow;
     }
   }
 
@@ -89,7 +105,7 @@ class ProEntitlementNotifier extends StateNotifier<bool> {
       if (mounted)
         state = _isIOS ? _snapshot.isActiveInCache(DateTime.now()) : legacy;
       // StoreKit 1 on older iOS versions cannot supply a verified snapshot.
-      if (_isIOS && !await _supportsStoreKit2 && mounted) {
+      if (_isIOS && !await _supportsStoreKit2() && mounted) {
         state = _snapshot.isActiveInCache(DateTime.now()) || legacy;
       }
     } catch (error) {
@@ -106,7 +122,7 @@ class ProEntitlementNotifier extends StateNotifier<bool> {
   }
 
   Future<bool> restoreFromStoreKit() async {
-    if (!await _supportsStoreKit2) return false;
+    if (!await _supportsStoreKit2()) return false;
     await _channel.invokeMethod<void>('sync');
     await _readAfterStoreChange();
     return true;
@@ -126,7 +142,7 @@ class ProEntitlementNotifier extends StateNotifier<bool> {
 
   Future<void> applyPurchase(String productId) async {
     await ready;
-    if (await _supportsStoreKit2) {
+    if (await _supportsStoreKit2()) {
       // A StoreKit update also arrives for revocations. Re-read the current
       // entitlements instead of treating the transaction as a new grant.
       await _readAfterStoreChange();
@@ -147,7 +163,7 @@ class ProEntitlementNotifier extends StateNotifier<bool> {
     await ready;
     if (!mounted) return;
     try {
-      if (!await _supportsStoreKit2) return;
+      if (!await _supportsStoreKit2()) return;
       final values = await _channel.invokeMapMethod<Object?, Object?>(
         'currentEntitlements',
       );

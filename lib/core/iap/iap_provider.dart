@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
+
 import 'pro_entitlement.dart';
 
 export 'pro_entitlement.dart'
@@ -82,20 +83,21 @@ class IAPNotifier extends StateNotifier<IAPState> {
         },
       );
       state = state.copyWith(available: true);
-      final canSellMonthly = await _ref
-          .read(isProProvider.notifier)
-          .canSellMonthly;
-      final response = await store.queryProductDetails(
-        canSellMonthly ? _productIds : const {kProductLifetime},
-      );
+      final response = await store.queryProductDetails(_productIds);
       debugPrint(
         '[RollReel] IAP products found: ${response.productDetails.map((p) => p.id).toList()}, '
         'not found: ${response.notFoundIDs}, error: ${response.error}',
       );
       if (!mounted) return;
-      state = state.copyWith(
-        products: {for (final p in response.productDetails) p.id: p},
-      );
+      final products = {for (final p in response.productDetails) p.id: p};
+      if (products.containsKey(kProductMonthly) &&
+          !await _ref.read(isProProvider.notifier).canSellMonthly) {
+        debugPrint(
+          '[RollReel] StoreKit returned Monthly, but entitlement verification is unavailable.',
+        );
+        products.remove(kProductMonthly);
+      }
+      if (mounted) state = state.copyWith(products: products);
     } catch (error) {
       debugPrint('[RollReel] Store initialization failed: $error');
       if (mounted) state = state.copyWith(products: const {});

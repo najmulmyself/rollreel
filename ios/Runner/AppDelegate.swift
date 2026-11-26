@@ -9,10 +9,10 @@ import UIKit
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
     GeneratedPluginRegistrant.register(with: self)
-    if let controller = window?.rootViewController as? FlutterViewController {
+    if let registrar = registrar(forPlugin: "RollReelStoreKitEntitlements") {
       FlutterMethodChannel(
         name: "rollreel/storekit_entitlements",
-        binaryMessenger: controller.binaryMessenger
+        binaryMessenger: registrar.messenger()
       ).setMethodCallHandler { call, result in
         if call.method == "isSupported" {
           if #available(iOS 15.0, *) {
