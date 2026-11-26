@@ -15,10 +15,16 @@ const _drive = 'assets/images/onboarding-drive.webp';
 const _kingfisher = 'assets/images/home_kingfisher.webp';
 
 class PaywallArtwork extends StatefulWidget {
-  const PaywallArtwork({super.key, required this.entry, required this.dark});
+  const PaywallArtwork({
+    super.key,
+    required this.entry,
+    required this.dark,
+    this.compact = false,
+  });
 
   final PaywallEntry entry;
   final bool dark;
+  final bool compact;
 
   @override
   State<PaywallArtwork> createState() => _PaywallArtworkState();
@@ -231,7 +237,11 @@ class _PaywallArtworkState extends State<PaywallArtwork>
                                 color: onDark
                                     ? Colors.white
                                     : RRColors.brandInk,
-                                fontSize: narrow ? 34 : 38,
+                                fontSize: widget.compact && largeText
+                                    ? 27
+                                    : narrow
+                                    ? 34
+                                    : 38,
                                 letterSpacing: -1.7,
                                 height: 1,
                               ),

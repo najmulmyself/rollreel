@@ -45,6 +45,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeTopAlbums => 'Top albums';
 
   @override
+  String get playerGuideSwipe => 'Swipe up';
+
+  @override
+  String get playerGuideSwipeBody =>
+      'Move to the next video in your camera roll.';
+
+  @override
+  String get playerGuideTap => 'Tap to play or pause';
+
+  @override
+  String get playerGuideTapBody =>
+      'Tap the video once to pause. Tap again to resume.';
+
+  @override
+  String get playerGuideSeek => 'Double-tap to seek';
+
+  @override
+  String get playerGuideSeekBody =>
+      'Double-tap the left side to go back 10 seconds or the right side to skip ahead 10 seconds.';
+
+  @override
+  String get playerGuideEdges => 'Drag along the edges';
+
+  @override
+  String get playerGuideEdgesBody =>
+      'Slide up or down on the left edge for brightness and on the right edge for volume.';
+
+  @override
+  String get playerGuideDone => 'Got it';
+
+  @override
   String get homeNoWatchHistory => 'Watch a video to start your history.';
 
   @override

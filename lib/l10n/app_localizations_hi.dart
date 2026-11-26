@@ -45,6 +45,36 @@ class AppLocalizationsHi extends AppLocalizations {
   String get homeTopAlbums => 'प्रमुख एल्बम';
 
   @override
+  String get playerGuideSwipe => 'ऊपर स्वाइप करें';
+
+  @override
+  String get playerGuideSwipeBody => 'अपनी लाइब्रेरी का अगला वीडियो देखें।';
+
+  @override
+  String get playerGuideTap => 'चलाने या रोकने के लिए टैप करें';
+
+  @override
+  String get playerGuideTapBody =>
+      'वीडियो रोकने के लिए एक बार टैप करें। फिर से चलाने के लिए दोबारा टैप करें।';
+
+  @override
+  String get playerGuideSeek => 'आगे या पीछे जाने के लिए दो बार टैप करें';
+
+  @override
+  String get playerGuideSeekBody =>
+      '10 सेकंड पीछे जाने के लिए बाईं ओर या 10 सेकंड आगे जाने के लिए दाईं ओर दो बार टैप करें।';
+
+  @override
+  String get playerGuideEdges => 'किनारों पर उंगली खिसकाएँ';
+
+  @override
+  String get playerGuideEdgesBody =>
+      'चमक के लिए बाएँ किनारे पर और आवाज़ के लिए दाएँ किनारे पर ऊपर या नीचे स्वाइप करें।';
+
+  @override
+  String get playerGuideDone => 'समझ गया';
+
+  @override
   String get homeNoWatchHistory =>
       'अपना इतिहास शुरू करने के लिए कोई वीडियो देखें।';
 

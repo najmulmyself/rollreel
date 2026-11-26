@@ -45,6 +45,37 @@ class AppLocalizationsPt extends AppLocalizations {
   String get homeTopAlbums => 'Álbuns principais';
 
   @override
+  String get playerGuideSwipe => 'Deslize para cima';
+
+  @override
+  String get playerGuideSwipeBody =>
+      'Passe para o próximo vídeo da sua fototeca.';
+
+  @override
+  String get playerGuideTap => 'Toque para reproduzir ou pausar';
+
+  @override
+  String get playerGuideTapBody =>
+      'Toque uma vez no vídeo para pausar. Toque novamente para continuar.';
+
+  @override
+  String get playerGuideSeek => 'Toque duas vezes para avançar ou voltar';
+
+  @override
+  String get playerGuideSeekBody =>
+      'Toque duas vezes à esquerda para voltar 10 segundos ou à direita para avançar 10 segundos.';
+
+  @override
+  String get playerGuideEdges => 'Deslize pelas bordas';
+
+  @override
+  String get playerGuideEdgesBody =>
+      'Deslize para cima ou para baixo na borda esquerda para ajustar o brilho e na direita para ajustar o volume.';
+
+  @override
+  String get playerGuideDone => 'Entendi';
+
+  @override
   String get homeNoWatchHistory =>
       'Assista a um vídeo para começar seu histórico.';
 

@@ -167,6 +167,8 @@ class _MainShellState extends ConsumerState<MainShell> {
           onOpenLibrary: () => _leavePlayerForTab(playerContext, 1),
           onOpenSettings: () => _leavePlayerForTab(playerContext, 3),
           onVaultChange: _changeVaultMembership,
+          onOpenSwipeOffer: (onPresented) =>
+              showSwipePaywall(playerContext, onPresented: onPresented),
           onOpenPaywall: () async {
             await _openPaywall(PaywallEntry.speed);
           },

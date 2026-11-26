@@ -45,6 +45,36 @@ class AppLocalizationsTr extends AppLocalizations {
   String get homeTopAlbums => 'Öne çıkan albümler';
 
   @override
+  String get playerGuideSwipe => 'Yukarı kaydır';
+
+  @override
+  String get playerGuideSwipeBody => 'Arşivindeki sonraki videoya geç.';
+
+  @override
+  String get playerGuideTap => 'Oynatmak veya duraklatmak için dokun';
+
+  @override
+  String get playerGuideTapBody =>
+      'Videoya bir kez dokunarak duraklat. Devam etmek için tekrar dokun.';
+
+  @override
+  String get playerGuideSeek => 'İleri veya geri gitmek için çift dokun';
+
+  @override
+  String get playerGuideSeekBody =>
+      '10 saniye geri gitmek için sola, 10 saniye ileri gitmek için sağa çift dokun.';
+
+  @override
+  String get playerGuideEdges => 'Kenarlardan sürükle';
+
+  @override
+  String get playerGuideEdgesBody =>
+      'Parlaklık için sol kenarda, ses seviyesi için sağ kenarda yukarı veya aşağı kaydır.';
+
+  @override
+  String get playerGuideDone => 'Anladım';
+
+  @override
   String get homeNoWatchHistory =>
       'İzleme geçmişini başlatmak için bir video izle.';
 

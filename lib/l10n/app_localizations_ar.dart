@@ -45,6 +45,36 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeTopAlbums => 'أهم الألبومات';
 
   @override
+  String get playerGuideSwipe => 'اسحب لأعلى';
+
+  @override
+  String get playerGuideSwipeBody => 'انتقل إلى الفيديو التالي في مكتبتك.';
+
+  @override
+  String get playerGuideTap => 'اضغط للتشغيل أو الإيقاف المؤقت';
+
+  @override
+  String get playerGuideTapBody =>
+      'اضغط على الفيديو مرة لإيقافه مؤقتًا ومرة أخرى لاستئنافه.';
+
+  @override
+  String get playerGuideSeek => 'اضغط مرتين للتقديم أو الإرجاع';
+
+  @override
+  String get playerGuideSeekBody =>
+      'اضغط مرتين على اليسار للرجوع 10 ثوانٍ أو على اليمين للتقدم 10 ثوانٍ.';
+
+  @override
+  String get playerGuideEdges => 'اسحب على طول الحواف';
+
+  @override
+  String get playerGuideEdgesBody =>
+      'اسحب لأعلى أو لأسفل على الحافة اليسرى لتغيير السطوع، وعلى الحافة اليمنى لتغيير مستوى الصوت.';
+
+  @override
+  String get playerGuideDone => 'فهمت';
+
+  @override
   String get homeNoWatchHistory => 'شاهد فيديو لبدء سجل المشاهدة.';
 
   @override

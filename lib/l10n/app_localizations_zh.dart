@@ -45,6 +45,33 @@ class AppLocalizationsZh extends AppLocalizations {
   String get homeTopAlbums => '主要相册';
 
   @override
+  String get playerGuideSwipe => '向上轻扫';
+
+  @override
+  String get playerGuideSwipeBody => '切换到相册中的下一段视频。';
+
+  @override
+  String get playerGuideTap => '轻点即可播放或暂停';
+
+  @override
+  String get playerGuideTapBody => '轻点视频一次即可暂停，再点一次即可恢复播放。';
+
+  @override
+  String get playerGuideSeek => '轻点两次即可快进或快退';
+
+  @override
+  String get playerGuideSeekBody => '轻点左侧两次后退 10 秒，轻点右侧两次前进 10 秒。';
+
+  @override
+  String get playerGuideEdges => '沿屏幕边缘拖动';
+
+  @override
+  String get playerGuideEdgesBody => '在左边缘上下滑动调节亮度，在右边缘上下滑动调节音量。';
+
+  @override
+  String get playerGuideDone => '知道了';
+
+  @override
   String get homeNoWatchHistory => '观看一段视频即可开始记录观看历史。';
 
   @override

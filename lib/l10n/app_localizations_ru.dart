@@ -45,6 +45,37 @@ class AppLocalizationsRu extends AppLocalizations {
   String get homeTopAlbums => 'Популярные альбомы';
 
   @override
+  String get playerGuideSwipe => 'Смахните вверх';
+
+  @override
+  String get playerGuideSwipeBody =>
+      'Перейдите к следующему видео в медиатеке.';
+
+  @override
+  String get playerGuideTap => 'Нажмите для воспроизведения или паузы';
+
+  @override
+  String get playerGuideTapBody =>
+      'Нажмите на видео один раз, чтобы поставить его на паузу, и ещё раз, чтобы продолжить.';
+
+  @override
+  String get playerGuideSeek => 'Двойное нажатие для перемотки';
+
+  @override
+  String get playerGuideSeekBody =>
+      'Дважды нажмите слева, чтобы вернуться на 10 секунд, или справа, чтобы перейти на 10 секунд вперёд.';
+
+  @override
+  String get playerGuideEdges => 'Проведите вдоль края';
+
+  @override
+  String get playerGuideEdgesBody =>
+      'Проведите вверх или вниз по левому краю для яркости, а по правому — для громкости.';
+
+  @override
+  String get playerGuideDone => 'Понятно';
+
+  @override
   String get homeNoWatchHistory =>
       'Посмотрите видео, чтобы начать историю просмотров.';
 

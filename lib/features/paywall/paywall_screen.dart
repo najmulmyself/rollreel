@@ -27,10 +27,45 @@ enum _Plan {
   final String productId;
 }
 
+Future<void> showSwipePaywall(
+  BuildContext context, {
+  required VoidCallback onPresented,
+}) async {
+  final dismissed = showModalBottomSheet<bool>(
+    context: context,
+    isScrollControlled: true,
+    useSafeArea: true,
+    showDragHandle: false,
+    clipBehavior: Clip.antiAlias,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(26)),
+    ),
+    sheetAnimationStyle: MediaQuery.disableAnimationsOf(context)
+        ? AnimationStyle.noAnimation
+        : null,
+    builder: (context) {
+      final needsMoreSpace =
+          MediaQuery.sizeOf(context).height < 720 ||
+          MediaQuery.textScalerOf(context).scale(16) > 20;
+      return FractionallySizedBox(
+        heightFactor: needsMoreSpace ? .90 : .75,
+        child: const PaywallScreen(compactOffer: true),
+      );
+    },
+  );
+  onPresented();
+  await dismissed;
+}
+
 class PaywallScreen extends ConsumerStatefulWidget {
-  const PaywallScreen({super.key, this.entry = PaywallEntry.playback});
+  const PaywallScreen({
+    super.key,
+    this.entry = PaywallEntry.playback,
+    this.compactOffer = false,
+  });
 
   final PaywallEntry entry;
+  final bool compactOffer;
 
   @override
   ConsumerState<PaywallScreen> createState() => _PaywallScreenState();
@@ -177,9 +212,15 @@ class _PaywallScreenState extends ConsumerState<PaywallScreen> {
         : Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              PaywallArtwork(entry: widget.entry, dark: dark),
-              const SizedBox(height: 12),
-              _Benefits(entry: widget.entry, colors: colors),
+              PaywallArtwork(
+                entry: widget.entry,
+                dark: dark,
+                compact: widget.compactOffer,
+              ),
+              if (!widget.compactOffer) ...[
+                const SizedBox(height: 12),
+                _Benefits(entry: widget.entry, colors: colors),
+              ],
             ],
           );
     final plans = active

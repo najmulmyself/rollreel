@@ -24,6 +24,9 @@ class ReviewPromptController {
 
   bool _hasSwipedThisSession = false;
 
+  bool hasUsedPlayer(SharedPreferences prefs) =>
+      _hasSwipedThisSession || (prefs.getInt(_kSessionCount) ?? 0) > 0;
+
   Future<void> ensureInstallDateRecorded() async {
     final prefs = await SharedPreferences.getInstance();
     if (prefs.getInt(_kInstallDate) == null) {

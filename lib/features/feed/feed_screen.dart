@@ -6,8 +6,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:photo_manager/photo_manager.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/ads/ads_provider.dart';
+import '../../core/ads/player_promotion_schedule.dart';
+import '../../core/ads/system_prompt_coordinator.dart';
+import '../../core/iap/iap_provider.dart';
 import '../../core/permissions/permission_provider.dart';
 import '../../core/review/review_prompt_provider.dart';
 import '../../core/settings/settings_provider.dart';
@@ -17,8 +21,11 @@ import '../../l10n/app_localizations.dart';
 import '../states/loading_state.dart';
 import '../states/no_videos_state.dart';
 import '../../shared/widgets/date_label.dart';
+import 'player_gesture_guide.dart';
 import 'settled_video_pager.dart';
 import 'video_feed_item.dart';
+
+const _guideSeenKey = 'player_gesture_guide_seen';
 
 class FeedScreen extends ConsumerStatefulWidget {
   const FeedScreen({
@@ -26,6 +33,7 @@ class FeedScreen extends ConsumerStatefulWidget {
     required this.onOpenLibrary,
     required this.onOpenSettings,
     this.onOpenBrowse,
+    this.onOpenSwipeOffer,
     this.onOpenPaywall,
     this.onVaultChange,
     this.initialAssetId,
@@ -37,6 +45,7 @@ class FeedScreen extends ConsumerStatefulWidget {
   final VoidCallback? onOpenBrowse;
   final VoidCallback onOpenLibrary;
   final VoidCallback onOpenSettings;
+  final Future<void> Function(VoidCallback onPresented)? onOpenSwipeOffer;
   final Future<void> Function()? onOpenPaywall;
   final Future<void> Function(String, bool)? onVaultChange;
   final String? initialAssetId;
@@ -62,6 +71,114 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   bool _filterInitialized = false;
   String? _controlsHiddenForAssetId;
   Timer? _dateLabelTimer;
+  late final AppLifecycleListener _lifecycle;
+  bool _checkingGuide = true;
+  SharedPreferences? _pendingGuide;
+  bool _playerOverlayOpen = false;
+  bool _checkingOffer = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _lifecycle = AppLifecycleListener(onResume: _maybeShowGuide);
+    unawaited(_loadGuidePreference());
+  }
+
+  bool get _canPresentOverlay =>
+      mounted &&
+      widget.isTabActive &&
+      !_playerOverlayOpen &&
+      ModalRoute.isCurrentOf(context) != false &&
+      WidgetsBinding.instance.lifecycleState == AppLifecycleState.resumed &&
+      !ref.read(isSystemPromptActiveProvider);
+
+  Future<void> _loadGuidePreference() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (!mounted) return;
+      final experienced = ref.read(reviewPromptProvider).hasUsedPlayer(prefs);
+      setState(() {
+        _checkingGuide = false;
+        if (!experienced && prefs.getBool(_guideSeenKey) != true) {
+          _pendingGuide = prefs;
+        }
+      });
+    } catch (error) {
+      debugPrint('[RollReel] Could not load the player guide preference: $error');
+      if (mounted) setState(() => _checkingGuide = false);
+    }
+  }
+
+  void _maybeShowGuide() {
+    final prefs = _pendingGuide;
+    if (prefs == null || _readyAssetId == null || !_canPresentOverlay) return;
+    _pendingGuide = null;
+    unawaited(_saveGuideSeen(prefs));
+    unawaited(_presentPlayerOverlay(() => showPlayerGestureGuide(context)));
+  }
+
+  Future<void> _saveGuideSeen(SharedPreferences prefs) async {
+    try {
+      if (!await prefs.setBool(_guideSeenKey, true)) {
+        debugPrint('[RollReel] Could not save the player guide preference.');
+      }
+    } catch (error) {
+      debugPrint('[RollReel] Could not save the player guide preference: $error');
+    }
+  }
+
+  Future<void> _presentPlayerOverlay(Future<void> Function() present) async {
+    setState(() => _playerOverlayOpen = true);
+    try {
+      await present();
+    } catch (error) {
+      debugPrint('[RollReel] Could not open the player overlay: $error');
+    } finally {
+      if (mounted) setState(() => _playerOverlayOpen = false);
+    }
+  }
+
+  Future<void> _handleSwipePromotion() async {
+    if (!_canPresentOverlay || _checkingGuide || _pendingGuide != null) return;
+    await ref.read(isProProvider.notifier).ready;
+    if (!_canPresentOverlay || ref.read(isProProvider)) return;
+
+    final ads = ref.read(adsProvider);
+    if (ads.isShowingInterstitial ||
+        _checkingOffer ||
+        ref.read(iapProvider).loading) {
+      return;
+    }
+
+    final schedule = ref.read(playerPromotionScheduleProvider);
+    final promotion = schedule.recordSwipe();
+    if (promotion == SwipePromotion.none) return;
+    final openOffer = widget.onOpenSwipeOffer;
+    if (promotion == SwipePromotion.interstitial || openOffer == null) {
+      ads.showInterstitial();
+      return;
+    }
+
+    _checkingOffer = true;
+    try {
+      final hasOfferSlot = await schedule.hasOfferSlot();
+      if (!_canPresentOverlay ||
+          ref.read(isProProvider) ||
+          ref.read(iapProvider).loading) {
+        return;
+      }
+      if (!hasOfferSlot) {
+        ads.showInterstitial();
+        return;
+      }
+
+      await _presentPlayerOverlay(
+        () => openOffer(() => unawaited(schedule.recordOfferShown())),
+      );
+    } finally {
+      _checkingOffer = false;
+    }
+  }
 
   void _initializeDefaultFilter() {
     if (!mounted || _filterInitialized || widget.initialAssetId != null) return;
@@ -128,9 +245,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     widget.onVideoChanged?.call(next.id);
     ref.read(reviewPromptProvider).recordSwipe();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && ModalRoute.isCurrentOf(context) != false) {
-        ref.read(adsProvider.notifier).registerSwipe();
-      }
+      if (mounted) unawaited(_handleSwipePromotion());
     });
   }
 
@@ -166,6 +281,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
 
   @override
   void dispose() {
+    _lifecycle.dispose();
     _dateLabelTimer?.cancel();
     _controller?.dispose();
     super.dispose();
@@ -179,6 +295,14 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     final safeTop = MediaQuery.paddingOf(context).top;
     final permission = ref.watch(permissionProvider).valueOrNull;
     final isLimitedAccess = permission == PermissionState.limited;
+
+    if (_pendingGuide != null && _readyAssetId != null && _canPresentOverlay) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowGuide());
+    }
+
+    ref.listen<bool>(isSystemPromptActiveProvider, (_, active) {
+      if (!active) _maybeShowGuide();
+    });
 
     ref.listen<AsyncValue<List<AssetEntity>>>(feedVideosProvider, (_, next) {
       if (_awaitingDeletion && next.hasValue && !next.isLoading) {
@@ -306,6 +430,8 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
               key: ValueKey(videos[index].id),
               asset: videos[index],
               isActive: index == safeIndex && widget.isTabActive,
+              playbackCovered:
+                  _checkingGuide || _pendingGuide != null || _playerOverlayOpen,
               preload: preload,
               onControllerReady: (controller) {
                 if (controller != null) _markPlaybackReady(videos[index].id);

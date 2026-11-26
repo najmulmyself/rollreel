@@ -37,6 +37,7 @@ class VideoFeedItem extends ConsumerStatefulWidget {
     required this.onOpenLibrary,
     required this.onOpenSettings,
     this.preload = false,
+    this.playbackCovered = false,
     this.onDelete,
     this.onPlayStateChanged,
     this.onControlsVisibilityChanged,
@@ -47,6 +48,7 @@ class VideoFeedItem extends ConsumerStatefulWidget {
   final AssetEntity asset;
   final bool isActive;
   final bool preload;
+  final bool playbackCovered;
   final void Function(VideoPlayerController?) onControllerReady;
   final VoidCallback onOpenLibrary;
   final VoidCallback onOpenSettings;
@@ -73,6 +75,7 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
   PMCancelToken? _thumbnailRequest;
   Timer? _preloadTimer;
   bool _activatedByNavigation = false;
+  bool _resumeWhenUncovered = false;
   bool _loadFailed = false;
   bool _titleRequested = false;
   bool _optionsOpen = false;
@@ -217,6 +220,7 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
         isActive: () =>
             mounted &&
             widget.isActive &&
+            !widget.playbackCovered &&
             ModalRoute.isCurrentOf(context) != false,
       );
       pending = null;
@@ -263,6 +267,10 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
     if (!mounted || !widget.isActive || !identical(controller, _controller)) {
       return;
     }
+    if (widget.playbackCovered) {
+      _resumeWhenUncovered = true;
+      return;
+    }
     try {
       await controller.play();
       if (!mounted ||
@@ -287,6 +295,7 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
         _loadFailed = false;
         _watchSession.reset();
       } else {
+        _resumeWhenUncovered = false;
         _controlsHideTimer?.cancel();
         _controlsVisible = true;
         _syncPlaybackAfterBuild();
@@ -294,6 +303,18 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
     }
     if (widget.isActive != old.isActive || widget.preload != old.preload) {
       _preparePlayback();
+    }
+    if (widget.playbackCovered == old.playbackCovered || !widget.isActive) {
+      return;
+    }
+    final controller = _controller;
+    if (controller == null) return;
+    if (widget.playbackCovered && controller.value.isPlaying) {
+      _resumeWhenUncovered = true;
+      unawaited(controller.pause());
+    } else if (!widget.playbackCovered && _resumeWhenUncovered) {
+      _resumeWhenUncovered = false;
+      scheduleMicrotask(() => _beginPlayback(controller));
     }
   }
 
@@ -336,7 +357,7 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
   }
 
   void _togglePlay() {
-    if (!_initialized || _controller == null) return;
+    if (!_initialized || widget.playbackCovered) return;
     final wasPlaying = _controller!.value.isPlaying;
     final nowPlaying = !wasPlaying;
     setState(() {

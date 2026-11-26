@@ -45,6 +45,37 @@ class AppLocalizationsDe extends AppLocalizations {
   String get homeTopAlbums => 'Top-Alben';
 
   @override
+  String get playerGuideSwipe => 'Nach oben wischen';
+
+  @override
+  String get playerGuideSwipeBody =>
+      'Wechsle zum nächsten Video in deiner Mediathek.';
+
+  @override
+  String get playerGuideTap => 'Tippen zum Abspielen oder Pausieren';
+
+  @override
+  String get playerGuideTapBody =>
+      'Tippe einmal auf das Video, um es anzuhalten. Tippe erneut, um es fortzusetzen.';
+
+  @override
+  String get playerGuideSeek => 'Doppeltippen zum Spulen';
+
+  @override
+  String get playerGuideSeekBody =>
+      'Tippe links doppelt für 10 Sekunden zurück oder rechts doppelt für 10 Sekunden vor.';
+
+  @override
+  String get playerGuideEdges => 'Am Rand streichen';
+
+  @override
+  String get playerGuideEdgesBody =>
+      'Streiche links nach oben oder unten für die Helligkeit und rechts für die Lautstärke.';
+
+  @override
+  String get playerGuideDone => 'Verstanden';
+
+  @override
   String get homeNoWatchHistory =>
       'Sieh dir ein Video an, um deinen Verlauf zu starten.';
 

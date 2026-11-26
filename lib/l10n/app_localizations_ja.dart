@@ -45,6 +45,33 @@ class AppLocalizationsJa extends AppLocalizations {
   String get homeTopAlbums => '主なアルバム';
 
   @override
+  String get playerGuideSwipe => '上にスワイプ';
+
+  @override
+  String get playerGuideSwipeBody => 'ライブラリの次の動画に移動します。';
+
+  @override
+  String get playerGuideTap => 'タップで再生・一時停止';
+
+  @override
+  String get playerGuideTapBody => '動画を一度タップすると一時停止し、もう一度タップすると再生を再開します。';
+
+  @override
+  String get playerGuideSeek => 'ダブルタップでスキップ';
+
+  @override
+  String get playerGuideSeekBody => '左側をダブルタップすると10秒戻り、右側なら10秒進みます。';
+
+  @override
+  String get playerGuideEdges => '画面の端を上下にドラッグ';
+
+  @override
+  String get playerGuideEdgesBody => '左端を上下に動かして明るさを、右端を上下に動かして音量を調節します。';
+
+  @override
+  String get playerGuideDone => '完了';
+
+  @override
   String get homeNoWatchHistory => '動画を再生すると視聴履歴が始まります。';
 
   @override

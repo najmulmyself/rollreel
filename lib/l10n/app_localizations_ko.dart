@@ -45,6 +45,34 @@ class AppLocalizationsKo extends AppLocalizations {
   String get homeTopAlbums => '주요 앨범';
 
   @override
+  String get playerGuideSwipe => '위로 스와이프';
+
+  @override
+  String get playerGuideSwipeBody => '보관함의 다음 영상으로 이동합니다.';
+
+  @override
+  String get playerGuideTap => '탭하여 재생 또는 일시 정지';
+
+  @override
+  String get playerGuideTapBody => '영상을 한 번 탭하면 일시 정지되고 다시 탭하면 재생됩니다.';
+
+  @override
+  String get playerGuideSeek => '두 번 탭하여 건너뛰기';
+
+  @override
+  String get playerGuideSeekBody =>
+      '왼쪽을 두 번 탭하면 10초 뒤로, 오른쪽을 두 번 탭하면 10초 앞으로 이동합니다.';
+
+  @override
+  String get playerGuideEdges => '가장자리를 위아래로 드래그';
+
+  @override
+  String get playerGuideEdgesBody => '왼쪽 가장자리는 화면 밝기를, 오른쪽 가장자리는 음량을 조절합니다.';
+
+  @override
+  String get playerGuideDone => '확인';
+
+  @override
   String get homeNoWatchHistory => '영상을 재생하면 시청 기록이 시작됩니다.';
 
   @override

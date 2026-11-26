@@ -45,6 +45,37 @@ class AppLocalizationsIt extends AppLocalizations {
   String get homeTopAlbums => 'Album principali';
 
   @override
+  String get playerGuideSwipe => 'Scorri verso l’alto';
+
+  @override
+  String get playerGuideSwipeBody =>
+      'Passa al video successivo della tua libreria.';
+
+  @override
+  String get playerGuideTap => 'Tocca per riprodurre o mettere in pausa';
+
+  @override
+  String get playerGuideTapBody =>
+      'Tocca il video una volta per metterlo in pausa. Toccalo di nuovo per riprendere.';
+
+  @override
+  String get playerGuideSeek => 'Tocca due volte per saltare';
+
+  @override
+  String get playerGuideSeekBody =>
+      'Tocca due volte a sinistra per tornare indietro di 10 secondi o a destra per avanzare di 10 secondi.';
+
+  @override
+  String get playerGuideEdges => 'Scorri lungo i bordi';
+
+  @override
+  String get playerGuideEdgesBody =>
+      'Scorri verso l’alto o il basso sul bordo sinistro per la luminosità e sul destro per il volume.';
+
+  @override
+  String get playerGuideDone => 'Ho capito';
+
+  @override
   String get homeNoWatchHistory =>
       'Guarda un video per iniziare la cronologia.';
 

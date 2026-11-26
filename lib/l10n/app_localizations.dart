@@ -192,6 +192,60 @@ abstract class AppLocalizations {
   /// **'Top albums'**
   String get homeTopAlbums;
 
+  /// No description provided for @playerGuideSwipe.
+  ///
+  /// In en, this message translates to:
+  /// **'Swipe up'**
+  String get playerGuideSwipe;
+
+  /// No description provided for @playerGuideSwipeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Move to the next video in your camera roll.'**
+  String get playerGuideSwipeBody;
+
+  /// No description provided for @playerGuideTap.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to play or pause'**
+  String get playerGuideTap;
+
+  /// No description provided for @playerGuideTapBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the video once to pause. Tap again to resume.'**
+  String get playerGuideTapBody;
+
+  /// No description provided for @playerGuideSeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Double-tap to seek'**
+  String get playerGuideSeek;
+
+  /// No description provided for @playerGuideSeekBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Double-tap the left side to go back 10 seconds or the right side to skip ahead 10 seconds.'**
+  String get playerGuideSeekBody;
+
+  /// No description provided for @playerGuideEdges.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag along the edges'**
+  String get playerGuideEdges;
+
+  /// No description provided for @playerGuideEdgesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Slide up or down on the left edge for brightness and on the right edge for volume.'**
+  String get playerGuideEdgesBody;
+
+  /// No description provided for @playerGuideDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Got it'**
+  String get playerGuideDone;
+
   /// No description provided for @homeNoWatchHistory.
   ///
   /// In en, this message translates to:
