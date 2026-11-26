@@ -984,4 +984,13 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get retry => '다시 시도';
+
+  @override
+  String get settingsLanguage => '언어';
+
+  @override
+  String get settingsSystemLanguage => '시스템 기본값';
+
+  @override
+  String get settingsLanguageSaveFailed => '언어를 저장하지 못했어요. 다시 시도해 주세요.';
 }

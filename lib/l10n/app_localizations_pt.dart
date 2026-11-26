@@ -1043,4 +1043,14 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get retry => 'Tentar novamente';
+
+  @override
+  String get settingsLanguage => 'Idioma';
+
+  @override
+  String get settingsSystemLanguage => 'Padrão do sistema';
+
+  @override
+  String get settingsLanguageSaveFailed =>
+      'Não foi possível salvar o idioma. Tente novamente.';
 }

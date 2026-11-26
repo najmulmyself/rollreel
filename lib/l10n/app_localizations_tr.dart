@@ -1010,4 +1010,14 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get retry => 'Tekrar Dene';
+
+  @override
+  String get settingsLanguage => 'Dil';
+
+  @override
+  String get settingsSystemLanguage => 'Sistem varsayılanı';
+
+  @override
+  String get settingsLanguageSaveFailed =>
+      'Dil kaydedilemedi. Lütfen tekrar deneyin.';
 }

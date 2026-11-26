@@ -275,5 +275,8 @@
   "active": "ATTIVO",
   "pro": "PRO",
   "plus": "PLUS",
-  "retry": "Riprova"
+  "retry": "Riprova",
+  "settingsLanguage": "Lingua",
+  "settingsSystemLanguage": "Lingua di sistema",
+  "settingsLanguageSaveFailed": "Impossibile salvare la lingua. Riprova."
 }

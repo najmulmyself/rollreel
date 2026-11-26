@@ -275,5 +275,8 @@
   "active": "已激活",
   "pro": "PRO",
   "plus": "PLUS",
-  "retry": "重试"
+  "retry": "重试",
+  "settingsLanguage": "语言",
+  "settingsSystemLanguage": "跟随系统",
+  "settingsLanguageSaveFailed": "无法保存语言，请重试。"
 }

@@ -275,5 +275,8 @@
   "active": "ETKİN",
   "pro": "PRO",
   "plus": "PLUS",
-  "retry": "Tekrar Dene"
+  "retry": "Tekrar Dene",
+  "settingsLanguage": "Dil",
+  "settingsSystemLanguage": "Sistem varsayılanı",
+  "settingsLanguageSaveFailed": "Dil kaydedilemedi. Lütfen tekrar deneyin."
 }

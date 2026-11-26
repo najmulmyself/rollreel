@@ -275,5 +275,8 @@
   "active": "АКТИВНО",
   "pro": "PRO",
   "plus": "PLUS",
-  "retry": "Повторить"
+  "retry": "Повторить",
+  "settingsLanguage": "Язык",
+  "settingsSystemLanguage": "Язык системы",
+  "settingsLanguageSaveFailed": "Не удалось сохранить язык. Попробуйте ещё раз."
 }

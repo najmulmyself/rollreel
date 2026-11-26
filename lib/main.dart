@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 
+import 'core/settings/app_locale_provider.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/colors.dart';
 import 'l10n/app_localizations.dart';
@@ -19,11 +20,12 @@ void main() {
   });
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final locale = ref.watch(appLocaleProvider);
     return ValueListenableBuilder<bool>(
       valueListenable: RRColors.isDark,
       builder: (context, _, _) => MaterialApp(
@@ -33,6 +35,7 @@ class MyApp extends StatelessWidget {
         themeMode: ThemeMode.dark,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
+        locale: locale,
         home: const AppRouter(),
       ),
     );

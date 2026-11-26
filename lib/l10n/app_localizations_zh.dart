@@ -976,4 +976,13 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get retry => '重试';
+
+  @override
+  String get settingsLanguage => '语言';
+
+  @override
+  String get settingsSystemLanguage => '跟随系统';
+
+  @override
+  String get settingsLanguageSaveFailed => '无法保存语言，请重试。';
 }

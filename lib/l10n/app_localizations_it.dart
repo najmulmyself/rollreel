@@ -1046,4 +1046,14 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get retry => 'Riprova';
+
+  @override
+  String get settingsLanguage => 'Lingua';
+
+  @override
+  String get settingsSystemLanguage => 'Lingua di sistema';
+
+  @override
+  String get settingsLanguageSaveFailed =>
+      'Impossibile salvare la lingua. Riprova.';
 }

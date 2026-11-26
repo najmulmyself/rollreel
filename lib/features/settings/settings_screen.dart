@@ -8,6 +8,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/iap/iap_provider.dart';
+import '../../core/settings/app_locale_provider.dart';
 import '../../core/settings/settings_provider.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/typography.dart';
@@ -26,6 +27,22 @@ Color get _muted =>
     RRColors.isDark.value ? RRColors.textSecond : RRColors.brandMutedInk;
 Color get _accent =>
     RRColors.isDark.value ? const Color(0xFFA9DFFF) : RRColors.brandBlue;
+
+const _languageNames = {
+  'ar': 'العربية',
+  'de': 'Deutsch',
+  'en': 'English',
+  'es': 'Español',
+  'fr': 'Français',
+  'hi': 'हिन्दी',
+  'it': 'Italiano',
+  'ja': '日本語',
+  'ko': '한국어',
+  'pt': 'Português',
+  'ru': 'Русский',
+  'tr': 'Türkçe',
+  'zh': '中文',
+};
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({
@@ -151,10 +168,51 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     await ref.read(settingsProvider.notifier).setDefaultFilter(selection);
   }
 
+  Future<void> _pickLanguage() async {
+    HapticFeedback.selectionClick();
+    final current = ref.read(appLocaleProvider)?.languageCode ?? '';
+    final selection = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: _surface,
+      barrierColor: RRColors.isDark.value
+          ? Colors.black54
+          : const Color(0x6A0B2033),
+      isScrollControlled: true,
+      useSafeArea: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      clipBehavior: Clip.antiAlias,
+      sheetAnimationStyle: MediaQuery.disableAnimationsOf(context)
+          ? AnimationStyle.noAnimation
+          : const AnimationStyle(
+              duration: Duration(milliseconds: 200),
+              reverseDuration: Duration(milliseconds: 160),
+            ),
+      builder: (_) => _LanguageSheet(current: current),
+    );
+    if (!mounted || selection == null || selection == current) return;
+    try {
+      await ref
+          .read(appLocaleProvider.notifier)
+          .setLocale(selection.isEmpty ? null : Locale(selection));
+    } catch (_) {
+      if (!mounted) return;
+      _messenger.currentState?.showSnackBar(
+        SnackBar(
+          content: Text(
+            AppLocalizations.of(context)!.settingsLanguageSaveFailed,
+          ),
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final settings = ref.watch(settingsProvider);
+    final locale = ref.watch(appLocaleProvider);
     final notifier = ref.read(settingsProvider.notifier);
     final isPro = ref.watch(isProProvider);
     final package = ref.watch(_packageInfoProvider).valueOrNull;
@@ -236,6 +294,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           _SettingsSection(
                             title: l10n.appearanceSection,
                             rows: [
+                              _SettingsRow(
+                                icon: CupertinoIcons.globe,
+                                label: l10n.settingsLanguage,
+                                value: locale == null
+                                    ? l10n.settingsSystemLanguage
+                                    : _languageNames[locale.languageCode],
+                                onTap: _pickLanguage,
+                              ),
                               _SettingsToggle(
                                 icon: CupertinoIcons.moon_stars,
                                 label: l10n.darkMode,
@@ -532,7 +598,7 @@ class _SettingsSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          _SettingsGroup(children: rows, divided: true),
+          _SettingsGroup(divided: true, children: rows),
         ],
       ),
     );
@@ -693,6 +759,98 @@ class _SettingsToggle extends StatelessWidget {
             thumbColor: dark ? RRColors.bgDeep : Colors.white,
             inactiveThumbColor: Colors.white,
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LanguageSheet extends StatelessWidget {
+  const _LanguageSheet({required this.current});
+
+  final String current;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final languages = [
+      MapEntry('', l10n.settingsSystemLanguage),
+      for (final locale in AppLocalizations.supportedLocales)
+        MapEntry(locale.languageCode, _languageNames[locale.languageCode]!),
+    ];
+    return SafeArea(
+      top: false,
+      child: SizedBox(
+        height: MediaQuery.sizeOf(context).height * .75,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsetsDirectional.fromSTEB(20, 12, 20, 6),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Semantics(
+                      header: true,
+                      child: Text(
+                        l10n.settingsLanguage,
+                        style: RRTypography.title2.copyWith(
+                          color: _ink,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                  ),
+                  CupertinoButton(
+                    padding: const EdgeInsetsDirectional.only(start: 12),
+                    onPressed: () => Navigator.pop(context),
+                    child: Text(
+                      l10n.libraryClose,
+                      style: RRTypography.subheadline.copyWith(color: _accent),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.only(bottom: 12),
+                itemCount: languages.length,
+                itemBuilder: (context, index) {
+                  final language = languages[index];
+                  final selected = language.key == current;
+                  return Semantics(
+                    checked: selected,
+                    inMutuallyExclusiveGroup: true,
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                      ),
+                      title: Text(
+                        language.value,
+                        style: RRTypography.body.copyWith(
+                          color: selected ? _accent : _ink,
+                          fontWeight: selected
+                              ? FontWeight.w700
+                              : FontWeight.w400,
+                        ),
+                      ),
+                      trailing: selected
+                          ? Icon(
+                              CupertinoIcons.check_mark,
+                              color: _accent,
+                              size: 18,
+                            )
+                          : null,
+                      onTap: () {
+                        HapticFeedback.selectionClick();
+                        Navigator.pop(context, language.key);
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );

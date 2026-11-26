@@ -983,4 +983,13 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get retry => '再試行';
+
+  @override
+  String get settingsLanguage => '言語';
+
+  @override
+  String get settingsSystemLanguage => 'システムのデフォルト';
+
+  @override
+  String get settingsLanguageSaveFailed => '言語を保存できませんでした。もう一度お試しください。';
 }

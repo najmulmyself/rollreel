@@ -1026,4 +1026,13 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get retry => 'إعادة المحاولة';
+
+  @override
+  String get settingsLanguage => 'اللغة';
+
+  @override
+  String get settingsSystemLanguage => 'لغة الجهاز';
+
+  @override
+  String get settingsLanguageSaveFailed => 'تعذّر حفظ اللغة. حاول مرة أخرى.';
 }

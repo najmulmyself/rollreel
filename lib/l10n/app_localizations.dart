@@ -1937,6 +1937,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Retry'**
   String get retry;
+
+  /// No description provided for @settingsLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get settingsLanguage;
+
+  /// No description provided for @settingsSystemLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'System default'**
+  String get settingsSystemLanguage;
+
+  /// No description provided for @settingsLanguageSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t save your language. Please try again.'**
+  String get settingsLanguageSaveFailed;
 }
 
 class _AppLocalizationsDelegate

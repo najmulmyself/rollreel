@@ -459,5 +459,8 @@
   "active": "ACTIVE",
   "pro": "PRO",
   "plus": "PLUS",
-  "retry": "Retry"
+  "retry": "Retry",
+  "settingsLanguage": "Language",
+  "settingsSystemLanguage": "System default",
+  "settingsLanguageSaveFailed": "Couldn’t save your language. Please try again."
 }

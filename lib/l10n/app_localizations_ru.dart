@@ -1038,4 +1038,14 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get retry => 'Повторить';
+
+  @override
+  String get settingsLanguage => 'Язык';
+
+  @override
+  String get settingsSystemLanguage => 'Язык системы';
+
+  @override
+  String get settingsLanguageSaveFailed =>
+      'Не удалось сохранить язык. Попробуйте ещё раз.';
 }

@@ -1006,4 +1006,14 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get retry => 'पुनः प्रयास करें';
+
+  @override
+  String get settingsLanguage => 'भाषा';
+
+  @override
+  String get settingsSystemLanguage => 'सिस्टम की भाषा';
+
+  @override
+  String get settingsLanguageSaveFailed =>
+      'भाषा सहेजी नहीं जा सकी। फिर से कोशिश करें।';
 }

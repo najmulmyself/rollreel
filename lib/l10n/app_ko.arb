@@ -275,5 +275,8 @@
   "active": "사용 중",
   "pro": "PRO",
   "plus": "PLUS",
-  "retry": "다시 시도"
+  "retry": "다시 시도",
+  "settingsLanguage": "언어",
+  "settingsSystemLanguage": "시스템 기본값",
+  "settingsLanguageSaveFailed": "언어를 저장하지 못했어요. 다시 시도해 주세요."
 }
