@@ -23,6 +23,8 @@ import 'video_feed_item.dart';
 class FeedScreen extends ConsumerStatefulWidget {
   const FeedScreen({
     super.key,
+    required this.onOpenLibrary,
+    required this.onOpenSettings,
     this.onOpenBrowse,
     this.onOpenPaywall,
     this.onVaultChange,
@@ -33,6 +35,8 @@ class FeedScreen extends ConsumerStatefulWidget {
   });
 
   final VoidCallback? onOpenBrowse;
+  final VoidCallback onOpenLibrary;
+  final VoidCallback onOpenSettings;
   final Future<void> Function()? onOpenPaywall;
   final Future<void> Function(String, bool)? onVaultChange;
   final String? initialAssetId;
@@ -56,8 +60,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
   String _dateLabelText = '';
   String? _readyAssetId;
   bool _filterInitialized = false;
-  bool _navVisible = true;
-  Timer? _navHideTimer;
+  String? _controlsHiddenForAssetId;
   Timer? _dateLabelTimer;
 
   void _initializeDefaultFilter() {
@@ -95,18 +98,6 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     setState(() => _readyAssetId = assetId);
   }
 
-  void _handlePlayStateChanged(bool playing) {
-    widget.onPlayStateChanged?.call(playing);
-    _navHideTimer?.cancel();
-    if (playing) {
-      _navHideTimer = Timer(const Duration(milliseconds: 1200), () {
-        if (mounted) setState(() => _navVisible = false);
-      });
-    } else if (mounted && !_navVisible) {
-      setState(() => _navVisible = true);
-    }
-  }
-
   void _onPageSettled(int index) {
     final videos = ref.read(feedVideosProvider).valueOrNull;
     if (videos == null ||
@@ -121,12 +112,11 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     final dayChanged = !DateUtils.isSameDay(previousDay, next.createDateTime);
     final showDate = dayChanged && ref.read(settingsProvider).showDateLabels;
 
-    _navHideTimer?.cancel();
     setState(() {
       _preloadDirection = index < previousIndex ? -1 : 1;
       _currentIndex = index;
       _readyAssetId = null;
-      _navVisible = true;
+      _controlsHiddenForAssetId = null;
       if (showDate) {
         _showDateLabel = true;
         _dateLabelText = _fmtDateLabel(next.createDateTime);
@@ -176,7 +166,6 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
 
   @override
   void dispose() {
-    _navHideTimer?.cancel();
     _dateLabelTimer?.cancel();
     _controller?.dispose();
     super.dispose();
@@ -299,6 +288,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
     }
 
     final safeIndex = _currentIndex.clamp(0, videos.length - 1);
+    final controlsVisible = _controlsHiddenForAssetId != videos[safeIndex].id;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -321,7 +311,12 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
                 if (controller != null) _markPlaybackReady(videos[index].id);
               },
               onDelete: () => _deleteCurrentVideo(videos),
-              onPlayStateChanged: _handlePlayStateChanged,
+              onPlayStateChanged: widget.onPlayStateChanged,
+              onControlsVisibilityChanged: (visible) => setState(() {
+                _controlsHiddenForAssetId = visible ? null : videos[index].id;
+              }),
+              onOpenLibrary: widget.onOpenLibrary,
+              onOpenSettings: widget.onOpenSettings,
               onOpenPaywall: widget.onOpenPaywall,
               onVaultChange: widget.onVaultChange,
             ),
@@ -331,35 +326,31 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
             top: safeTop + 8,
             left: 0,
             right: 0,
-            child: IgnorePointer(
-              ignoring: !_navVisible,
-              child: AnimatedOpacity(
-                opacity: _navVisible ? 1.0 : 0.0,
-                duration: const Duration(milliseconds: 250),
-                child: _FilterTabs(
-                  activeFilter: activeFilter,
-                  onSearchTap: widget.onOpenBrowse,
-                  onBackTap: widget.onOpenBrowse,
-                  onFilterChanged: (f) {
-                    ref.read(feedFilterProvider.notifier).state = f;
-                    setState(() {
-                      _currentIndex = 0;
-                      _readyAssetId = null;
-                    });
-                    if (_pageController.hasClients) {
-                      _pageController.jumpToPage(0);
+            child: PlayerControlsVisibility(
+              visible: controlsVisible,
+              child: _FilterTabs(
+                activeFilter: activeFilter,
+                onSearchTap: widget.onOpenBrowse,
+                onBackTap: widget.onOpenBrowse,
+                onFilterChanged: (f) {
+                  ref.read(feedFilterProvider.notifier).state = f;
+                  setState(() {
+                    _currentIndex = 0;
+                    _readyAssetId = null;
+                  });
+                  if (_pageController.hasClients) {
+                    _pageController.jumpToPage(0);
+                  }
+                  // Show date label for first video after filter change
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    final updated = ref.read(feedVideosProvider).valueOrNull;
+                    if (updated != null &&
+                        updated.isNotEmpty &&
+                        settings.showDateLabels) {
+                      _showInitialDateLabel(updated);
                     }
-                    // Show date label for first video after filter change
-                    WidgetsBinding.instance.addPostFrameCallback((_) {
-                      final updated = ref.read(feedVideosProvider).valueOrNull;
-                      if (updated != null &&
-                          updated.isNotEmpty &&
-                          settings.showDateLabels) {
-                        _showInitialDateLabel(updated);
-                      }
-                    });
-                  },
-                ),
+                  });
+                },
               ),
             ),
           ),
@@ -369,7 +360,10 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
               top: safeTop + 56,
               left: 0,
               right: 0,
-              child: Center(child: DateLabel(label: _dateLabelText)),
+              child: PlayerControlsVisibility(
+                visible: controlsVisible,
+                child: Center(child: DateLabel(label: _dateLabelText)),
+              ),
             ),
           // ── Limited Photo Library access banner ──────────────────────────
           if (isLimitedAccess)
@@ -377,13 +371,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> {
               top: safeTop + 52,
               left: 0,
               right: 0,
-              child: IgnorePointer(
-                ignoring: !_navVisible,
-                child: AnimatedOpacity(
-                  opacity: _navVisible ? 1.0 : 0.0,
-                  duration: const Duration(milliseconds: 250),
-                  child: _LimitedAccessBanner(accessibleCount: videos.length),
-                ),
+              child: PlayerControlsVisibility(
+                visible: controlsVisible,
+                child: _LimitedAccessBanner(accessibleCount: videos.length),
               ),
             ),
         ],

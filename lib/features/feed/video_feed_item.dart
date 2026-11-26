@@ -32,9 +32,12 @@ class VideoFeedItem extends ConsumerStatefulWidget {
     required this.asset,
     required this.isActive,
     required this.onControllerReady,
+    required this.onOpenLibrary,
+    required this.onOpenSettings,
     this.preload = false,
     this.onDelete,
     this.onPlayStateChanged,
+    this.onControlsVisibilityChanged,
     this.onOpenPaywall,
     this.onVaultChange,
   });
@@ -43,8 +46,11 @@ class VideoFeedItem extends ConsumerStatefulWidget {
   final bool isActive;
   final bool preload;
   final void Function(VideoPlayerController?) onControllerReady;
+  final VoidCallback onOpenLibrary;
+  final VoidCallback onOpenSettings;
   final VoidCallback? onDelete;
   final ValueChanged<bool>? onPlayStateChanged;
+  final ValueChanged<bool>? onControlsVisibilityChanged;
   final Future<void> Function()? onOpenPaywall;
   final Future<void> Function(String, bool)? onVaultChange;
 
@@ -91,13 +97,14 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
   void _scheduleControlsAutoHide() {
     _controlsHideTimer?.cancel();
     _controlsHideTimer = Timer(const Duration(milliseconds: 1000), () {
-      if (mounted) setState(() => _controlsVisible = false);
+      if (mounted && widget.isActive) _setControlsVisible(false);
     });
   }
 
-  void _showControls() {
-    _controlsHideTimer?.cancel();
-    if (mounted) setState(() => _controlsVisible = true);
+  void _setControlsVisible(bool visible) {
+    if (visible == _controlsVisible) return;
+    setState(() => _controlsVisible = visible);
+    widget.onControlsVisibilityChanged?.call(visible);
   }
 
   @override
@@ -328,7 +335,8 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
     if (nowPlaying) {
       _scheduleControlsAutoHide();
     } else {
-      _showControls();
+      _controlsHideTimer?.cancel();
+      _setControlsVisible(true);
     }
     Future.delayed(const Duration(milliseconds: 750), () {
       if (mounted) setState(() => _showPlayIcon = false);
@@ -747,17 +755,20 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
               alignment: const Alignment(1, -0.05),
               child: Padding(
                 padding: const EdgeInsets.only(right: RRSpace.sp16),
-                child: _Sidebar(
-                  asset: widget.asset,
-                  isFavorited: isFavorited,
-                  onFavorite: () {
-                    HapticFeedback.lightImpact();
-                    ref
-                        .read(favoritesIdsProvider.notifier)
-                        .toggle(widget.asset.id);
-                  },
-                  onFullscreen: () => _openLandscape(context),
-                  onOptions: () => _showOptions(context),
+                child: PlayerControlsVisibility(
+                  visible: _controlsVisible,
+                  child: _Sidebar(
+                    asset: widget.asset,
+                    isFavorited: isFavorited,
+                    onFavorite: () {
+                      HapticFeedback.lightImpact();
+                      ref
+                          .read(favoritesIdsProvider.notifier)
+                          .toggle(widget.asset.id);
+                    },
+                    onFullscreen: () => _openLandscape(context),
+                    onOptions: () => _showOptions(context),
+                  ),
                 ),
               ),
             ),
@@ -768,28 +779,56 @@ class _VideoFeedItemState extends ConsumerState<VideoFeedItem> {
               left: RRSpace.sp16,
               right: RRSpace.sp16,
               bottom: safeBottom + 8,
-              child: IgnorePointer(
-                ignoring: !_controlsVisible,
+              child: PlayerControlsVisibility(
+                visible: _controlsVisible,
                 child: AnimatedSlide(
-                  duration: const Duration(milliseconds: 220),
+                  duration: MediaQuery.disableAnimationsOf(context)
+                      ? Duration.zero
+                      : const Duration(milliseconds: 220),
                   curve: Curves.easeOutCubic,
                   offset: _controlsVisible ? Offset.zero : const Offset(0, 0.3),
-                  child: AnimatedOpacity(
-                    duration: const Duration(milliseconds: 220),
-                    opacity: _controlsVisible ? 1.0 : 0.0,
-                    child: _InfoCard(
-                      asset: widget.asset,
-                      title: _title,
-                      controller: controller,
-                      onTogglePlay: _togglePlay,
-                      onSeekPrev: () => _seekBy(const Duration(seconds: -10)),
-                      onSeekNext: () => _seekBy(const Duration(seconds: 10)),
-                    ),
+                  child: _InfoCard(
+                    asset: widget.asset,
+                    title: _title,
+                    controller: controller,
+                    onOpenLibrary: widget.onOpenLibrary,
+                    onOpenSettings: widget.onOpenSettings,
+                    onTogglePlay: _togglePlay,
+                    onSeekPrev: () => _seekBy(const Duration(seconds: -10)),
+                    onSeekNext: () => _seekBy(const Duration(seconds: 10)),
                   ),
                 ),
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+class PlayerControlsVisibility extends StatelessWidget {
+  const PlayerControlsVisibility({
+    super.key,
+    required this.visible,
+    required this.child,
+  });
+
+  final bool visible;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      ignoring: !visible,
+      child: ExcludeSemantics(
+        excluding: !visible,
+        child: AnimatedOpacity(
+          opacity: visible ? 1.0 : 0.0,
+          duration: MediaQuery.disableAnimationsOf(context)
+              ? Duration.zero
+              : const Duration(milliseconds: 220),
+          child: child,
+        ),
       ),
     );
   }
@@ -995,6 +1034,8 @@ class _InfoCard extends StatelessWidget {
   const _InfoCard({
     required this.asset,
     required this.controller,
+    required this.onOpenLibrary,
+    required this.onOpenSettings,
     required this.onTogglePlay,
     required this.onSeekPrev,
     required this.onSeekNext,
@@ -1004,6 +1045,8 @@ class _InfoCard extends StatelessWidget {
   final AssetEntity asset;
   final String? title;
   final VideoPlayerController controller;
+  final VoidCallback onOpenLibrary;
+  final VoidCallback onOpenSettings;
   final VoidCallback onTogglePlay;
   final VoidCallback onSeekPrev;
   final VoidCallback onSeekNext;
@@ -1092,6 +1135,8 @@ class _InfoCard extends StatelessWidget {
         const SizedBox(height: 16),
         _ControlsRow(
           controller: controller,
+          onOpenLibrary: onOpenLibrary,
+          onOpenSettings: onOpenSettings,
           onTogglePlay: onTogglePlay,
           onSeekPrev: onSeekPrev,
           onSeekNext: onSeekNext,
@@ -1104,12 +1149,16 @@ class _InfoCard extends StatelessWidget {
 class _ControlsRow extends StatefulWidget {
   const _ControlsRow({
     required this.controller,
+    required this.onOpenLibrary,
+    required this.onOpenSettings,
     required this.onTogglePlay,
     required this.onSeekPrev,
     required this.onSeekNext,
   });
 
   final VideoPlayerController controller;
+  final VoidCallback onOpenLibrary;
+  final VoidCallback onOpenSettings;
   final VoidCallback onTogglePlay;
   final VoidCallback onSeekPrev;
   final VoidCallback onSeekNext;
@@ -1119,17 +1168,12 @@ class _ControlsRow extends StatefulWidget {
 }
 
 class _ControlsRowState extends State<_ControlsRow> {
-  late (bool, double) _playback;
-
-  (bool, double) get _currentPlayback {
-    final value = widget.controller.value;
-    return (value.isPlaying, value.playbackSpeed);
-  }
+  late bool _isPlaying;
 
   @override
   void initState() {
     super.initState();
-    _playback = _currentPlayback;
+    _isPlaying = widget.controller.value.isPlaying;
     widget.controller.addListener(_playbackChanged);
   }
 
@@ -1138,13 +1182,13 @@ class _ControlsRowState extends State<_ControlsRow> {
     super.didUpdateWidget(old);
     if (identical(old.controller, widget.controller)) return;
     old.controller.removeListener(_playbackChanged);
-    _playback = _currentPlayback;
+    _isPlaying = widget.controller.value.isPlaying;
     widget.controller.addListener(_playbackChanged);
   }
 
   void _playbackChanged() {
-    final playback = _currentPlayback;
-    if (playback != _playback) setState(() => _playback = playback);
+    final isPlaying = widget.controller.value.isPlaying;
+    if (isPlaying != _isPlaying) setState(() => _isPlaying = isPlaying);
   }
 
   @override
@@ -1155,16 +1199,14 @@ class _ControlsRowState extends State<_ControlsRow> {
 
   @override
   Widget build(BuildContext context) {
-    final (isPlaying, playbackSpeed) = _playback;
+    final l10n = AppLocalizations.of(context)!;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _SpeedBtn(
-          label: '0.5x',
-          active: playbackSpeed == 0.5,
-          onTap: () => widget.controller.setPlaybackSpeed(
-            playbackSpeed == 0.5 ? 1.0 : 0.5,
-          ),
+        _CardIconBtn(
+          icon: CupertinoIcons.folder,
+          semanticLabel: l10n.library,
+          onTap: widget.onOpenLibrary,
         ),
         _CardIconBtn(
           icon: CupertinoIcons.backward_end_fill,
@@ -1183,7 +1225,7 @@ class _ControlsRowState extends State<_ControlsRow> {
               shape: BoxShape.circle,
             ),
             child: Icon(
-              isPlaying ? CupertinoIcons.pause_fill : CupertinoIcons.play_fill,
+              _isPlaying ? CupertinoIcons.pause_fill : CupertinoIcons.play_fill,
               color: Colors.white,
               size: 26,
             ),
@@ -1195,49 +1237,12 @@ class _ControlsRowState extends State<_ControlsRow> {
           size: 40,
           iconSize: 18,
         ),
-        _SpeedBtn(
-          label: '1.0x',
-          active: playbackSpeed == 1.0,
-          onTap: () => widget.controller.setPlaybackSpeed(1.0),
+        _CardIconBtn(
+          icon: CupertinoIcons.gear_alt,
+          semanticLabel: l10n.settings,
+          onTap: widget.onOpenSettings,
         ),
       ],
-    );
-  }
-}
-
-class _SpeedBtn extends StatelessWidget {
-  const _SpeedBtn({required this.label, required this.active, this.onTap});
-  final String label;
-  final bool active;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            label,
-            style: TextStyle(
-              color: active ? RRColors.accentViolet : Colors.white,
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            'Speed',
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.5),
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -1245,28 +1250,34 @@ class _SpeedBtn extends StatelessWidget {
 class _CardIconBtn extends StatelessWidget {
   const _CardIconBtn({
     required this.icon,
-    this.onTap,
+    required this.onTap,
+    this.semanticLabel,
     this.size = 44,
     this.iconSize = 20,
   });
   final IconData icon;
-  final VoidCallback? onTap;
+  final VoidCallback onTap;
+  final String? semanticLabel;
   final double size;
   final double iconSize;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.08),
-          shape: BoxShape.circle,
+    return Semantics(
+      button: true,
+      label: semanticLabel,
+      child: GestureDetector(
+        onTap: onTap,
+        behavior: HitTestBehavior.opaque,
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.08),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: Colors.white, size: iconSize),
         ),
-        child: Icon(icon, color: Colors.white, size: iconSize),
       ),
     );
   }

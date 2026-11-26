@@ -145,6 +145,12 @@ class _MainShellState extends ConsumerState<MainShell> {
     );
   }
 
+  void _leavePlayerForTab(BuildContext playerContext, int tab) {
+    if (ModalRoute.isCurrentOf(playerContext) != true) return;
+    _setTab(tab);
+    Navigator.of(playerContext).pop();
+  }
+
   // The video player is a full-screen route pushed from the floating center
   // button (or from tapping a video in Library/Favorites), not one of the
   // persistent bottom-nav tabs.
@@ -155,9 +161,11 @@ class _MainShellState extends ConsumerState<MainShell> {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
         fullscreenDialog: true,
-        builder: (_) => FeedScreen(
+        builder: (playerContext) => FeedScreen(
           initialAssetId: assetId,
           onOpenBrowse: () => Navigator.of(context).pop(),
+          onOpenLibrary: () => _leavePlayerForTab(playerContext, 1),
+          onOpenSettings: () => _leavePlayerForTab(playerContext, 3),
           onVaultChange: _changeVaultMembership,
           onOpenPaywall: () async {
             await _openPaywall(PaywallEntry.speed);
@@ -175,8 +183,10 @@ class _MainShellState extends ConsumerState<MainShell> {
     if (!mounted) return;
     await Navigator.of(context).push<void>(
       MaterialPageRoute<void>(
-        builder: (_) => OnThisDayScreen(
+        builder: (playerContext) => OnThisDayScreen(
           initialAssetId: assetId,
+          onOpenLibrary: () => _leavePlayerForTab(playerContext, 1),
+          onOpenSettings: () => _leavePlayerForTab(playerContext, 3),
           onVaultChange: _changeVaultMembership,
         ),
       ),
