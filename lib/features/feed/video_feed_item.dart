@@ -938,31 +938,30 @@ class _Sidebar extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         _SideBtn(
-          icon: isFavorited ? CupertinoIcons.heart_fill : CupertinoIcons.heart,
-          color: Colors.white,
-          bgColor: isFavorited
-              ? RRColors.accentViolet
-              : Colors.black.withValues(alpha: 0.32),
+          icon: isFavorited
+              ? CupertinoIcons.suit_heart_fill
+              : CupertinoIcons.suit_heart,
+          selected: isFavorited,
           label: l10n.like,
           onTap: onFavorite,
         ),
         const SizedBox(height: 22),
         Builder(
           builder: (btnContext) => _SideBtn(
-            icon: CupertinoIcons.share,
+            icon: CupertinoIcons.arrowshape_turn_up_right,
             label: l10n.share,
             onTap: () => _share(btnContext),
           ),
         ),
         const SizedBox(height: 22),
         _SideBtn(
-          icon: Icons.fullscreen_rounded,
+          icon: CupertinoIcons.arrow_up_left_arrow_down_right,
           label: l10n.expand,
           onTap: onFullscreen,
         ),
         const SizedBox(height: 22),
         _SideBtn(
-          icon: CupertinoIcons.ellipsis,
+          icon: CupertinoIcons.ellipsis_vertical,
           semanticLabel: l10n.libraryVideoOptions(
             asset.title ?? l10n.videoFallbackTitle,
           ),
@@ -977,15 +976,13 @@ class _SideBtn extends StatelessWidget {
   const _SideBtn({
     required this.icon,
     required this.onTap,
-    this.color = Colors.white,
-    this.bgColor,
+    this.selected,
     this.label,
     this.semanticLabel,
   });
   final IconData icon;
   final VoidCallback onTap;
-  final Color color;
-  final Color? bgColor;
+  final bool? selected;
   final String? label;
   final String? semanticLabel;
 
@@ -994,6 +991,7 @@ class _SideBtn extends StatelessWidget {
     return Semantics(
       button: true,
       label: semanticLabel,
+      selected: selected,
       child: GestureDetector(
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
@@ -1004,10 +1002,13 @@ class _SideBtn extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: bgColor ?? Colors.black.withValues(alpha: 0.32),
+                color: selected == true
+                    ? RRColors.accentViolet
+                    : RRColors.brandInk.withValues(alpha: 0.68),
                 shape: BoxShape.circle,
+                border: Border.all(color: const Color(0x40FFFFFF)),
               ),
-              child: Icon(icon, color: color, size: 22),
+              child: Icon(icon, color: Colors.white, size: 22),
             ),
             if (label != null) ...[
               const SizedBox(height: 4),
