@@ -1063,4 +1063,17 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get updateStoreUnavailable =>
       'Не удалось открыть App Store. Попробуйте ещё раз.';
+
+  @override
+  String get settingsCurrentPlan => 'Текущий план';
+
+  @override
+  String get settingsFreePlan => 'Бесплатный план';
+
+  @override
+  String get settingsProPlan => 'План Pro';
+
+  @override
+  String get settingsFreePlanDescription =>
+      'Перейдите на Pro для просмотра без рекламы и доступа к личному хранилищу.';
 }

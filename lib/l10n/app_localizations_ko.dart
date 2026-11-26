@@ -1007,4 +1007,16 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get updateStoreUnavailable => 'App Store를 열지 못했어요. 다시 시도해 주세요.';
+
+  @override
+  String get settingsCurrentPlan => '현재 요금제';
+
+  @override
+  String get settingsFreePlan => '무료 요금제';
+
+  @override
+  String get settingsProPlan => 'Pro 요금제';
+
+  @override
+  String get settingsFreePlanDescription => '업그레이드하고 광고 없는 재생과 비공개 보관함을 이용하세요.';
 }

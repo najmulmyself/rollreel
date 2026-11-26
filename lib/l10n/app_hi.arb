@@ -282,5 +282,9 @@
   "updateAvailableTitle": "RollReel का नया संस्करण आ गया है",
   "updateAvailableBody": "संस्करण {version} App Store पर उपलब्ध है। जब चाहें अपडेट करें।",
   "updateNow": "अपडेट करें",
-  "updateStoreUnavailable": "App Store नहीं खुल सका। फिर से कोशिश करें।"
+  "updateStoreUnavailable": "App Store नहीं खुल सका। फिर से कोशिश करें।",
+  "settingsCurrentPlan": "मौजूदा प्लान",
+  "settingsFreePlan": "मुफ़्त प्लान",
+  "settingsProPlan": "Pro प्लान",
+  "settingsFreePlanDescription": "बिना विज्ञापन वीडियो देखने और प्राइवेट वॉल्ट के लिए अपग्रेड करें।"
 }

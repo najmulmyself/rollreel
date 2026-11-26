@@ -1049,4 +1049,17 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get updateStoreUnavailable => 'تعذّر فتح App Store. حاول مرة أخرى.';
+
+  @override
+  String get settingsCurrentPlan => 'الخطة الحالية';
+
+  @override
+  String get settingsFreePlan => 'الخطة المجانية';
+
+  @override
+  String get settingsProPlan => 'خطة Pro';
+
+  @override
+  String get settingsFreePlanDescription =>
+      'رقِّ خطتك للمشاهدة بلا إعلانات واستخدام الخزنة الخاصة.';
 }

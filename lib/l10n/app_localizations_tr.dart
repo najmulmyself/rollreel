@@ -1035,4 +1035,17 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get updateStoreUnavailable =>
       'App Store açılamadı. Lütfen tekrar deneyin.';
+
+  @override
+  String get settingsCurrentPlan => 'Mevcut plan';
+
+  @override
+  String get settingsFreePlan => 'Ücretsiz plan';
+
+  @override
+  String get settingsProPlan => 'Pro planı';
+
+  @override
+  String get settingsFreePlanDescription =>
+      'Reklamsız oynatma ve Özel Kasa için yükseltin.';
 }

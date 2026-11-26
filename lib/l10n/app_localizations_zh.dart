@@ -999,4 +999,16 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get updateStoreUnavailable => '无法打开 App Store，请重试。';
+
+  @override
+  String get settingsCurrentPlan => '当前方案';
+
+  @override
+  String get settingsFreePlan => '免费方案';
+
+  @override
+  String get settingsProPlan => 'Pro 方案';
+
+  @override
+  String get settingsFreePlanDescription => '升级即可享受无广告播放和隐私保险箱。';
 }

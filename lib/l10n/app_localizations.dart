@@ -1979,6 +1979,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Couldn’t open the App Store. Please try again.'**
   String get updateStoreUnavailable;
+
+  /// No description provided for @settingsCurrentPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Current plan'**
+  String get settingsCurrentPlan;
+
+  /// No description provided for @settingsFreePlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Free plan'**
+  String get settingsFreePlan;
+
+  /// No description provided for @settingsProPlan.
+  ///
+  /// In en, this message translates to:
+  /// **'Pro plan'**
+  String get settingsProPlan;
+
+  /// No description provided for @settingsFreePlanDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade for ad-free playback and Privacy Vault.'**
+  String get settingsFreePlanDescription;
 }
 
 class _AppLocalizationsDelegate

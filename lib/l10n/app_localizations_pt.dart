@@ -1068,4 +1068,17 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get updateStoreUnavailable =>
       'Não foi possível abrir a App Store. Tente novamente.';
+
+  @override
+  String get settingsCurrentPlan => 'Plano atual';
+
+  @override
+  String get settingsFreePlan => 'Plano gratuito';
+
+  @override
+  String get settingsProPlan => 'Plano Pro';
+
+  @override
+  String get settingsFreePlanDescription =>
+      'Faça upgrade para reprodução sem anúncios e acesso ao Cofre privado.';
 }

@@ -1031,4 +1031,17 @@ class AppLocalizationsHi extends AppLocalizations {
   @override
   String get updateStoreUnavailable =>
       'App Store नहीं खुल सका। फिर से कोशिश करें।';
+
+  @override
+  String get settingsCurrentPlan => 'मौजूदा प्लान';
+
+  @override
+  String get settingsFreePlan => 'मुफ़्त प्लान';
+
+  @override
+  String get settingsProPlan => 'Pro प्लान';
+
+  @override
+  String get settingsFreePlanDescription =>
+      'बिना विज्ञापन वीडियो देखने और प्राइवेट वॉल्ट के लिए अपग्रेड करें।';
 }

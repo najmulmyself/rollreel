@@ -282,5 +282,9 @@
   "updateAvailableTitle": "Вышла новая версия RollReel",
   "updateAvailableBody": "Версия {version} доступна в App Store. Обновите приложение, когда вам будет удобно.",
   "updateNow": "Обновить",
-  "updateStoreUnavailable": "Не удалось открыть App Store. Попробуйте ещё раз."
+  "updateStoreUnavailable": "Не удалось открыть App Store. Попробуйте ещё раз.",
+  "settingsCurrentPlan": "Текущий план",
+  "settingsFreePlan": "Бесплатный план",
+  "settingsProPlan": "План Pro",
+  "settingsFreePlanDescription": "Перейдите на Pro для просмотра без рекламы и доступа к личному хранилищу."
 }

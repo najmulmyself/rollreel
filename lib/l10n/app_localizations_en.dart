@@ -1058,4 +1058,17 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get updateStoreUnavailable =>
       'Couldn’t open the App Store. Please try again.';
+
+  @override
+  String get settingsCurrentPlan => 'Current plan';
+
+  @override
+  String get settingsFreePlan => 'Free plan';
+
+  @override
+  String get settingsProPlan => 'Pro plan';
+
+  @override
+  String get settingsFreePlanDescription =>
+      'Upgrade for ad-free playback and Privacy Vault.';
 }

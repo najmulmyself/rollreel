@@ -15,6 +15,9 @@ import '../../core/theme/typography.dart';
 import '../../l10n/app_localizations.dart';
 
 final _packageInfoProvider = FutureProvider((_) => PackageInfo.fromPlatform());
+final _planReadyProvider = FutureProvider<void>(
+  (ref) => ref.watch(isProProvider.notifier).ready,
+);
 
 Color get _background =>
     RRColors.isDark.value ? RRColors.bgDeep : const Color(0xFFF4FAFF);
@@ -215,6 +218,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final locale = ref.watch(appLocaleProvider);
     final notifier = ref.read(settingsProvider.notifier);
     final isPro = ref.watch(isProProvider);
+    final planReady = ref.watch(_planReadyProvider).hasValue;
     final package = ref.watch(_packageInfoProvider).valueOrNull;
 
     return AnnotatedRegion(
@@ -244,8 +248,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         children: [
                           _SettingsGroup(
                             children: [
-                              _ProBanner(
-                                isPro: isPro,
+                              _PlanCard(
+                                isPro: planReady ? isPro : null,
                                 onPressed: widget.onOpenPaywall,
                               ),
                               _SettingsRow(
@@ -330,6 +334,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                               _SettingsRow(
                                 icon: CupertinoIcons.lock_shield_fill,
                                 label: l10n.privacyVault,
+                                badge: l10n.pro,
                                 description: l10n.settingsVaultDescription,
                                 onTap: widget.onOpenVault,
                               ),
@@ -499,10 +504,10 @@ class _SettingsHeaderState extends State<_SettingsHeader> {
   }
 }
 
-class _ProBanner extends StatelessWidget {
-  const _ProBanner({required this.isPro, required this.onPressed});
+class _PlanCard extends StatelessWidget {
+  const _PlanCard({required this.isPro, required this.onPressed});
 
-  final bool isPro;
+  final bool? isPro;
   final VoidCallback onPressed;
 
   @override
@@ -522,9 +527,9 @@ class _ProBanner extends StatelessWidget {
           ),
         ),
         child: InkWell(
-          onTap: onPressed,
+          onTap: isPro == null ? null : onPressed,
           child: Container(
-            constraints: const BoxConstraints(minHeight: 78),
+            constraints: const BoxConstraints(minHeight: 98),
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
             child: Row(
               children: [
@@ -546,21 +551,35 @@ class _ProBanner extends StatelessWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        l10n.paywallTitle,
-                        style: RRTypography.headline.copyWith(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const SizedBox(height: 3),
-                      Text(
-                        isPro
-                            ? l10n.settingsProActive
-                            : l10n.settingsProDescription,
+                        l10n.settingsCurrentPlan,
                         style: RRTypography.caption.copyWith(
                           color: const Color(0xFFD8ECF8),
                         ),
                       ),
+                      const SizedBox(height: 3),
+                      Text(
+                        switch (isPro) {
+                          true => l10n.settingsProPlan,
+                          false => l10n.settingsFreePlan,
+                          null => l10n.homeLoading,
+                        },
+                        style: RRTypography.headline.copyWith(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      if (isPro != null) ...[
+                        const SizedBox(height: 3),
+                        Text(
+                          isPro!
+                              ? l10n.settingsProActive
+                              : l10n.settingsFreePlanDescription,
+                          style: RRTypography.caption.copyWith(
+                            color: const Color(0xFFD8ECF8),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -647,6 +666,7 @@ class _SettingsRow extends StatelessWidget {
     required this.icon,
     required this.label,
     this.description,
+    this.badge,
     this.value,
     this.accessory,
     this.onTap,
@@ -655,6 +675,7 @@ class _SettingsRow extends StatelessWidget {
   final IconData icon;
   final String label;
   final String? description;
+  final String? badge;
   final String? value;
   final Widget? accessory;
   final VoidCallback? onTap;
@@ -689,12 +710,39 @@ class _SettingsRow extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    label,
-                    style: RRTypography.headline.copyWith(
-                      color: _ink,
-                      fontSize: 15,
-                    ),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        label,
+                        style: RRTypography.headline.copyWith(
+                          color: _ink,
+                          fontSize: 15,
+                        ),
+                      ),
+                      if (badge case final text?)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 3,
+                          ),
+                          decoration: BoxDecoration(
+                            color: _accent.withValues(alpha: .12),
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                          child: Text(
+                            text,
+                            style: RRTypography.caption.copyWith(
+                              color: _accent,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: .4,
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                   if (description case final description?) ...[
                     const SizedBox(height: 3),

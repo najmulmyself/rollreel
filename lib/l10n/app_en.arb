@@ -467,5 +467,9 @@
   "updateAvailableBody": "Version {version} is available on the App Store. Update when you’re ready.",
   "updateNow": "Update",
   "updateStoreUnavailable": "Couldn’t open the App Store. Please try again.",
-  "@updateAvailableBody": {"placeholders": {"version": {"type": "String", "example": "2.1.0"}}}
+  "@updateAvailableBody": {"placeholders": {"version": {"type": "String", "example": "2.1.0"}}},
+  "settingsCurrentPlan": "Current plan",
+  "settingsFreePlan": "Free plan",
+  "settingsProPlan": "Pro plan",
+  "settingsFreePlanDescription": "Upgrade for ad-free playback and Privacy Vault."
 }

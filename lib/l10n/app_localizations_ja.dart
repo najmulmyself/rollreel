@@ -1006,4 +1006,17 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get updateStoreUnavailable => 'App Storeを開けませんでした。もう一度お試しください。';
+
+  @override
+  String get settingsCurrentPlan => '現在のプラン';
+
+  @override
+  String get settingsFreePlan => '無料プラン';
+
+  @override
+  String get settingsProPlan => 'Proプラン';
+
+  @override
+  String get settingsFreePlanDescription =>
+      'アップグレードすると、広告なしの再生とプライベート保管庫を利用できます。';
 }

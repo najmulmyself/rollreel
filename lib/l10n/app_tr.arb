@@ -282,5 +282,9 @@
   "updateAvailableTitle": "RollReel’in yeni sürümü burada",
   "updateAvailableBody": "{version} sürümü App Store’da mevcut. Hazır olduğunuzda güncelleyin.",
   "updateNow": "Güncelle",
-  "updateStoreUnavailable": "App Store açılamadı. Lütfen tekrar deneyin."
+  "updateStoreUnavailable": "App Store açılamadı. Lütfen tekrar deneyin.",
+  "settingsCurrentPlan": "Mevcut plan",
+  "settingsFreePlan": "Ücretsiz plan",
+  "settingsProPlan": "Pro planı",
+  "settingsFreePlanDescription": "Reklamsız oynatma ve Özel Kasa için yükseltin."
 }
