@@ -766,7 +766,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get vaultLockedSubtitle =>
-      'Your private videos are safely locked and only you can access them.';
+      'Unlock with biometrics or your device passcode.';
 
   @override
   String get unlockWithFaceId => 'Unlock with Face ID';
@@ -790,10 +790,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get vaultBadgeSecureSub => 'Only you can access your vault';
 
   @override
-  String get vaultBadgeEncryptedTitle => 'End-to-End Encrypted';
+  String get vaultBadgePhotosTitle => 'Original videos';
 
   @override
-  String get vaultBadgeEncryptedSub => 'Your videos stay fully encrypted';
+  String get vaultBadgePhotosSub => 'Stay in Photos';
 
   @override
   String get vaultBadgeHiddenTitle => 'Hidden & Discreet';
@@ -815,7 +815,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get vaultEmptySubtitle =>
-      'Keep your private videos safe and secure in one place.';
+      'Adding a video to the Vault hides it in RollReel. The original stays in Photos.';
 
   @override
   String get addVideosToVault => 'Add Videos to Vault';

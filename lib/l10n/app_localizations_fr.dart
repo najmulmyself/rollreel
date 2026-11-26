@@ -774,7 +774,8 @@ class AppLocalizationsFr extends AppLocalizations {
   String get vaultLocked => 'Coffre verrouillé';
 
   @override
-  String get vaultLockedSubtitle => 'Vos vidéos privées sont en sécurité ici';
+  String get vaultLockedSubtitle =>
+      'Déverrouillez le coffre avec la biométrie ou le code de votre appareil.';
 
   @override
   String get unlockWithFaceId => 'Déverrouiller avec Face ID';
@@ -799,10 +800,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get vaultBadgeSecureSub => 'Only you can access your vault';
 
   @override
-  String get vaultBadgeEncryptedTitle => 'End-to-End Encrypted';
+  String get vaultBadgePhotosTitle => 'Vidéos d’origine';
 
   @override
-  String get vaultBadgeEncryptedSub => 'Your videos stay fully encrypted';
+  String get vaultBadgePhotosSub => 'Restent dans Photos';
 
   @override
   String get vaultBadgeHiddenTitle => 'Hidden & Discreet';
@@ -824,7 +825,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get vaultEmptySubtitle =>
-      'Keep your private videos safe and secure in one place.';
+      'Ajouter une vidéo au coffre la masque dans RollReel. L’original reste dans l’app Photos.';
 
   @override
   String get addVideosToVault => 'Add Videos to Vault';

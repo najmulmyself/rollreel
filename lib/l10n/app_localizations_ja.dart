@@ -724,7 +724,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get vaultLocked => '金庫はロック中';
 
   @override
-  String get vaultLockedSubtitle => 'プライベートな動画はここで安全に保管';
+  String get vaultLockedSubtitle => '生体認証またはデバイスのパスコードで金庫を開きます。';
 
   @override
   String get unlockWithFaceId => 'Face ID でロック解除';
@@ -748,10 +748,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get vaultBadgeSecureSub => 'Only you can access your vault';
 
   @override
-  String get vaultBadgeEncryptedTitle => 'End-to-End Encrypted';
+  String get vaultBadgePhotosTitle => '元の動画';
 
   @override
-  String get vaultBadgeEncryptedSub => 'Your videos stay fully encrypted';
+  String get vaultBadgePhotosSub => '写真アプリに残ります';
 
   @override
   String get vaultBadgeHiddenTitle => 'Hidden & Discreet';
@@ -773,7 +773,7 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get vaultEmptySubtitle =>
-      'Keep your private videos safe and secure in one place.';
+      '金庫に追加した動画はRollReel内で非表示になります。元の動画は写真アプリに残ります。';
 
   @override
   String get addVideosToVault => 'Add Videos to Vault';

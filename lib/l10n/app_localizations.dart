@@ -1437,7 +1437,7 @@ abstract class AppLocalizations {
   /// No description provided for @vaultLockedSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Your private videos are safely locked and only you can access them.'**
+  /// **'Unlock with biometrics or your device passcode.'**
   String get vaultLockedSubtitle;
 
   /// No description provided for @unlockWithFaceId.
@@ -1482,17 +1482,17 @@ abstract class AppLocalizations {
   /// **'Only you can access your vault'**
   String get vaultBadgeSecureSub;
 
-  /// No description provided for @vaultBadgeEncryptedTitle.
+  /// No description provided for @vaultBadgePhotosTitle.
   ///
   /// In en, this message translates to:
-  /// **'End-to-End Encrypted'**
-  String get vaultBadgeEncryptedTitle;
+  /// **'Original videos'**
+  String get vaultBadgePhotosTitle;
 
-  /// No description provided for @vaultBadgeEncryptedSub.
+  /// No description provided for @vaultBadgePhotosSub.
   ///
   /// In en, this message translates to:
-  /// **'Your videos stay fully encrypted'**
-  String get vaultBadgeEncryptedSub;
+  /// **'Stay in Photos'**
+  String get vaultBadgePhotosSub;
 
   /// No description provided for @vaultBadgeHiddenTitle.
   ///
@@ -1533,7 +1533,7 @@ abstract class AppLocalizations {
   /// No description provided for @vaultEmptySubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Keep your private videos safe and secure in one place.'**
+  /// **'Adding a video to the Vault hides it in RollReel. The original stays in Photos.'**
   String get vaultEmptySubtitle;
 
   /// No description provided for @addVideosToVault.

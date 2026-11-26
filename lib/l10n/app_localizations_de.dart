@@ -775,7 +775,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get vaultLocked => 'Tresor gesperrt';
 
   @override
-  String get vaultLockedSubtitle => 'Deine privaten Videos sind hier sicher';
+  String get vaultLockedSubtitle =>
+      'Entsperre den Tresor mit Biometrie oder deinem Gerätecode.';
 
   @override
   String get unlockWithFaceId => 'Mit Face ID entsperren';
@@ -800,10 +801,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get vaultBadgeSecureSub => 'Only you can access your vault';
 
   @override
-  String get vaultBadgeEncryptedTitle => 'End-to-End Encrypted';
+  String get vaultBadgePhotosTitle => 'Originalvideos';
 
   @override
-  String get vaultBadgeEncryptedSub => 'Your videos stay fully encrypted';
+  String get vaultBadgePhotosSub => 'Bleiben in Fotos';
 
   @override
   String get vaultBadgeHiddenTitle => 'Hidden & Discreet';
@@ -827,7 +828,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get vaultEmptySubtitle =>
-      'Keep your private videos safe and secure in one place.';
+      'Wenn du ein Video zum Tresor hinzufügst, wird es in RollReel ausgeblendet. Das Original bleibt in der Fotos-App.';
 
   @override
   String get addVideosToVault => 'Add Videos to Vault';

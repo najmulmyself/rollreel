@@ -742,7 +742,8 @@ class AppLocalizationsTr extends AppLocalizations {
   String get vaultLocked => 'Kasa Kilitli';
 
   @override
-  String get vaultLockedSubtitle => 'Gizli videoların burada güvende';
+  String get vaultLockedSubtitle =>
+      'Kasayı biyometrik doğrulamayla veya aygıt parolanızla açın.';
 
   @override
   String get unlockWithFaceId => 'Face ID ile Aç';
@@ -766,10 +767,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get vaultBadgeSecureSub => 'Only you can access your vault';
 
   @override
-  String get vaultBadgeEncryptedTitle => 'End-to-End Encrypted';
+  String get vaultBadgePhotosTitle => 'Orijinal videolar';
 
   @override
-  String get vaultBadgeEncryptedSub => 'Your videos stay fully encrypted';
+  String get vaultBadgePhotosSub => 'Fotoğraflar’da kalır';
 
   @override
   String get vaultBadgeHiddenTitle => 'Hidden & Discreet';
@@ -792,7 +793,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get vaultEmptySubtitle =>
-      'Keep your private videos safe and secure in one place.';
+      'Kasaya eklenen video RollReel içinde gizlenir. Orijinali Fotoğraflar uygulamasında kalır.';
 
   @override
   String get addVideosToVault => 'Add Videos to Vault';

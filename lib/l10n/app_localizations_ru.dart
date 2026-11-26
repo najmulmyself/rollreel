@@ -770,7 +770,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get vaultLocked => 'Хранилище заблокировано';
 
   @override
-  String get vaultLockedSubtitle => 'Ваши личные видео здесь в безопасности';
+  String get vaultLockedSubtitle =>
+      'Откройте хранилище с помощью биометрии или код-пароля устройства.';
 
   @override
   String get unlockWithFaceId => 'Разблокировать с Face ID';
@@ -794,10 +795,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get vaultBadgeSecureSub => 'Only you can access your vault';
 
   @override
-  String get vaultBadgeEncryptedTitle => 'End-to-End Encrypted';
+  String get vaultBadgePhotosTitle => 'Оригиналы видео';
 
   @override
-  String get vaultBadgeEncryptedSub => 'Your videos stay fully encrypted';
+  String get vaultBadgePhotosSub => 'Остаются в «Фото»';
 
   @override
   String get vaultBadgeHiddenTitle => 'Hidden & Discreet';
@@ -820,7 +821,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get vaultEmptySubtitle =>
-      'Keep your private videos safe and secure in one place.';
+      'Добавленное в хранилище видео скрывается в RollReel. Оригинал остаётся в приложении «Фото».';
 
   @override
   String get addVideosToVault => 'Add Videos to Vault';

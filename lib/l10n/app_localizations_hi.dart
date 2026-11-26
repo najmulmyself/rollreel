@@ -741,7 +741,8 @@ class AppLocalizationsHi extends AppLocalizations {
   String get vaultLocked => 'वॉल्ट लॉक है';
 
   @override
-  String get vaultLockedSubtitle => 'आपके निजी वीडियो यहाँ सुरक्षित हैं';
+  String get vaultLockedSubtitle =>
+      'बायोमेट्रिक्स या अपने डिवाइस के पासकोड से वॉल्ट खोलें।';
 
   @override
   String get unlockWithFaceId => 'Face ID से अनलॉक करें';
@@ -765,10 +766,10 @@ class AppLocalizationsHi extends AppLocalizations {
   String get vaultBadgeSecureSub => 'Only you can access your vault';
 
   @override
-  String get vaultBadgeEncryptedTitle => 'End-to-End Encrypted';
+  String get vaultBadgePhotosTitle => 'मूल वीडियो';
 
   @override
-  String get vaultBadgeEncryptedSub => 'Your videos stay fully encrypted';
+  String get vaultBadgePhotosSub => 'फ़ोटो ऐप में रहते हैं';
 
   @override
   String get vaultBadgeHiddenTitle => 'Hidden & Discreet';
@@ -790,7 +791,7 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get vaultEmptySubtitle =>
-      'Keep your private videos safe and secure in one place.';
+      'वॉल्ट में जोड़ा गया वीडियो RollReel में छिप जाता है। मूल वीडियो फ़ोटो ऐप में रहता है।';
 
   @override
   String get addVideosToVault => 'Add Videos to Vault';

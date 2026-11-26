@@ -717,7 +717,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get vaultLocked => '保险库已锁定';
 
   @override
-  String get vaultLockedSubtitle => '你的私密视频安全地保存在这里';
+  String get vaultLockedSubtitle => '使用生物识别或设备密码解锁保险库。';
 
   @override
   String get unlockWithFaceId => '使用 Face ID 解锁';
@@ -741,10 +741,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get vaultBadgeSecureSub => 'Only you can access your vault';
 
   @override
-  String get vaultBadgeEncryptedTitle => 'End-to-End Encrypted';
+  String get vaultBadgePhotosTitle => '原始视频';
 
   @override
-  String get vaultBadgeEncryptedSub => 'Your videos stay fully encrypted';
+  String get vaultBadgePhotosSub => '仍保留在“照片”中';
 
   @override
   String get vaultBadgeHiddenTitle => 'Hidden & Discreet';
@@ -766,7 +766,7 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get vaultEmptySubtitle =>
-      'Keep your private videos safe and secure in one place.';
+      '添加到保险库的视频会在 RollReel 中隐藏。原始视频仍保留在“照片”App 中。';
 
   @override
   String get addVideosToVault => 'Add Videos to Vault';

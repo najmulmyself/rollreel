@@ -358,9 +358,9 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
                 ),
                 Expanded(
                   child: _VaultBadge(
-                    icon: CupertinoIcons.lock_fill,
-                    title: l10n.vaultBadgeEncryptedTitle,
-                    subtitle: l10n.vaultBadgeEncryptedSub,
+                    icon: CupertinoIcons.photo_on_rectangle,
+                    title: l10n.vaultBadgePhotosTitle,
+                    subtitle: l10n.vaultBadgePhotosSub,
                   ),
                 ),
                 Expanded(
@@ -550,9 +550,9 @@ class _EmptyVault extends StatelessWidget {
                 Container(width: 1, height: 60, color: RRColors.divider),
                 Expanded(
                   child: _VaultBadge(
-                    icon: CupertinoIcons.checkmark_shield_fill,
-                    title: l10n.vaultBadgeEncryptedTitle,
-                    subtitle: l10n.vaultBadgeEncryptedSub,
+                    icon: CupertinoIcons.photo_on_rectangle,
+                    title: l10n.vaultBadgePhotosTitle,
+                    subtitle: l10n.vaultBadgePhotosSub,
                   ),
                 ),
                 Container(width: 1, height: 60, color: RRColors.divider),

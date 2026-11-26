@@ -762,7 +762,8 @@ class AppLocalizationsAr extends AppLocalizations {
   String get vaultLocked => 'الخزنة مقفلة';
 
   @override
-  String get vaultLockedSubtitle => 'مقاطعك الخاصة في أمان هنا';
+  String get vaultLockedSubtitle =>
+      'افتح الخزنة بالمصادقة البيومترية أو برمز دخول جهازك.';
 
   @override
   String get unlockWithFaceId => 'فتح باستخدام Face ID';
@@ -786,10 +787,10 @@ class AppLocalizationsAr extends AppLocalizations {
   String get vaultBadgeSecureSub => 'Only you can access your vault';
 
   @override
-  String get vaultBadgeEncryptedTitle => 'End-to-End Encrypted';
+  String get vaultBadgePhotosTitle => 'الفيديوهات الأصلية';
 
   @override
-  String get vaultBadgeEncryptedSub => 'Your videos stay fully encrypted';
+  String get vaultBadgePhotosSub => 'تبقى في تطبيق الصور';
 
   @override
   String get vaultBadgeHiddenTitle => 'Hidden & Discreet';
@@ -811,7 +812,7 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get vaultEmptySubtitle =>
-      'Keep your private videos safe and secure in one place.';
+      'عند إضافة فيديو إلى الخزنة، يختفي داخل RollReel. يبقى الفيديو الأصلي في تطبيق الصور.';
 
   @override
   String get addVideosToVault => 'Add Videos to Vault';

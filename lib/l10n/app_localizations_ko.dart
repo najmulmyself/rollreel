@@ -725,7 +725,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get vaultLocked => '금고 잠김';
 
   @override
-  String get vaultLockedSubtitle => '개인 동영상이 여기에 안전하게 보관됩니다';
+  String get vaultLockedSubtitle => '생체 인증이나 기기 암호로 금고의 잠금을 해제하세요.';
 
   @override
   String get unlockWithFaceId => 'Face ID로 잠금 해제';
@@ -749,10 +749,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get vaultBadgeSecureSub => 'Only you can access your vault';
 
   @override
-  String get vaultBadgeEncryptedTitle => 'End-to-End Encrypted';
+  String get vaultBadgePhotosTitle => '원본 동영상';
 
   @override
-  String get vaultBadgeEncryptedSub => 'Your videos stay fully encrypted';
+  String get vaultBadgePhotosSub => '사진 앱에 남습니다';
 
   @override
   String get vaultBadgeHiddenTitle => 'Hidden & Discreet';
@@ -774,7 +774,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get vaultEmptySubtitle =>
-      'Keep your private videos safe and secure in one place.';
+      '금고에 추가한 동영상은 RollReel에서 숨겨집니다. 원본은 사진 앱에 남아 있습니다.';
 
   @override
   String get addVideosToVault => 'Add Videos to Vault';

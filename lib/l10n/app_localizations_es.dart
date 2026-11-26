@@ -772,7 +772,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get vaultLocked => 'Bóveda bloqueada';
 
   @override
-  String get vaultLockedSubtitle => 'Tus videos privados están seguros aquí';
+  String get vaultLockedSubtitle =>
+      'Desbloquea la bóveda con biometría o con el código de tu dispositivo.';
 
   @override
   String get unlockWithFaceId => 'Desbloquear con Face ID';
@@ -797,10 +798,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get vaultBadgeSecureSub => 'Only you can access your vault';
 
   @override
-  String get vaultBadgeEncryptedTitle => 'End-to-End Encrypted';
+  String get vaultBadgePhotosTitle => 'Vídeos originales';
 
   @override
-  String get vaultBadgeEncryptedSub => 'Your videos stay fully encrypted';
+  String get vaultBadgePhotosSub => 'Siguen en Fotos';
 
   @override
   String get vaultBadgeHiddenTitle => 'Hidden & Discreet';
@@ -822,7 +823,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get vaultEmptySubtitle =>
-      'Keep your private videos safe and secure in one place.';
+      'Al añadir un vídeo a la bóveda, se oculta en RollReel. El original sigue en la app Fotos.';
 
   @override
   String get addVideosToVault => 'Add Videos to Vault';

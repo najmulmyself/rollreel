@@ -775,7 +775,8 @@ class AppLocalizationsIt extends AppLocalizations {
   String get vaultLocked => 'Cassaforte bloccata';
 
   @override
-  String get vaultLockedSubtitle => 'I tuoi video privati sono al sicuro qui';
+  String get vaultLockedSubtitle =>
+      'Sblocca la cassaforte con la biometria o con il codice del dispositivo.';
 
   @override
   String get unlockWithFaceId => 'Sblocca con Face ID';
@@ -800,10 +801,10 @@ class AppLocalizationsIt extends AppLocalizations {
   String get vaultBadgeSecureSub => 'Only you can access your vault';
 
   @override
-  String get vaultBadgeEncryptedTitle => 'End-to-End Encrypted';
+  String get vaultBadgePhotosTitle => 'Video originali';
 
   @override
-  String get vaultBadgeEncryptedSub => 'Your videos stay fully encrypted';
+  String get vaultBadgePhotosSub => 'Restano in Foto';
 
   @override
   String get vaultBadgeHiddenTitle => 'Hidden & Discreet';
@@ -825,7 +826,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get vaultEmptySubtitle =>
-      'Keep your private videos safe and secure in one place.';
+      'Un video aggiunto alla cassaforte viene nascosto in RollReel. L’originale resta nell’app Foto.';
 
   @override
   String get addVideosToVault => 'Add Videos to Vault';
