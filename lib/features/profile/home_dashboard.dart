@@ -255,6 +255,7 @@ class _MostWatchedRow extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final title = ref.watch(homeTitleProvider(asset)).valueOrNull;
     return _ActivityRow(
+      icon: CupertinoIcons.doc,
       label: title ?? l10n.videoFallbackTitle,
       value: l10n.homePlayCount(plays),
       onTap: onTap,
@@ -296,10 +297,16 @@ class _ActivityNote extends StatelessWidget {
 }
 
 class _ActivityRow extends StatelessWidget {
-  const _ActivityRow({required this.label, required this.value, this.onTap});
+  const _ActivityRow({
+    required this.label,
+    required this.value,
+    this.icon,
+    this.onTap,
+  });
 
   final String label;
   final String value;
+  final IconData? icon;
   final VoidCallback? onTap;
 
   @override
@@ -313,6 +320,10 @@ class _ActivityRow extends StatelessWidget {
       ),
       child: Row(
         children: [
+          if (icon case final symbol?) ...[
+            ExcludeSemantics(child: Icon(symbol, size: 22, color: homeAccent)),
+            const SizedBox(width: 10),
+          ],
           Expanded(child: Text(label, style: style)),
           const SizedBox(width: 8),
           Expanded(
