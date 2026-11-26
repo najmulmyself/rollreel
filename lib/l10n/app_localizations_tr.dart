@@ -125,19 +125,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get homeYourActivity => 'Etkinliğin';
 
   @override
-  String get homeEmptyTitle => 'İlk videon burada başlıyor';
-
-  @override
-  String get homeEmptyBody =>
-      'Kameranla bir video çek. Geri döndüğünde burada olacak.';
-
-  @override
-  String get homeOpenCamera => 'Kamerayı aç';
-
-  @override
-  String get homeCaptureFailed => 'RollReel videoyu çekemedi veya kaydedemedi.';
-
-  @override
   String get homeAccessTitle => 'Videolarını seç';
 
   @override

@@ -125,19 +125,6 @@ class AppLocalizationsHi extends AppLocalizations {
   String get homeYourActivity => 'आपकी गतिविधि';
 
   @override
-  String get homeEmptyTitle => 'आपका पहला वीडियो यहीं से शुरू होता है';
-
-  @override
-  String get homeEmptyBody =>
-      'कैमरे से एक वीडियो रिकॉर्ड करें। वापस आने पर वह यहाँ मिलेगा।';
-
-  @override
-  String get homeOpenCamera => 'कैमरा खोलें';
-
-  @override
-  String get homeCaptureFailed => 'RollReel वीडियो रिकॉर्ड या सेव नहीं कर सका।';
-
-  @override
   String get homeAccessTitle => 'अपने वीडियो चुनें';
 
   @override

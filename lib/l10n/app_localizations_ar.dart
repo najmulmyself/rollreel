@@ -146,18 +146,6 @@ class AppLocalizationsAr extends AppLocalizations {
   String get homeYourActivity => 'نشاطك';
 
   @override
-  String get homeEmptyTitle => 'أول مقطع لك يبدأ هنا';
-
-  @override
-  String get homeEmptyBody => 'سجّل مقطعًا بالكاميرا. ستجده هنا عند عودتك.';
-
-  @override
-  String get homeOpenCamera => 'فتح الكاميرا';
-
-  @override
-  String get homeCaptureFailed => 'تعذّر على RollReel تسجيل المقطع أو حفظه.';
-
-  @override
   String get homeAccessTitle => 'اختر مقاطعك';
 
   @override

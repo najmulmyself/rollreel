@@ -140,20 +140,6 @@ class AppLocalizationsIt extends AppLocalizations {
   String get homeYourActivity => 'La tua attività';
 
   @override
-  String get homeEmptyTitle => 'Il tuo primo video inizia qui';
-
-  @override
-  String get homeEmptyBody =>
-      'Registra un video con la fotocamera. Lo troverai qui al tuo ritorno.';
-
-  @override
-  String get homeOpenCamera => 'Apri fotocamera';
-
-  @override
-  String get homeCaptureFailed =>
-      'RollReel non è riuscito a registrare o salvare il video.';
-
-  @override
   String get homeAccessTitle => 'Scegli i tuoi video';
 
   @override

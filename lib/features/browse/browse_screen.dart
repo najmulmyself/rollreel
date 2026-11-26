@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -11,7 +12,6 @@ import '../../core/permissions/permission_provider.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/typography.dart';
 import '../../core/vault/vault_provider.dart';
-import '../../core/video/capture_video.dart';
 import '../../core/video/video_library_provider.dart';
 import '../../l10n/app_localizations.dart';
 import '../feed/video_feed_item.dart' show VideoInfoSheet;
@@ -44,7 +44,6 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
   late final ScrollController _scrollController;
   final _search = TextEditingController();
   String _query = '';
-  bool _recording = false;
 
   @override
   void initState() {
@@ -200,30 +199,6 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
     }
   }
 
-  Future<void> _openCamera() async {
-    if (_recording) return;
-    setState(() => _recording = true);
-    try {
-      final clip = await recordVideo();
-      if (clip == null) return;
-      await saveRecordedVideo(clip);
-      if (!mounted) return;
-      HapticFeedback.mediumImpact();
-      ref.invalidate(videoLibraryProvider);
-    } on Exception catch (error) {
-      debugPrint('Could not record or save video: $error');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.homeCaptureFailed),
-          ),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _recording = false);
-    }
-  }
-
   Future<void> _requestPhotosAccess() async {
     try {
       final permission = await ref.read(permissionProvider.notifier).request();
@@ -253,6 +228,10 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
     final filter = ref.watch(browseFilterProvider);
     final hasFilters = _hasFilters(filter);
     final dark = RRColors.isDark.value;
+    final showBanner =
+        !kIsWeb &&
+        (defaultTargetPlatform == TargetPlatform.iOS ||
+            defaultTargetPlatform == TargetPlatform.android);
     // Use the full window height so showing the keyboard cannot swap the
     // sliver that owns the focused search field.
     final canPin =
@@ -267,7 +246,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
           color: librarySurface,
           child: SafeArea(
             top: false,
-            child: canRecordVideo
+            child: showBanner
                 ? const Center(heightFactor: 1, child: BannerAdWidget())
                 : const SizedBox.shrink(),
           ),
@@ -385,8 +364,8 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
     Widget stateMessage({
       required String title,
       required String body,
-      required String action,
-      required VoidCallback? onPressed,
+      String? action,
+      VoidCallback? onPressed,
       IconData? icon,
     }) => SliverToBoxAdapter(
       child: LibraryMessage(
@@ -424,9 +403,7 @@ class _BrowseScreenState extends ConsumerState<BrowseScreen> {
     if (visible!.requireValue.isEmpty) {
       return stateMessage(
         title: l10n.libraryEmptyTitle,
-        body: l10n.homeEmptyBody,
-        action: canRecordVideo ? l10n.homeOpenCamera : l10n.retry,
-        onPressed: canRecordVideo ? (_recording ? null : _openCamera) : _retry,
+        body: l10n.noVideosYetBody,
       );
     }
     final filtered = ref.watch(browseVideosProvider);

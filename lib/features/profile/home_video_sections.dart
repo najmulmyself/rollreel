@@ -1,16 +1,13 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 import '../../core/memories/on_this_day_provider.dart';
 import '../../core/permissions/permission_provider.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/typography.dart';
-import '../../core/video/capture_video.dart';
 import '../../core/video/video_library_provider.dart';
 import '../../l10n/app_localizations.dart';
 import 'home_clip_player.dart';
@@ -36,7 +33,7 @@ final homeTitleProvider = FutureProvider.autoDispose
       }
     });
 
-class HomeVideoSections extends ConsumerStatefulWidget {
+class HomeVideoSections extends ConsumerWidget {
   const HomeVideoSections({
     super.key,
     required this.onOpenLibrary,
@@ -47,55 +44,7 @@ class HomeVideoSections extends ConsumerStatefulWidget {
   final ValueChanged<String?> onOpenMemories;
 
   @override
-  ConsumerState<HomeVideoSections> createState() => _HomeVideoSectionsState();
-}
-
-class _HomeVideoSectionsState extends ConsumerState<HomeVideoSections> {
-  bool _openingCamera = false;
-
-  @override
-  void initState() {
-    super.initState();
-    // Android can recreate RollReel while the camera activity is on top.
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        _saveCameraResult(() async {
-          final result = await ImagePicker().retrieveLostData();
-          if (result.exception case final error?) throw error;
-          return result.files?.firstOrNull;
-        });
-      });
-    }
-  }
-
-  Future<void> _openCamera() => _saveCameraResult(recordVideo);
-
-  Future<void> _saveCameraResult(Future<XFile?> Function() loadClip) async {
-    if (_openingCamera) return;
-    setState(() => _openingCamera = true);
-    try {
-      final clip = await loadClip();
-      if (clip == null) return;
-      await saveRecordedVideo(clip);
-      if (!mounted) return;
-      HapticFeedback.mediumImpact();
-      ref.invalidate(videoLibraryProvider);
-    } catch (error) {
-      debugPrint('Could not capture or save a video: $error');
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(AppLocalizations.of(context)!.homeCaptureFailed),
-        ),
-      );
-    } finally {
-      if (mounted) setState(() => _openingCamera = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
     final permission = ref.watch(permissionProvider);
     if (permission.isLoading) return const _WatchSkeleton();
@@ -125,12 +74,8 @@ class _HomeVideoSectionsState extends ConsumerState<HomeVideoSections> {
     if (latest == null) {
       return _LibraryMessage(
         icon: CupertinoIcons.photo,
-        title: l10n.homeEmptyTitle,
-        body: l10n.homeEmptyBody,
-        action: canRecordVideo ? l10n.homeOpenCamera : l10n.library,
-        onPressed: canRecordVideo
-            ? (_openingCamera ? null : _openCamera)
-            : widget.onOpenLibrary,
+        title: l10n.libraryEmptyTitle,
+        body: l10n.noVideosYetBody,
       );
     }
 
@@ -144,7 +89,7 @@ class _HomeVideoSectionsState extends ConsumerState<HomeVideoSections> {
         _SectionHeading(
           title: l10n.watchNext,
           action: l10n.library,
-          onPressed: widget.onOpenLibrary,
+          onPressed: onOpenLibrary,
         ),
         _FeaturedVideo(asset: latest),
         const SizedBox(height: 19),
@@ -155,7 +100,7 @@ class _HomeVideoSectionsState extends ConsumerState<HomeVideoSections> {
           _SectionHeading(
             title: l10n.onThisDay,
             action: l10n.seeAll,
-            onPressed: () => widget.onOpenMemories(null),
+            onPressed: () => onOpenMemories(null),
           ),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -163,7 +108,7 @@ class _HomeVideoSectionsState extends ConsumerState<HomeVideoSections> {
               Expanded(
                 child: _MemoryPreview(
                   asset: previews.first,
-                  onTap: () => widget.onOpenMemories(previews.first.id),
+                  onTap: () => onOpenMemories(previews.first.id),
                 ),
               ),
               const SizedBox(width: 10),
@@ -171,7 +116,7 @@ class _HomeVideoSectionsState extends ConsumerState<HomeVideoSections> {
                 child: previews.length == 2
                     ? _MemoryPreview(
                         asset: previews.last,
-                        onTap: () => widget.onOpenMemories(previews.last.id),
+                        onTap: () => onOpenMemories(previews.last.id),
                       )
                     : const SizedBox.shrink(),
               ),
@@ -308,14 +253,14 @@ class _LibraryMessage extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.body,
-    required this.action,
-    required this.onPressed,
+    this.action,
+    this.onPressed,
   });
 
   final IconData icon;
   final String title;
   final String body;
-  final String action;
+  final String? action;
   final VoidCallback? onPressed;
 
   @override
@@ -338,24 +283,29 @@ class _LibraryMessage extends StatelessWidget {
           Text(title, style: homeHeading),
           const SizedBox(height: 7),
           Text(body, style: _homeCaption.copyWith(fontSize: 14, height: 1.5)),
-          const SizedBox(height: 18),
-          FilledButton(
-            onPressed: onPressed == null
-                ? null
-                : () {
-                    HapticFeedback.selectionClick();
-                    onPressed!();
-                  },
-            style: FilledButton.styleFrom(
-              backgroundColor: homeAccent,
-              foregroundColor: RRColors.isDark.value
-                  ? RRColors.brandInk
-                  : Colors.white,
-              minimumSize: const Size(44, 46),
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 11),
+          if (action case final label?) ...[
+            const SizedBox(height: 18),
+            FilledButton(
+              onPressed: onPressed == null
+                  ? null
+                  : () {
+                      HapticFeedback.selectionClick();
+                      onPressed!();
+                    },
+              style: FilledButton.styleFrom(
+                backgroundColor: homeAccent,
+                foregroundColor: RRColors.isDark.value
+                    ? RRColors.brandInk
+                    : Colors.white,
+                minimumSize: const Size(44, 46),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 11,
+                ),
+              ),
+              child: Text(label),
             ),
-            child: Text(action),
-          ),
+          ],
         ],
       ),
     );

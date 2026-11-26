@@ -338,14 +338,14 @@ class LibraryMessage extends StatelessWidget {
     super.key,
     required this.title,
     required this.description,
-    required this.action,
-    required this.onPressed,
+    this.action,
+    this.onPressed,
     this.icon,
   });
 
   final String title;
   final String description;
-  final String action;
+  final String? action;
   final VoidCallback? onPressed;
   final IconData? icon;
 
@@ -385,17 +385,19 @@ class LibraryMessage extends StatelessWidget {
               description,
               style: libraryBody.copyWith(color: libraryMuted, fontSize: 15),
             ),
-            const SizedBox(height: 5),
-            TextButton(
-              onPressed: onPressed,
-              style: TextButton.styleFrom(
-                foregroundColor: libraryAccent,
-                padding: EdgeInsets.zero,
-                minimumSize: const Size(44, 44),
-                alignment: AlignmentDirectional.centerStart,
+            if (action case final label?) ...[
+              const SizedBox(height: 5),
+              TextButton(
+                onPressed: onPressed,
+                style: TextButton.styleFrom(
+                  foregroundColor: libraryAccent,
+                  padding: EdgeInsets.zero,
+                  minimumSize: const Size(44, 44),
+                  alignment: AlignmentDirectional.centerStart,
+                ),
+                child: Text(label),
               ),
-              child: Text(action),
-            ),
+            ],
           ],
         ),
       ),

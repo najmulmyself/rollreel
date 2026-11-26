@@ -142,20 +142,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get homeYourActivity => 'Ваша активность';
 
   @override
-  String get homeEmptyTitle => 'Здесь будет ваше первое видео';
-
-  @override
-  String get homeEmptyBody =>
-      'Снимите видео на камеру. Когда вернётесь, оно будет здесь.';
-
-  @override
-  String get homeOpenCamera => 'Открыть камеру';
-
-  @override
-  String get homeCaptureFailed =>
-      'RollReel не удалось снять или сохранить видео.';
-
-  @override
   String get homeAccessTitle => 'Выберите свои видео';
 
   @override

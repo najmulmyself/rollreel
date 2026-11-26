@@ -122,18 +122,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get homeYourActivity => '나의 활동';
 
   @override
-  String get homeEmptyTitle => '첫 동영상을 찍어 보세요';
-
-  @override
-  String get homeEmptyBody => '카메라로 동영상을 찍으면 돌아왔을 때 여기에서 볼 수 있어요.';
-
-  @override
-  String get homeOpenCamera => '카메라 열기';
-
-  @override
-  String get homeCaptureFailed => 'RollReel에서 동영상을 촬영하거나 저장하지 못했어요.';
-
-  @override
   String get homeAccessTitle => '동영상을 선택하세요';
 
   @override

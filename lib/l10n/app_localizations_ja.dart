@@ -121,18 +121,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get homeYourActivity => 'あなたのアクティビティ';
 
   @override
-  String get homeEmptyTitle => '最初の動画を撮ってみよう';
-
-  @override
-  String get homeEmptyBody => 'カメラで動画を撮影すると、戻ってきたときにここに表示されます。';
-
-  @override
-  String get homeOpenCamera => 'カメラを開く';
-
-  @override
-  String get homeCaptureFailed => 'RollReel で動画を撮影または保存できませんでした。';
-
-  @override
   String get homeAccessTitle => '動画を選ぶ';
 
   @override

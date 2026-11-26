@@ -120,18 +120,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get homeYourActivity => '你的动态';
 
   @override
-  String get homeEmptyTitle => '从这里开始拍第一段视频';
-
-  @override
-  String get homeEmptyBody => '用相机录一段视频，回来就能在这里看到。';
-
-  @override
-  String get homeOpenCamera => '打开相机';
-
-  @override
-  String get homeCaptureFailed => 'RollReel 无法拍摄或保存视频。';
-
-  @override
   String get homeAccessTitle => '选择你的视频';
 
   @override

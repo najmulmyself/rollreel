@@ -318,30 +318,6 @@ abstract class AppLocalizations {
   /// **'Your activity'**
   String get homeYourActivity;
 
-  /// No description provided for @homeEmptyTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Your first reel starts here'**
-  String get homeEmptyTitle;
-
-  /// No description provided for @homeEmptyBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Record a video with your camera. It’ll be here when you come back.'**
-  String get homeEmptyBody;
-
-  /// No description provided for @homeOpenCamera.
-  ///
-  /// In en, this message translates to:
-  /// **'Open Camera'**
-  String get homeOpenCamera;
-
-  /// No description provided for @homeCaptureFailed.
-  ///
-  /// In en, this message translates to:
-  /// **'RollReel couldn’t record or save the video.'**
-  String get homeCaptureFailed;
-
   /// No description provided for @homeAccessTitle.
   ///
   /// In en, this message translates to:
