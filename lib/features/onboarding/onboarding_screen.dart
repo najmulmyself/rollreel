@@ -1,11 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:photo_manager/photo_manager.dart';
 
-import '../../core/theme/colors.dart';
-import '../../core/theme/spacing.dart';
 import '../../core/theme/typography.dart';
-import '../../shared/widgets/primary_button.dart';
+import '../../l10n/app_localizations.dart';
+import 'onboarding_layout.dart';
+import 'onboarding_sample.dart';
+import 'onboarding_style.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key, required this.onDone});
@@ -17,112 +19,159 @@ class OnboardingScreen extends StatefulWidget {
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
-  final _pageCtrl = PageController();
-  int _index = 0;
+  final _controller = PageController();
+  int _step = 0;
   bool _requesting = false;
+  bool _couldNotRequest = false;
+  bool _finishing = false;
+
+  bool get _busy => _requesting || _finishing;
+
+  void _finish(PermissionState permission) {
+    setState(() => _finishing = true);
+    widget.onDone(permission);
+  }
+
+  void _skip() {
+    if (_busy) return;
+    HapticFeedback.selectionClick();
+    _finish(PermissionState.notDetermined);
+  }
 
   Future<void> _requestAccess() async {
-    setState(() => _requesting = true);
-    final result = await PhotoManager.requestPermissionExtend();
-    if (mounted) {
-      setState(() => _requesting = false);
-      widget.onDone(result);
+    if (_busy) return;
+    HapticFeedback.selectionClick();
+    setState(() {
+      _requesting = true;
+      _couldNotRequest = false;
+    });
+
+    try {
+      final permission = await PhotoManager.requestPermissionExtend();
+      if (mounted) {
+        _requesting = false;
+        _finish(permission);
+      }
+    } on Exception {
+      if (!mounted) return;
+      setState(() {
+        _requesting = false;
+        _couldNotRequest = true;
+      });
     }
   }
 
-  void _next() => _pageCtrl.nextPage(
-        duration: const Duration(milliseconds: 350),
-        curve: Curves.easeInOut,
+  void _moveTo(int index) {
+    if (_busy) return;
+    HapticFeedback.selectionClick();
+    if (MediaQuery.disableAnimationsOf(context)) {
+      _controller.jumpToPage(index);
+    } else {
+      _controller.animateToPage(
+        index,
+        duration: const Duration(milliseconds: 240),
+        curve: Curves.easeOutCubic,
       );
+    }
+  }
 
   @override
   void dispose() {
-    _pageCtrl.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: RRColors.bgDeep,
-      body: Stack(
+    final l10n = AppLocalizations.of(context)!;
+    final isPermission = _step == 2;
+
+    return OnboardingLayout(
+      step: _step,
+      primaryLabel: switch (_step) {
+        0 => l10n.onboardingTrySwipe,
+        1 => l10n.continueLabel,
+        _ when _requesting => l10n.requesting,
+        _ when _couldNotRequest => l10n.retry,
+        _ => l10n.onboardingChooseVideos,
+      },
+      onPrimary: _busy
+          ? null
+          : isPermission
+          ? _requestAccess
+          : () => _moveTo(_step + 1),
+      onBack: _step > 0 && !_busy ? () => _moveTo(_step - 1) : null,
+      onSkip: !isPermission && !_busy ? _skip : null,
+      secondaryLabel: isPermission ? l10n.onboardingNotNow : null,
+      onSecondary: _busy ? null : _skip,
+      body: PageView(
+        controller: _controller,
+        physics: _busy ? const NeverScrollableScrollPhysics() : null,
+        onPageChanged: (index) => setState(() => _step = index),
         children: [
-          _BackgroundGlows(index: _index),
-          SafeArea(
+          _OnboardingPage(
+            title: l10n.onboardingTitle,
+            subtitle: l10n.onboardingSubtitle,
+            titleGap: 26,
+            fullBleed: true,
+            child: const _WelcomeArtwork(),
+          ),
+          _OnboardingPage(
+            title: l10n.onboardingSwipeTitle,
+            subtitle: l10n.onboardingSwipeSubtitle,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Skip
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                      RRSpace.sp20, RRSpace.sp8, RRSpace.sp20, 0),
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () => widget.onDone(PermissionState.notDetermined),
-                      style: TextButton.styleFrom(
-                        foregroundColor: RRColors.textSecond,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: RRSpace.sp12, vertical: RRSpace.sp8),
-                      ),
-                      child: const Text(
-                        'Skip',
-                        style: TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w400),
+                const SizedBox(height: 21),
+                OnboardingSample(active: _step == 1),
+                const SizedBox(height: 14),
+                DecoratedBox(
+                  decoration: const BoxDecoration(
+                    border: BorderDirectional(
+                      start: BorderSide(color: Color(0xFF359BB9), width: 3),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsetsDirectional.only(start: 15),
+                    child: Text(
+                      l10n.onboardingPrivacyBody,
+                      style: const OnboardingStyle().body.copyWith(
+                        fontSize: 14,
                       ),
                     ),
                   ),
                 ),
-
-                // Pages (visual + text)
-                Expanded(
-                  child: PageView(
-                    controller: _pageCtrl,
-                    onPageChanged: (i) => setState(() => _index = i),
-                    children: const [_Page1(), _Page2(), _Page3()],
-                  ),
+              ],
+            ),
+          ),
+          _OnboardingPage(
+            title: l10n.onboardingPermissionTitle,
+            subtitle: l10n.onboardingAccessBody,
+            titleGap: 28,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 32),
+                _AccessRow(
+                  icon: CupertinoIcons.photo,
+                  title: l10n.onboardingLimitedTitle,
+                  description: l10n.onboardingLimitedBody,
                 ),
-
-                // Page indicator dots
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(3, (i) {
-                    final active = i == _index;
-                    return AnimatedContainer(
-                      duration: const Duration(milliseconds: 250),
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      width: active ? 24 : 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        borderRadius:
-                            BorderRadius.circular(RRSpace.radiusFull),
-                        gradient: active ? RRColors.gradBrand : null,
-                        color: active
-                            ? null
-                            : RRColors.textDisabled
-                                .withValues(alpha: 0.5),
+                _AccessRow(
+                  icon: CupertinoIcons.square_on_square,
+                  title: l10n.onboardingFullTitle,
+                  description: l10n.onboardingFullBody,
+                ),
+                if (_couldNotRequest)
+                  Semantics(
+                    liveRegion: true,
+                    child: Text(
+                      l10n.onboardingPermissionError,
+                      style: const OnboardingStyle().body.copyWith(
+                        fontSize: 14,
                       ),
-                    );
-                  }),
-                ),
-
-                // CTA button
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                      RRSpace.sp20, RRSpace.sp20, RRSpace.sp20, RRSpace.sp32),
-                  child: PrimaryButton(
-                    label: switch (_index) {
-                      0 => 'Get Started',
-                      1 => 'Continue',
-                      _ => _requesting ? 'Requesting…' : 'Allow Access',
-                    },
-                    onPressed: switch (_index) {
-                      0 => _next,
-                      1 => _next,
-                      _ => _requesting ? null : _requestAccess,
-                    },
+                    ),
                   ),
-                ),
               ],
             ),
           ),
@@ -132,473 +181,188 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 }
 
-// ─── Background ───────────────────────────────────────────────────────────────
+class _OnboardingPage extends StatelessWidget {
+  const _OnboardingPage({
+    required this.title,
+    required this.subtitle,
+    required this.child,
+    this.titleGap = 16,
+    this.fullBleed = false,
+  });
 
-class _BackgroundGlows extends StatelessWidget {
-  const _BackgroundGlows({required this.index});
-  final int index;
+  final String title;
+  final String subtitle;
+  final Widget child;
+  final double titleGap;
+  final bool fullBleed;
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        // Top-left coral glow — all pages
-        Positioned(
-          top: -80,
-          left: -80,
-          child: Container(
-            width: 280,
-            height: 280,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: RadialGradient(
-                colors: [
-                  RRColors.accentCoral.withValues(alpha: 0.22),
-                  Colors.transparent,
-                ],
-              ),
-            ),
-          ),
-        ),
-        // Bottom violet/cyan glow — pages 2 & 3
-        AnimatedOpacity(
-          opacity: index > 0 ? 1.0 : 0.0,
-          duration: const Duration(milliseconds: 400),
-          child: Align(
-            alignment: Alignment.bottomCenter,
-            child: Container(
-              height: 320,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    RRColors.accentViolet.withValues(alpha: 0.12),
-                    RRColors.accentCyan.withValues(alpha: 0.08),
+    const style = OnboardingStyle();
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = MediaQuery.sizeOf(context).height < 660;
+        return SingleChildScrollView(
+          padding: EdgeInsets.only(top: compact ? 2 : 15, bottom: 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: compact ? 8 : titleGap),
+                    Semantics(
+                      header: true,
+                      child: Text(
+                        title,
+                        style: style.title(constraints.maxWidth),
+                      ),
+                    ),
+                    const SizedBox(height: 13),
+                    Text(subtitle, style: style.body),
                   ],
                 ),
               ),
-            ),
+              if (fullBleed)
+                child
+              else
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: child,
+                ),
+            ],
           ),
-        ),
-      ],
+        );
+      },
     );
   }
 }
 
-// ─── Page 1 ───────────────────────────────────────────────────────────────────
-
-class _Page1 extends StatelessWidget {
-  const _Page1();
+class _WelcomeArtwork extends StatelessWidget {
+  const _WelcomeArtwork();
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        Spacer(flex: 1),
-        _CardStack(),
-        SizedBox(height: 20),
-        _SwipeHint(),
-        Spacer(flex: 2),
-        _PageText(
-          title: 'Your Videos.\nFinally Watchable.',
-          body:
-              'Swipe through your camera roll like a real feed. No uploads, no accounts. Just your memories.',
-        ),
-        SizedBox(height: RRSpace.sp24),
-      ],
+    final height = (MediaQuery.sizeOf(context).height * .34).clamp(
+      210.0,
+      312.0,
     );
-  }
-}
+    final mascot = MediaQuery.disableAnimationsOf(context)
+        ? 'assets/images/onboarding-kingfisher.webp'
+        : 'assets/images/onboarding-kingfisher-wave.webp';
 
-class _CardStack extends StatelessWidget {
-  const _CardStack();
-
-  static const double _w = 178.0;
-  static const double _h = 128.0;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 270,
-      height: _h + 50,
-      child: Stack(
-        alignment: Alignment.centerLeft,
-        clipBehavior: Clip.none,
-        children: [
-          // Back card – maroon
-          Positioned(
-            left: 65,
-            top: 22,
-            child: Transform.rotate(
-              angle: 0.25,
-              alignment: Alignment.bottomLeft,
-              child: const _VideoCard(
-                width: _w,
-                height: _h,
-                color: Color(0xFF4A1030),
-              ),
-            ),
-          ),
-          // Middle card – navy
-          Positioned(
-            left: 32,
-            top: 10,
-            child: Transform.rotate(
-              angle: 0.13,
-              alignment: Alignment.bottomLeft,
-              child: const _VideoCard(
-                width: _w,
-                height: _h,
-                color: Color(0xFF1A2650),
-              ),
-            ),
-          ),
-          // Front card – olive green
-          Transform.rotate(
-            angle: -0.025,
-            child: const _VideoCard(
-              width: _w,
-              height: _h,
-              color: Color(0xFF2D4822),
-              showContent: true,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _VideoCard extends StatelessWidget {
-  const _VideoCard({
-    required this.width,
-    required this.height,
-    required this.color,
-    this.showContent = false,
-  });
-
-  final double width;
-  final double height;
-  final Color color;
-  final bool showContent;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: width,
-      height: height,
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(RRSpace.radiusLg),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.4),
-            blurRadius: 14,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: showContent
-          ? Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return ExcludeSemantics(
+      child: Padding(
+        padding: const EdgeInsets.only(top: 20),
+        child: SizedBox(
+          height: height,
+          child: LayoutBuilder(
+            builder: (context, constraints) => Stack(
+              clipBehavior: Clip.hardEdge,
               children: [
-                Expanded(
-                  child: Center(
-                    child: Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.22),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.play_arrow_rounded,
+                Positioned(
+                  left: -constraints.maxWidth * .05,
+                  right: -constraints.maxWidth * .07,
+                  bottom: height * .06,
+                  height: height * .42,
+                  child: Transform.rotate(
+                    angle: -.10472,
+                    child: DecoratedBox(
+                      decoration: const BoxDecoration(
                         color: Colors.white,
-                        size: 22,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Color(0x1C122B42),
+                            blurRadius: 5,
+                            offset: Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 5),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          spacing: 4,
+                          children: [
+                            for (final (name, weight) in [
+                              ('dinner', 105),
+                              ('coast', 124),
+                              ('drive', 92),
+                            ])
+                              Expanded(
+                                flex: weight,
+                                child: Image.asset(
+                                  'assets/images/onboarding-$name.webp',
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-                Padding(
-                  padding:
-                      const EdgeInsets.fromLTRB(10, 0, 10, 10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Meal Prep Sunday',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      Text(
-                        'Today · 2:34',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.6),
-                          fontSize: 10,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            )
-          : null,
-    );
-  }
-}
-
-class _SwipeHint extends StatelessWidget {
-  const _SwipeHint();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        Icon(CupertinoIcons.chevron_up, color: RRColors.accentCyan, size: 13),
-        SizedBox(height: 3),
-        Text(
-          'SWIPE',
-          style: TextStyle(
-            color: RRColors.accentCyan,
-            fontSize: 10,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 2.2,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// ─── Page 2 ───────────────────────────────────────────────────────────────────
-
-class _Page2 extends StatelessWidget {
-  const _Page2();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        Spacer(flex: 1),
-        _PrivacyVisual(),
-        Spacer(flex: 2),
-        _PageText(
-          title: '100% Private.\n100% Yours.',
-          body:
-              'Your videos never leave your phone. No cloud, no sign-in, no tracking. Just you.',
-        ),
-        SizedBox(height: RRSpace.sp24),
-      ],
-    );
-  }
-}
-
-class _PrivacyVisual extends StatelessWidget {
-  const _PrivacyVisual();
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: 220,
-      height: 160,
-      child: Stack(
-        alignment: Alignment.center,
-        clipBehavior: Clip.none,
-        children: const [
-          Icon(
-            CupertinoIcons.lock_fill,
-            size: 82,
-            color: RRColors.accentViolet,
-          ),
-          // No Cloud – left
-          Positioned(
-            left: -18,
-            top: 28,
-            child: _PillLabel('No Cloud'),
-          ),
-          // No Account – top right
-          Positioned(
-            right: -28,
-            top: 2,
-            child: _PillLabel('No Account'),
-          ),
-          // No Tracking – bottom center
-          Positioned(
-            bottom: 0,
-            child: _PillLabel('No Tracking'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _PillLabel extends StatelessWidget {
-  const _PillLabel(this.text);
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: RRColors.bgElevated,
-        borderRadius: BorderRadius.circular(RRSpace.radiusFull),
-        border: Border.all(
-          color: RRColors.accentViolet.withValues(alpha: 0.55),
-        ),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-        ),
-      ),
-    );
-  }
-}
-
-// ─── Page 3 ───────────────────────────────────────────────────────────────────
-
-class _Page3 extends StatelessWidget {
-  const _Page3();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        Spacer(flex: 1),
-        _PhotoAccessVisual(),
-        Spacer(flex: 2),
-        _PageText(
-          title: "Let's Find\nYour Videos",
-          body:
-              'RollReel needs access to your photo library to show your videos. They stay on your device, always.',
-        ),
-        SizedBox(height: RRSpace.sp24),
-      ],
-    );
-  }
-}
-
-class _PhotoAccessVisual extends StatelessWidget {
-  const _PhotoAccessVisual();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: RRSpace.sp24),
-      child: Column(
-        children: [
-          const Icon(
-            Icons.image_outlined,
-            size: 64,
-            color: RRColors.accentCoral,
-          ),
-          const SizedBox(height: RRSpace.sp16),
-          const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _MiniThumb(color: Color(0xFF2D4822)),
-              SizedBox(width: RRSpace.sp8),
-              _MiniThumb(color: Color(0xFF4A3010)),
-              SizedBox(width: RRSpace.sp8),
-              _MiniThumb(color: Color(0xFF4A1030)),
-            ],
-          ),
-          const SizedBox(height: RRSpace.sp16),
-          Container(
-            padding: const EdgeInsets.symmetric(
-                horizontal: RRSpace.sp16, vertical: RRSpace.sp12),
-            decoration: BoxDecoration(
-              color: RRColors.bgElevated.withValues(alpha: 0.85),
-              borderRadius: BorderRadius.circular(RRSpace.radiusMd),
-              border: Border.all(
-                  color: RRColors.accentCyan.withValues(alpha: 0.30)),
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Icon(CupertinoIcons.info_circle,
-                    size: 16, color: RRColors.accentCyan),
-                const SizedBox(width: RRSpace.sp8),
-                Expanded(
-                  child: Text(
-                    'We only read videos — never photos, never uploads.',
-                    style: TextStyle(
-                        color: RRColors.textSecond, fontSize: 13, height: 1.4),
-                  ),
+                Positioned(
+                  right: constraints.maxWidth * .12,
+                  bottom: height * .04,
+                  height: height * .87,
+                  child: Image.asset(mascot, fit: BoxFit.contain),
                 ),
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
 }
 
-class _MiniThumb extends StatelessWidget {
-  const _MiniThumb({required this.color});
-  final Color color;
+class _AccessRow extends StatelessWidget {
+  const _AccessRow({
+    required this.icon,
+    required this.title,
+    required this.description,
+  });
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 52,
-      height: 52,
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(RRSpace.radiusMd),
-      ),
-    );
-  }
-}
-
-// ─── Shared text block ────────────────────────────────────────────────────────
-
-class _PageText extends StatelessWidget {
-  const _PageText({required this.title, required this.body});
-
+  final IconData icon;
   final String title;
-  final String body;
+  final String description;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: RRSpace.sp24),
-      child: Column(
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontFamily: '.SF Pro Display',
-              fontSize: 32,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.8,
-              color: Colors.white,
-              height: 1.15,
+    const style = OnboardingStyle();
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        border: Border(top: BorderSide(color: style.line)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 18),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ExcludeSemantics(child: Icon(icon, size: 22, color: style.action)),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: RRTypography.headline.copyWith(
+                      color: style.ink,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(description, style: style.body.copyWith(fontSize: 14)),
+                ],
+              ),
             ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: RRSpace.sp12),
-          Text(
-            body,
-            style: RRTypography.body.copyWith(
-              color: RRColors.textSecond,
-              height: 1.5,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

@@ -1,39 +1,49 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
-import '../../core/theme/spacing.dart';
-import '../../core/theme/typography.dart';
-import '../../shared/widgets/primary_button.dart';
-import '../../shared/widgets/secondary_button.dart';
+import '../../l10n/app_localizations.dart';
+import '../onboarding/onboarding_layout.dart';
+import '../onboarding/onboarding_style.dart';
 
 class PermissionDeniedScreen extends StatelessWidget {
-  const PermissionDeniedScreen({super.key, required this.onTryAgain, required this.onContinue});
+  const PermissionDeniedScreen({
+    super.key,
+    required this.onTryAgain,
+    required this.onContinue,
+  });
 
   final VoidCallback onTryAgain;
   final VoidCallback onContinue;
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(RRSpace.sp20),
+    final l10n = AppLocalizations.of(context)!;
+    const style = OnboardingStyle();
+
+    return OnboardingLayout(
+      primaryLabel: l10n.openSettings,
+      onPrimary: onTryAgain,
+      secondaryLabel: l10n.continueAnyway,
+      onSecondary: onContinue,
+      body: LayoutBuilder(
+        builder: (context, constraints) => SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(
+            24,
+            (MediaQuery.sizeOf(context).height * .14).clamp(40.0, 133.0),
+            24,
+            12,
+          ),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Icon(CupertinoIcons.photo_fill_on_rectangle_fill, size: 64),
-              const SizedBox(height: RRSpace.sp16),
-              Text('No Videos Found', style: RRTypography.title1, textAlign: TextAlign.center),
-              const SizedBox(height: RRSpace.sp12),
-              Text(
-                'RollReel needs photo library access to show your local videos. Your videos are never uploaded.',
-                style: RRTypography.body.copyWith(color: Colors.white70),
-                textAlign: TextAlign.center,
+              Semantics(
+                header: true,
+                child: Text(
+                  l10n.permissionDeniedTitle,
+                  style: style.title(constraints.maxWidth),
+                ),
               ),
-              const SizedBox(height: RRSpace.sp24),
-              PrimaryButton(label: 'Open Settings', onPressed: onTryAgain),
-              const SizedBox(height: RRSpace.sp12),
-              SecondaryButton(label: 'Continue Anyway', onPressed: onContinue),
+              const SizedBox(height: 13),
+              Text(l10n.permissionDeniedBody, style: style.body),
             ],
           ),
         ),

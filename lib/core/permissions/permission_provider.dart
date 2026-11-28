@@ -1,22 +1,26 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photo_manager/photo_manager.dart';
 
-final permissionProvider = StateNotifierProvider<PermissionNotifier, AsyncValue<PermissionState>>((ref) {
-  return PermissionNotifier();
-});
+final permissionProvider =
+    StateNotifierProvider<PermissionNotifier, AsyncValue<PermissionState>>((
+      ref,
+    ) {
+      return PermissionNotifier();
+    });
 
 class PermissionNotifier extends StateNotifier<AsyncValue<PermissionState>> {
   PermissionNotifier() : super(const AsyncValue.loading()) {
-    _check();
+    refresh();
   }
 
-  Future<void> _check() async {
+  Future<void> refresh() async {
     try {
-      // Check current state without prompting
-      final result = await PhotoManager.requestPermissionExtend();
-      state = AsyncValue.data(result);
+      final result = await PhotoManager.getPermissionState(
+        requestOption: const PermissionRequestOption(),
+      );
+      if (mounted) state = AsyncValue.data(result);
     } catch (e, st) {
-      state = AsyncValue.error(e, st);
+      if (mounted) state = AsyncValue.error(e, st);
     }
   }
 
@@ -24,10 +28,10 @@ class PermissionNotifier extends StateNotifier<AsyncValue<PermissionState>> {
     state = const AsyncValue.loading();
     try {
       final result = await PhotoManager.requestPermissionExtend();
-      state = AsyncValue.data(result);
+      if (mounted) state = AsyncValue.data(result);
       return result;
     } catch (e, st) {
-      state = AsyncValue.error(e, st);
+      if (mounted) state = AsyncValue.error(e, st);
       rethrow;
     }
   }

@@ -11,9 +11,9 @@ enum VideoTimePeriod { all, today, thisWeek, thisMonth, y2026, y2025, y2024 }
 
 enum VideoDurationFilter {
   any,
-  short,   // < 60 s
-  medium,  // 60 – 300 s
-  long,    // > 300 s
+  short, // < 60 s
+  medium, // 60 – 300 s
+  long, // > 300 s
 }
 
 enum VideoSortOrder { newest, oldest, shortest, longest }
@@ -33,26 +33,41 @@ class BrowseFilter {
     VideoTimePeriod? period,
     VideoDurationFilter? duration,
     VideoSortOrder? sort,
-  }) =>
-      BrowseFilter(
-        period: period ?? this.period,
-        duration: duration ?? this.duration,
-        sort: sort ?? this.sort,
-      );
+  }) => BrowseFilter(
+    period: period ?? this.period,
+    duration: duration ?? this.duration,
+    sort: sort ?? this.sort,
+  );
 }
 
 // ─── Providers ───────────────────────────────────────────────────────────────
 
-final browseFilterProvider =
-    StateProvider<BrowseFilter>((ref) => const BrowseFilter());
+final browseFilterProvider = StateProvider<BrowseFilter>(
+  (ref) => const BrowseFilter(),
+);
 
-Future<List<AssetEntity>> _fetchVideos() async {
+Future<List<AssetEntity>> _fetchVideos({bool loadTitles = false}) async {
   final paths = await PhotoManager.getAssetPathList(
     type: RequestType.video,
     onlyAll: true,
+    filterOption: loadTitles
+        ? FilterOptionGroup(videoOption: const FilterOption(needTitle: true))
+        : null,
   );
   if (paths.isEmpty) return [];
-  return paths.first.getAssetListRange(start: 0, end: 9999);
+  final library = paths.first;
+  final count = await library.assetCountAsync;
+  if (count == 0) return [];
+
+  const pageSize = 5000;
+  final videos = <String, AssetEntity>{};
+  for (var page = 0; page * pageSize < count; page++) {
+    final assets = await library.getAssetListPaged(page: page, size: pageSize);
+    for (final asset in assets) {
+      videos[asset.id] = asset;
+    }
+  }
+  return videos.values.toList();
 }
 
 /// Returns ALL videos from the device library (no filter applied).
@@ -79,24 +94,29 @@ final videoLibraryProvider = FutureProvider<List<AssetEntity>>((ref) async {
     return result;
   } catch (e) {
     debugPrint('Video library error: $e');
-    return [];
+    rethrow;
   }
 });
 
 /// Drives cross-tab Browse → Feed navigation. Set to an asset ID to jump there.
 final feedJumpToAssetProvider = StateProvider<String?>((ref) => null);
 
+/// Share the same vault exclusion across public video surfaces.
+final visibleVideosProvider = FutureProvider<List<AssetEntity>>((ref) async {
+  final library = ref.watch(videoLibraryProvider.future);
+  final vault = ref.watch(vaultIdsProvider.notifier);
+  ref.watch(vaultIdsProvider);
+  await vault.ready;
+  return (await library).where((asset) => !vault.contains(asset.id)).toList();
+});
+
 /// Active quick-filter for the feed screen.
 final feedFilterProvider = StateProvider<FeedFilter>((ref) => FeedFilter.all);
 
 /// Returns all videos excluding those in the vault, filtered by [feedFilterProvider].
 final feedVideosProvider = FutureProvider<List<AssetEntity>>((ref) async {
-  final all = await ref.watch(videoLibraryProvider.future);
-  final vaultIds = ref.watch(vaultIdsProvider);
   final feedFilter = ref.watch(feedFilterProvider);
-
-  Iterable<AssetEntity> result =
-      vaultIds.isEmpty ? all : all.where((a) => !vaultIds.contains(a.id));
+  Iterable<AssetEntity> result = await ref.watch(visibleVideosProvider.future);
 
   final now = DateTime.now();
   final todayStart = DateTime(now.year, now.month, now.day);
@@ -107,7 +127,10 @@ final feedVideosProvider = FutureProvider<List<AssetEntity>>((ref) async {
     case FeedFilter.today:
       result = result.where((a) {
         final d = DateTime(
-            a.createDateTime.year, a.createDateTime.month, a.createDateTime.day);
+          a.createDateTime.year,
+          a.createDateTime.month,
+          a.createDateTime.day,
+        );
         return d == todayStart;
       });
     case FeedFilter.shorts:
@@ -119,19 +142,30 @@ final feedVideosProvider = FutureProvider<List<AssetEntity>>((ref) async {
   return result.toList();
 });
 
+/// Apple Photos omits filenames from its ordinary library query. Load them
+/// together when a search needs them, keeping the first library load lightweight.
+final browseVideoTitlesProvider =
+    FutureProvider.autoDispose<Map<String, String>>((ref) async {
+      final visible = await ref.watch(visibleVideosProvider.future);
+      final visibleIds = visible.map((video) => video.id).toSet();
+      final titled = await _fetchVideos(loadTitles: true);
+      return {
+        for (final video in titled)
+          if (visibleIds.contains(video.id))
+            if (video.title case final title?) video.id: title,
+      };
+    });
+
 /// Returns the filtered + sorted subset of [videoLibraryProvider] excluding vault.
 final browseVideosProvider = FutureProvider<List<AssetEntity>>((ref) async {
   try {
-    final all = await ref.watch(videoLibraryProvider.future);
     final filter = ref.watch(browseFilterProvider);
-    final vaultIds = ref.watch(vaultIdsProvider);
+    Iterable<AssetEntity> result = await ref.watch(
+      visibleVideosProvider.future,
+    );
 
     final now = DateTime.now();
     final todayStart = DateTime(now.year, now.month, now.day);
-
-    // ── Vault filter ─────────────────────────────────────────────────────────
-    Iterable<AssetEntity> result =
-        vaultIds.isEmpty ? all : all.where((a) => !vaultIds.contains(a.id));
 
     // ── Period filter ────────────────────────────────────────────────────────
 
@@ -141,16 +175,21 @@ final browseVideosProvider = FutureProvider<List<AssetEntity>>((ref) async {
       case VideoTimePeriod.today:
         result = result.where((a) {
           final d = DateTime(
-              a.createDateTime.year, a.createDateTime.month, a.createDateTime.day);
+            a.createDateTime.year,
+            a.createDateTime.month,
+            a.createDateTime.day,
+          );
           return d == todayStart;
         });
       case VideoTimePeriod.thisWeek:
         final weekAgo = now.subtract(const Duration(days: 7));
         result = result.where((a) => a.createDateTime.isAfter(weekAgo));
       case VideoTimePeriod.thisMonth:
-        result = result.where((a) =>
-            a.createDateTime.year == now.year &&
-            a.createDateTime.month == now.month);
+        result = result.where(
+          (a) =>
+              a.createDateTime.year == now.year &&
+              a.createDateTime.month == now.month,
+        );
       case VideoTimePeriod.y2026:
         result = result.where((a) => a.createDateTime.year == 2026);
       case VideoTimePeriod.y2025:
@@ -188,14 +227,16 @@ final browseVideosProvider = FutureProvider<List<AssetEntity>>((ref) async {
     return list;
   } catch (e) {
     debugPrint('Browse videos error: $e');
-    return [];
+    rethrow;
   }
 });
 
 // ─── Thumbnail ───────────────────────────────────────────────────────────────
 
-final thumbnailProvider =
-    FutureProvider.family<Uint8List?, String>((ref, assetId) async {
+final thumbnailProvider = FutureProvider.family<Uint8List?, String>((
+  ref,
+  assetId,
+) async {
   try {
     final assets = await ref.watch(videoLibraryProvider.future);
     final asset = assets.where((a) => a.id == assetId).firstOrNull;

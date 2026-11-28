@@ -47,7 +47,7 @@ class AppSettings {
     this.showDateLabels = true,
     this.showDurationBadges = true,
     this.defaultFilter = FeedFilter.all,
-    this.darkMode = true,
+    this.darkMode = false,
   });
 
   AppSettings copyWith({
@@ -79,7 +79,7 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final filterIndex = prefs.getInt(_kDefaultFilter) ?? 0;
-      final darkMode = prefs.getBool(_kDarkMode) ?? true;
+      final darkMode = prefs.getBool(_kDarkMode) ?? false;
       RRColors.isDark.value = darkMode;
       state = AppSettings(
         loopShortVideos: prefs.getBool(_kLoop) ?? true,

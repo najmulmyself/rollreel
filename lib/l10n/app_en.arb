@@ -1,0 +1,475 @@
+{
+  "@@locale": "en",
+  "watchNext": "Watch next",
+  "seeAll": "See all",
+  "homeRecordedToday": "Recorded today",
+  "homePlays": "Plays",
+  "homeWatchActivity": "Watch activity",
+  "homeWatchStreak": "Watch streak",
+  "homeMostWatched": "Most Watched",
+  "homeTopFolders": "Top folders",
+  "homeVideoRecap": "Year in review",
+  "homeRecordedThisYear": "Recorded this year",
+  "homeWatchedToday": "Watched today",
+  "homeTopAlbums": "Top albums",
+  "playerGuideSwipe": "Swipe up",
+  "playerGuideSwipeBody": "Move to the next video in your camera roll.",
+  "playerGuideTap": "Tap to play or pause",
+  "playerGuideTapBody": "Tap the video once to pause. Tap again to resume.",
+  "playerGuideSeek": "Double-tap to seek",
+  "playerGuideSeekBody": "Double-tap the left side to go back 10 seconds or the right side to skip ahead 10 seconds.",
+  "playerGuideEdges": "Drag along the edges",
+  "playerGuideEdgesBody": "Slide up or down on the left edge for brightness and on the right edge for volume.",
+  "playerGuideDone": "Got it",
+  "homeNoWatchHistory": "Watch a video to start your history.",
+  "homeNoVideoAlbums": "Albums with videos will appear here.",
+  "homeNoVideoFolders": "Folders with videos will appear here.",
+  "homeLimitedVideoCollections": "Limited access can hide some albums or folders.",
+  "homeWatchDays": "{count, plural, one{{count} day} other{{count} days}}",
+  "@homeWatchDays": {
+    "placeholders": {
+      "count": {"type": "int", "format": "decimalPattern"}
+    }
+  },
+  "homePlayCount": "{count, plural, one{{count} play} other{{count} plays}}",
+  "@homePlayCount": {
+    "placeholders": {
+      "count": {"type": "int", "format": "decimalPattern"}
+    }
+  },
+  "homeUnavailable": "Unavailable",
+  "homeLoading": "Loading…",
+  "homeCameraRoll": "Your\ncamera roll.",
+  "homeWatchTab": "Watch",
+  "homeActivityTab": "Activity",
+  "homeYourActivity": "Your activity",
+  "homeAccessTitle": "Choose your videos",
+  "homeAccessBody": "Allow Photos access in Settings to watch videos from your camera roll.",
+  "homeLoadFailed": "Your videos couldn’t load",
+  "homeLoadFailedBody": "Your camera roll may still be syncing. Give it another try.",
+  "homeNoMemories": "No videos from this date in past years.",
+  "homePlayClip": "Play {title}",
+  "homePlaybackFailed": "This video couldn’t play.",
+  "homePause": "Pause",
+  "homePlay": "Play",
+  "@homePlayClip": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingTitle": "Back to your\ncamera roll.",
+  "favoritesSavedCount": "{count} saved",
+  "favoritesRemoveVideo": "Remove {title} from Favorites",
+  "favoritesRemoved": "Removed from Favorites",
+  "favoritesUndo": "Undo",
+  "favoritesLoadFailed": "Favorites couldn’t load",
+  "favoritesRetryBody": "Try fetching your saved videos again.",
+  "favoritesAccessBody": "Allow Photos access to see your saved videos.",
+  "favoritesUpdateFailed": "Couldn’t update Favorites.",
+  "@favoritesSavedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@favoritesRemoveVideo": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "onboardingSwipeTitle": "Swipe up for\nthe next video.",
+  "onboardingSwipeSubtitle": "Try it on the preview below.",
+  "onboardingTrySwipe": "Try a swipe",
+  "onboardingSampleClip": "Sample clip {current} of {total}",
+  "onboardingNextSample": "Show next sample clip",
+  "onboardingLimitedTitle": "Pick specific videos",
+  "onboardingLimitedBody": "Choose the items RollReel can see in the system picker.",
+  "onboardingFullTitle": "Allow your whole library",
+  "onboardingFullBody": "Browse all your camera-roll videos. You can change access in Settings.",
+  "onboardingChooseVideos": "Choose videos",
+  "onboardingNotNow": "Not Now",
+  "@onboardingSampleClip": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "onboardingSubtitle": "Watch the little moments you filmed, one video at a time.",
+  "onboardingPrivacyBody": "Your own videos play on your device. There’s no account to create or library to upload.",
+  "onboardingPermissionBody": "Allow photo library access so RollReel can find and play your videos.",
+  "onboardingAccessBody": "RollReel uses Photos access to show videos from your camera roll.",
+  "onboardingPermissionNote": "You can change access anytime in Settings.",
+  "onboardingPermissionError": "Couldn’t request access. Try again or skip for now.",
+  "onboardingStep": "Step {step} of {total}",
+  "@onboardingStep": {
+    "placeholders": {
+      "step": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "onboardingPrivacyTitle": "For your eyes only.",
+  "onboardingPermissionTitle": "Which videos\ncan we play?",
+  "onboardingNoCloud": "No Cloud",
+  "onboardingNoAccount": "No Account",
+  "onboardingNoTracking": "No Tracking",
+  "swipeHint": "SWIPE",
+  "skip": "Skip",
+  "getStarted": "Get Started",
+  "continueLabel": "Continue",
+  "requesting": "Requesting…",
+  "allowAccess": "Allow Access",
+  "noVideosYetTitle": "No Videos Yet",
+  "noVideosYetBody": "Your camera roll videos will appear here.",
+  "openPhotosApp": "Open Photos App",
+  "loadingLibrary": "Loading your library...",
+  "permissionDeniedTitle": "Photos access\nis off.",
+  "permissionDeniedBody": "Choose videos in Settings when you’re ready. You can still explore RollReel.",
+  "openSettings": "Open Settings",
+  "continueAnyway": "Continue Anyway",
+  "today": "Today",
+  "yesterday": "Yesterday",
+  "cancel": "Cancel",
+  "ok": "OK",
+  "back": "Back",
+  "remove": "Remove",
+  "manage": "Manage",
+  "videoFallbackTitle": "Video",
+  "filterAll": "All",
+  "filterToday": "Today",
+  "filterShorts": "Shorts",
+  "filterLong": "Long",
+  "filterRecent": "Recent",
+  "videoDeleted": "Video deleted",
+  "getInfo": "Get Info",
+  "addToVault": "Add to Vault",
+  "removeFromVault": "Remove from Vault",
+  "deleteVideo": "Delete Video",
+  "deleteVideoWarning": "This will permanently delete the video from your library.",
+  "thisVideo": "This video",
+  "share": "Share",
+  "like": "Like",
+  "expand": "Expand",
+  "photoLibraryAccess": "Photo Library Access",
+  "limitedAccessMessage": "You're currently sharing a limited selection of videos.",
+  "selectMoreVideos": "Select More Videos",
+  "allowFullAccess": "Allow Full Access",
+  "managingCount": "Managing {count} of your videos",
+  "@managingCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "infoDate": "Date",
+  "infoDuration": "Duration",
+  "infoResolution": "Resolution",
+  "infoFileSize": "File Size",
+  "infoFormat": "Format",
+  "feed": "Feed",
+  "library": "Library",
+  "libraryFilters": "Filters",
+  "libraryClose": "Close",
+  "libraryEmptyTitle": "No videos yet",
+  "libraryAccessOff": "Photos access is off",
+  "libraryNoMatches": "No matching videos",
+  "librarySearchHelp": "Try a different title or clear your search.",
+  "libraryNoFilterMatches": "No videos match these filters",
+  "libraryFilterHelp": "Clear the filters to see all of your videos.",
+  "libraryUnknownDate": "Date unknown",
+  "libraryDeleteFailed": "RollReel couldn’t delete the video.",
+  "libraryDeviceCount": "{count, plural, one{1 video} other{{count} videos}} on this device",
+  "libraryMemoriesCount": "{count, plural, one{1 video} other{{count} videos}} from past years",
+  "libraryVideoOptions": "Options for {title}",
+  "libraryVideoRow": "{title} · {date} · {duration}",
+  "@libraryDeviceCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@libraryMemoriesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@libraryVideoOptions": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
+  },
+  "@libraryVideoRow": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      },
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "favoritesEmptyTitle": "No favorites yet",
+  "favoritesEmptyBody": "Tap the heart while watching a video to save it here.",
+  "goToLibrary": "Browse Library",
+  "infoTab": "Info",
+  "searchVideos": "Search videos…",
+  "videosTitle": "Videos",
+  "videosCount": "{count} Videos",
+  "@videosCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "yourLibrary": "Your Library",
+  "libraryTitle": "Library",
+  "librarySubtitle": "Your personal video collection",
+  "totalInLibrary": "Total in your library",
+  "localBadge": "Local",
+  "noResults": "No Results",
+  "noVideosFound": "No Videos Found",
+  "noSearchMatches": "No videos match \"{query}\".",
+  "@noSearchMatches": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "tryDifferentFilter": "Try a different filter.",
+  "clearSearch": "Clear Search",
+  "clearFilters": "Clear Filters",
+  "filter": "Filter",
+  "reset": "Reset",
+  "timePeriod": "Time period",
+  "thisWeek": "This Week",
+  "thisMonth": "This Month",
+  "duration": "Duration",
+  "any": "Any",
+  "durationShort": "Under 1 min",
+  "durationMedium": "1–5 min",
+  "durationLong": "Over 5 min",
+  "sortBy": "Sort by",
+  "newestFirst": "Newest First",
+  "oldestFirst": "Oldest First",
+  "shortestFirst": "Shortest First",
+  "longestFirst": "Longest First",
+  "applyFilters": "Apply Filters",
+  "onThisDay": "On This Day",
+  "onThisDaySubtitleOne": "1 memory from {years}",
+  "@onThisDaySubtitleOne": {
+    "placeholders": {
+      "years": {
+        "type": "String"
+      }
+    }
+  },
+  "onThisDaySubtitleMany": "{count} memories from past years",
+  "@onThisDaySubtitleMany": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "yearsAgoOne": "1 year ago",
+  "yearsAgoMany": "{years} years ago",
+  "@yearsAgoMany": {
+    "placeholders": {
+      "years": {
+        "type": "int"
+      }
+    }
+  },
+  "onThisDayHeader": "On This Day · {yearsAgo}",
+  "@onThisDayHeader": {
+    "placeholders": {
+      "yearsAgo": {
+        "type": "String"
+      }
+    }
+  },
+  "positionCounter": "{current} of {total}",
+  "@positionCounter": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "couldNotLoadMemories": "Could not load memories: {error}",
+  "@couldNotLoadMemories": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "couldNotLoadVideos": "Could not load videos: {error}",
+  "@couldNotLoadVideos": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "settings": "Settings",
+  "home": "Home",
+  "favorites": "Favorites",
+  "playbackSection": "Playback",
+  "loopShortVideos": "Loop short videos",
+  "loopShortVideosSub": "Replay clips under 30 seconds",
+  "autoPlayOnLaunch": "Auto-play on launch",
+  "autoPlayOnLaunchSub": "Start playback when the feed opens",
+  "defaultFilter": "Default filter",
+  "defaultFilterSub": "Choose what opens in the feed",
+  "appearanceSection": "Appearance",
+  "darkMode": "Dark mode",
+  "darkModeSub": "Use dark theme for the app",
+  "showDateLabels": "Show date labels",
+  "showDateLabelsSub": "Display date on video thumbnails",
+  "showDurationBadges": "Show duration badges",
+  "showDurationBadgesSub": "Show video duration on thumbnails",
+  "privacySection": "Privacy",
+  "privacyVault": "Privacy Vault",
+  "privacySettingsTitle": "Privacy Settings",
+  "privacySettingsSub": "Manage your data and permissions",
+  "proBadge": "Pro",
+  "aboutSection": "About",
+  "privacyPolicy": "Privacy Policy",
+  "privacyPolicyBody": "RollReel does not upload, transmit, or store any of your videos outside your device. No account is required. No personal data is shared with third parties.",
+  "rateApp": "Rate RollReel",
+  "shareApp": "Share RollReel",
+  "version": "Version",
+  "settingsFilterDescription": "Choose which videos you see when you open the feed.",
+  "settingsProDescription": "Ad-free playback and Privacy Vault",
+  "settingsProActive": "Pro is active",
+  "settingsVaultDescription": "Open your private videos",
+  "settingsRestoreComplete": "Finished checking for past purchases.",
+  "settingsRestoreFailed": "Couldn’t restore purchases. Please try again.",
+  "proCardSubtitle": "Ad-free · Vault · Speed · Collections",
+  "proCardTagline": "Elevate your viewing experience",
+  "shareAppMessage": "Check out RollReel – swipe through your camera roll videos, 100% offline!",
+  "vaultTitle": "Private Vault",
+  "vaultLocked": "Vault Locked",
+  "vaultLockedSubtitle": "Unlock with biometrics or your device passcode.",
+  "unlockWithFaceId": "Unlock with Face ID",
+  "unlockVaultReason": "Unlock your Private Vault",
+  "faceIdUnavailable": "Face ID is not available on this device.",
+  "orDivider": "OR",
+  "enterPasscode": "Enter Passcode",
+  "vaultBadgeSecureTitle": "Private & Secure",
+  "vaultBadgeSecureSub": "Only you can access your vault",
+  "vaultBadgePhotosTitle": "Original videos",
+  "vaultBadgePhotosSub": "Stay in Photos",
+  "vaultBadgeHiddenTitle": "Hidden & Discreet",
+  "vaultBadgeHiddenSub": "Your privacy is our priority",
+  "authFailed": "Authentication failed. Please try again.",
+  "vaultLoadFailed": "Failed to load vault",
+  "vaultEmpty": "Vault is empty",
+  "vaultEmptyHint": "Tap ••• on any video to add it here",
+  "vaultEmptySubtitle": "Adding a video to the Vault hides it in RollReel. The original stays in Photos.",
+  "addVideosToVault": "Add Videos to Vault",
+  "howItWorks": "How it works",
+  "removeFromVaultTitle": "Remove from Vault?",
+  "removeFromVaultBody": "This video will return to your main library.",
+  "vaultRecoveryLocked": "Unlock the Vault to return your videos to Library.",
+  "vaultReturnAll": "Return videos to Library",
+  "vaultRecoveryBody": "You can return your vaulted videos to Library at any time.",
+  "vaultRecoveryConfirm": "All Vault videos will be visible again in your RollReel library.",
+  "vaultRecoveryDone": "Videos returned to Library.",
+  "vaultUpdateFailed": "Couldn’t update the Vault. Please try again.",
+  "paywallTitle": "RollReel Pro",
+  "paywallPlaybackTitle": "Keep watching.",
+  "paywallPlaybackBody": "Your videos, without ad breaks.",
+  "paywallVaultTitle": "Keep it to yourself.",
+  "paywallVaultBody": "A locked space for your private videos.",
+  "paywallMemoriesTitle": "See this\nday again.",
+  "paywallMemoriesBody": "Find videos from this day in past years.",
+  "paywallSpeedTitle": "Watch at your pace.",
+  "paywallAdFree": "Ad-free playback",
+  "paywallAdFreeBody": "Replay clips without ad breaks",
+  "paywallVaultBenefit": "Lock the clips you choose",
+  "paywallSpeed": "Hold to play at 2×",
+  "paywallSpeedBenefit": "Fast-forward with a press and hold",
+  "paywallMemoriesBenefit": "Rediscover clips from past years",
+  "paywallChoosePlan": "Choose a plan",
+  "paywallLifetime": "Lifetime",
+  "paywallMonthly": "Monthly",
+  "paywallRenewsMonthly": "Auto-renews monthly",
+  "paywallGetLifetime": "Get Lifetime",
+  "paywallSubscribeMonthly": "Subscribe monthly",
+  "paywallMonthlyPrice": "{price}/month",
+  "@paywallMonthlyPrice": {"placeholders": {"price": {"type": "String"}}},
+  "paywallLifetimeBilling": "{price} once. No subscription.",
+  "@paywallLifetimeBilling": {"placeholders": {"price": {"type": "String"}}},
+  "paywallMonthlyBilling": "{price}/month. Auto-renews monthly. Cancel in App Store settings.",
+  "@paywallMonthlyBilling": {"placeholders": {"price": {"type": "String"}}},
+  "paywallLoadingPrices": "Loading prices…",
+  "paywallPricesUnavailable": "Plans unavailable",
+  "paywallLinkUnavailable": "Couldn’t open this link. Please try again.",
+  "paywallTagline": "Watch more. Worry less.",
+  "featureAdFree": "Ad-Free Experience",
+  "featureAdFreeSub": "No interruptions, ever",
+  "featureVault": "Privacy Vault",
+  "featureVaultSub": "Lock sensitive videos with Face ID",
+  "featureSpeed": "Playback Speed Control",
+  "featureSpeedSub": "2× fast-forward on long-press",
+  "featureOnThisDay": "On This Day",
+  "featureOnThisDaySub": "Relive videos from past years",
+  "unlockPro": "Unlock RollReel Pro",
+  "unlockProForever": "Unlock Pro Forever",
+  "youArePro": "You're Pro!",
+  "lifetimeFooter": "One-time purchase · No subscription · Forever yours",
+  "monthlyFooter": "Auto-renews monthly · Cancel anytime",
+  "restorePurchases": "Restore Purchases",
+  "subscriptionDisclaimer": "Payment charged to Apple ID. Subscription auto-renews unless cancelled 24h before period ends.",
+  "oneTimeDisclaimer": "Payment charged to Apple ID. No subscription. Your access is permanent.",
+  "onePaymentLabel": "One-time payment",
+  "bulletLifetimeAccess": "Lifetime access",
+  "bulletAllProFeatures": "All Pro features",
+  "bulletFutureUpdates": "Future updates",
+  "termsOfUse": "Terms of Use",
+  "lifetimeAccess": "Lifetime Access",
+  "foundingMember": "Founding member",
+  "bestValue": "Best Value",
+  "planNotAvailable": "This plan isn't available right now. Please try again later.",
+  "purchaseFailed": "Purchase failed",
+  "active": "ACTIVE",
+  "pro": "PRO",
+  "plus": "PLUS",
+  "retry": "Retry",
+  "settingsLanguage": "Language",
+  "settingsSystemLanguage": "System default",
+  "settingsLanguageSaveFailed": "Couldn’t save your language. Please try again.",
+  "updateAvailableTitle": "A new RollReel is here",
+  "updateAvailableBody": "Version {version} is available on the App Store. Update when you’re ready.",
+  "updateNow": "Update",
+  "updateStoreUnavailable": "Couldn’t open the App Store. Please try again.",
+  "@updateAvailableBody": {"placeholders": {"version": {"type": "String", "example": "2.1.0"}}},
+  "settingsCurrentPlan": "Current plan",
+  "settingsFreePlan": "Free plan",
+  "settingsProPlan": "Pro plan",
+  "settingsFreePlanDescription": "Upgrade for ad-free playback and Privacy Vault."
+}

@@ -6,10 +6,22 @@ import 'package:flutter/material.dart';
 class RRColors {
   const RRColors._();
 
-  static final ValueNotifier<bool> isDark = ValueNotifier<bool>(true);
+  static final ValueNotifier<bool> isDark = ValueNotifier<bool>(false);
+
+  static const Color brandLightBackground = Color(0xFFF3FAFD);
+  static const Color brandInk = Color(0xFF0C2639);
+  static const Color brandMutedInk = Color(0xFF405C70);
+  static const Color brandOutline = Color(0xFFC5DCEB);
+  static const Color brandBlue = Color(0xFF0A4E8C);
+  static const Color brandCyan = Color(0xFF087D9B);
 
   static Color get bgDeep =>
       isDark.value ? const Color(0xFF07070F) : const Color(0xFFF5F5F7);
+  // Light-lavender page background used by the new light-theme screens
+  // (Profile, Library). Falls back to bgDeep in dark mode until a dark
+  // variant of this design system exists.
+  static Color get bgTint =>
+      isDark.value ? const Color(0xFF07070F) : const Color(0xFFF3F1FB);
   static Color get bgSurface =>
       isDark.value ? const Color(0xFF111118) : const Color(0xFFFFFFFF);
   static Color get bgElevated =>
@@ -38,6 +50,18 @@ class RRColors {
   static const Color accentViolet = Color(0xFF8B5CF6);
   static const Color accentGreen = Color(0xFF4ADE80);
   static const Color accentPink = Color(0xFFFF5E8B);
+  static const Color accentBlue = Color(0xFF3B82F6);
+  static const Color accentRed = Color(0xFFEF4444);
+  static const Color accentOrange = Color(0xFFF59E0B);
+
+  // Flat icon-tile colors — same vivid value in both themes, matching
+  // iOS Settings-style colorful glyph tiles.
+  static const Color iconOrange = Color(0xFFFF9F43);
+  static const Color iconGreen = Color(0xFF2ECC71);
+  static const Color iconRed = Color(0xFFEE4D6E);
+  static const Color iconPurple = Color(0xFF8B5CF6);
+  static const Color iconBlue = Color(0xFF4A90E2);
+  static const Color iconTeal = Color(0xFF34C9A3);
 
   static const LinearGradient gradBrand = LinearGradient(
     colors: [accentCoral, accentViolet],
@@ -56,5 +80,11 @@ class RRColors {
     colors: [accentViolet, accentCyan],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient gradVioletPink = LinearGradient(
+    colors: [Color(0xFF7C3AED), accentPink],
+    begin: Alignment.centerLeft,
+    end: Alignment.centerRight,
   );
 }

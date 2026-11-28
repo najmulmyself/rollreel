@@ -6,14 +6,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:photo_manager/photo_manager.dart';
 
+import '../../core/iap/iap_provider.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
+import '../../core/theme/typography.dart';
 import '../../core/vault/vault_provider.dart';
+import '../../l10n/app_localizations.dart';
+import '../../shared/widgets/duration_badge.dart';
+import '../../shared/widgets/primary_button.dart';
 
 class VaultScreen extends ConsumerStatefulWidget {
-  const VaultScreen({super.key, required this.onBack});
+  const VaultScreen({super.key, required this.onBack, required this.onRecovered});
 
   final VoidCallback onBack;
+  final VoidCallback onRecovered;
 
   @override
   ConsumerState<VaultScreen> createState() => _VaultScreenState();
@@ -23,23 +29,46 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
   final _auth = LocalAuthentication();
   bool _unlocked = false;
   bool _authenticating = false;
+  bool _restoringAll = false;
 
   Future<void> _unlock() async {
     if (_authenticating) return;
     setState(() => _authenticating = true);
+    final l10n = AppLocalizations.of(context)!;
     try {
       final canCheck = await _auth.canCheckBiometrics;
       if (!canCheck) {
-        _showError('Face ID is not available on this device.');
+        _showError(l10n.faceIdUnavailable);
         return;
       }
       final ok = await _auth.authenticate(
-        localizedReason: 'Unlock your Private Vault',
+        localizedReason: l10n.unlockVaultReason,
         options: const AuthenticationOptions(biometricOnly: true),
       );
       if (ok && mounted) setState(() => _unlocked = true);
     } catch (_) {
-      if (mounted) _showError('Authentication failed. Please try again.');
+      if (mounted) _showError(l10n.authFailed);
+    } finally {
+      if (mounted) setState(() => _authenticating = false);
+    }
+  }
+
+  // "Enter Passcode" reuses the same platform prompt with biometricOnly
+  // disabled — iOS/Android already fall back to the device passcode UI
+  // when biometrics aren't used or fail, so no separate passcode screen
+  // is needed.
+  Future<void> _unlockWithPasscode() async {
+    if (_authenticating) return;
+    setState(() => _authenticating = true);
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final ok = await _auth.authenticate(
+        localizedReason: l10n.unlockVaultReason,
+        options: const AuthenticationOptions(biometricOnly: false),
+      );
+      if (ok && mounted) setState(() => _unlocked = true);
+    } catch (_) {
+      if (mounted) _showError(l10n.authFailed);
     } finally {
       if (mounted) setState(() => _authenticating = false);
     }
@@ -58,31 +87,74 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
     );
   }
 
+  void _showHowItWorks() {
+    final l10n = AppLocalizations.of(context)!;
+    showCupertinoDialog<void>(
+      context: context,
+      builder: (_) => CupertinoAlertDialog(
+        title: Text(l10n.vaultTitle),
+        content: Text(l10n.vaultEmptySubtitle),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.pop(context),
+            child: Text(l10n.ok),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _restoreAllVideos() async {
+    if (_restoringAll) return;
+    setState(() => _restoringAll = true);
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final confirmed = await showCupertinoDialog<bool>(
+        context: context,
+        builder: (dialogContext) => CupertinoAlertDialog(
+          title: Text(l10n.vaultReturnAll),
+          content: Text(l10n.vaultRecoveryConfirm),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(l10n.cancel),
+            ),
+            CupertinoDialogAction(
+              isDefaultAction: true,
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(l10n.vaultReturnAll),
+            ),
+          ],
+        ),
+      );
+      if (!mounted || !_unlocked || confirmed != true) return;
+      await ref.read(vaultIdsProvider.notifier).restoreAll();
+      if (mounted) widget.onRecovered();
+    } catch (error) {
+      debugPrint('[RollReel] Vault recovery could not finish: $error');
+      if (mounted) _showError(l10n.vaultUpdateFailed);
+    } finally {
+      if (mounted) setState(() => _restoringAll = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isPro = ref.watch(isProProvider);
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color(0xFF120F35),
-              Color(0xFF4E3AAA),
-              Color(0xFF7C55E0),
-            ],
-            stops: [0.0, 0.45, 1.0],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              _buildNav(),
-              Expanded(
-                child: _unlocked ? _buildUnlocked() : _buildLocked(),
-              ),
-            ],
-          ),
+      backgroundColor: RRColors.bgTint,
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildNav(),
+            Expanded(
+              child: !_unlocked
+                  ? _buildLocked(recoveryOnly: !isPro)
+                  : isPro
+                  ? _buildUnlocked()
+                  : _buildRecovery(),
+            ),
+          ],
         ),
       ),
     );
@@ -100,159 +172,295 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
             padding: const EdgeInsets.symmetric(
                 horizontal: RRSpace.sp8, vertical: RRSpace.sp8),
             onPressed: widget.onBack,
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(CupertinoIcons.chevron_left,
-                    color: Colors.white54, size: 16),
-                SizedBox(width: 4),
+                const Icon(CupertinoIcons.chevron_left,
+                    color: RRColors.accentViolet, size: 16),
+                const SizedBox(width: 4),
                 Text(
-                  'Back',
-                  style: TextStyle(color: Colors.white54, fontSize: 16),
+                  AppLocalizations.of(context)!.back,
+                  style: TextStyle(
+                      color: RRColors.textPrimary,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w500),
                 ),
               ],
             ),
           ),
           const Spacer(),
-          if (_unlocked)
-            Padding(
-              padding: const EdgeInsets.only(right: RRSpace.sp8),
-              child: const Text(
-                'Private Vault',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 17,
-                  fontWeight: FontWeight.w600,
-                ),
+          if (_unlocked) ...[
+            Text(
+              AppLocalizations.of(context)!.vaultTitle,
+              style: TextStyle(
+                color: RRColors.textPrimary,
+                fontSize: 17,
+                fontWeight: FontWeight.w600,
               ),
             ),
+            const SizedBox(width: RRSpace.sp8),
+            Container(
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(
+                border: Border.all(
+                    color: RRColors.accentViolet.withValues(alpha: 0.5)),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              alignment: Alignment.center,
+              child: const Icon(CupertinoIcons.shield_fill,
+                  color: RRColors.accentViolet, size: 15),
+            ),
+          ],
         ],
       ),
     );
   }
 
+  // Colors the first word dark and the rest violet; falls back to a solid
+  // violet title when the string has no separate first word to split.
+  List<TextSpan> _titleSpans(String title) {
+    const baseStyle = TextStyle(fontSize: 32, fontWeight: FontWeight.w800);
+    final firstSpace = title.indexOf(' ');
+    if (firstSpace < 0) {
+      return [
+        TextSpan(
+            text: title,
+            style: baseStyle.copyWith(color: RRColors.accentViolet)),
+      ];
+    }
+    return [
+      TextSpan(
+        text: title.substring(0, firstSpace),
+        style: baseStyle.copyWith(color: const Color(0xFF1A1A2E)),
+      ),
+      TextSpan(
+        text: title.substring(firstSpace),
+        style: baseStyle.copyWith(color: RRColors.accentViolet),
+      ),
+    ];
+  }
+
   // ── Locked state ───────────────────────────────────────────────────────────
 
-  Widget _buildLocked() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: RRSpace.sp32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              CupertinoIcons.lock_fill,
-              size: 80,
-              color: Colors.white38,
+  Widget _buildLocked({required bool recoveryOnly}) {
+    final l10n = AppLocalizations.of(context)!;
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: RRSpace.sp24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: RRSpace.sp12),
+          const _VaultLockHero(),
+          const SizedBox(height: RRSpace.sp24),
+          RichText(
+            textAlign: TextAlign.center,
+            text: TextSpan(children: _titleSpans(l10n.vaultLocked)),
+          ),
+          const SizedBox(height: RRSpace.sp12),
+          Text(
+            recoveryOnly ? l10n.vaultRecoveryLocked : l10n.vaultLockedSubtitle,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: RRColors.textSecond,
+              fontSize: 15,
+              height: 1.4,
             ),
-            const SizedBox(height: RRSpace.sp24),
-            const Text(
-              'Vault Locked',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 28,
-                fontWeight: FontWeight.w700,
-              ),
+          ),
+          const SizedBox(height: RRSpace.sp24),
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: RRColors.accentViolet.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
             ),
-            const SizedBox(height: RRSpace.sp8),
-            const Text(
-              'Your private videos are safe here',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.white60,
-                fontSize: 15,
-              ),
+            alignment: Alignment.center,
+            child: const Icon(
+              CupertinoIcons.viewfinder,
+              color: RRColors.accentViolet,
+              size: 24,
             ),
-            const SizedBox(height: RRSpace.sp32),
-            GestureDetector(
-              onTap: _authenticating ? null : _unlock,
-              child: Container(
-                height: RRSpace.buttonHeight,
-                decoration: BoxDecoration(
-                  gradient: RRColors.gradBrand,
-                  borderRadius: BorderRadius.circular(RRSpace.radiusFull),
+          ),
+          const SizedBox(height: RRSpace.sp20),
+          PrimaryButton(
+            label: l10n.unlockWithFaceId,
+            icon: CupertinoIcons.viewfinder,
+            gradient: RRColors.gradVioletPink,
+            onPressed: _authenticating ? null : _unlock,
+          ),
+          const SizedBox(height: RRSpace.sp20),
+          Row(
+            children: [
+              Expanded(child: Divider(color: RRColors.divider)),
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: RRSpace.sp12),
+                child: Text(
+                  l10n.orDivider,
+                  style: TextStyle(color: RRColors.textDisabled, fontSize: 12),
                 ),
-                child: _authenticating
-                    ? const Center(
-                        child: SizedBox(
-                          width: 22,
-                          height: 22,
-                          child: CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2.5,
-                          ),
-                        ),
-                      )
-                    : const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.face_retouching_natural,
-                              color: Colors.white, size: 22),
-                          SizedBox(width: RRSpace.sp8),
-                          Text(
-                            'Unlock with Face ID',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
-                      ),
+              ),
+              Expanded(child: Divider(color: RRColors.divider)),
+            ],
+          ),
+          const SizedBox(height: RRSpace.sp20),
+          GestureDetector(
+            onTap: _authenticating ? null : _unlockWithPasscode,
+            child: Container(
+              height: RRSpace.buttonHeight,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(RRSpace.radiusFull),
+                border: Border.all(
+                    color: RRColors.accentViolet.withValues(alpha: 0.4)),
+              ),
+              alignment: Alignment.center,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(CupertinoIcons.square_grid_3x2,
+                      color: RRColors.accentViolet, size: 18),
+                  const SizedBox(width: 8),
+                  Text(
+                    l10n.enterPasscode,
+                    style: const TextStyle(
+                      color: RRColors.accentViolet,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          ),
+          const SizedBox(height: RRSpace.sp24),
+          Container(
+            padding: const EdgeInsets.symmetric(
+                horizontal: RRSpace.sp12, vertical: RRSpace.sp16),
+            decoration: BoxDecoration(
+              color: RRColors.bgElevated,
+              borderRadius: BorderRadius.circular(RRSpace.radiusLg),
+              boxShadow: const [
+                BoxShadow(
+                    color: Color(0x0F000000),
+                    blurRadius: 12,
+                    offset: Offset(0, 4)),
+              ],
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _VaultBadge(
+                    icon: CupertinoIcons.checkmark_shield_fill,
+                    title: l10n.vaultBadgeSecureTitle,
+                    subtitle: l10n.vaultBadgeSecureSub,
+                  ),
+                ),
+                Expanded(
+                  child: _VaultBadge(
+                    icon: CupertinoIcons.photo_on_rectangle,
+                    title: l10n.vaultBadgePhotosTitle,
+                    subtitle: l10n.vaultBadgePhotosSub,
+                  ),
+                ),
+                Expanded(
+                  child: _VaultBadge(
+                    icon: CupertinoIcons.eye_slash,
+                    title: l10n.vaultBadgeHiddenTitle,
+                    subtitle: l10n.vaultBadgeHiddenSub,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: RRSpace.sp24),
+        ],
       ),
     );
   }
 
   // ── Unlocked state ─────────────────────────────────────────────────────────
 
+  Widget _buildRecovery() {
+    final l10n = AppLocalizations.of(context)!;
+    final hasVideos = ref.watch(vaultIdsProvider.select((ids) => ids.isNotEmpty));
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(RRSpace.sp24),
+        child: Column(
+          children: [
+            Icon(CupertinoIcons.folder, size: 38, color: RRColors.accentViolet),
+            const SizedBox(height: RRSpace.sp16),
+            Text(
+              hasVideos ? l10n.vaultReturnAll : l10n.vaultEmpty,
+              style: RRTypography.title2,
+              textAlign: TextAlign.center,
+            ),
+            if (hasVideos) ...[
+              const SizedBox(height: RRSpace.sp8),
+              Text(
+                l10n.vaultRecoveryBody,
+                style: RRTypography.body.copyWith(color: RRColors.textSecond),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: RRSpace.sp20),
+              FilledButton(
+                onPressed: _restoringAll ? null : _restoreAllVideos,
+                style: FilledButton.styleFrom(
+                  backgroundColor: RRColors.isDark.value
+                      ? const Color(0xFFA7DEFF) : RRColors.brandBlue,
+                  foregroundColor: RRColors.isDark.value ? RRColors.brandInk : Colors.white,
+                  minimumSize: const Size(44, 48),
+                  padding: const EdgeInsets.all(RRSpace.sp12),
+                ),
+                child: Text(l10n.vaultReturnAll, textAlign: TextAlign.center),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildUnlocked() {
     final assetsAsync = ref.watch(vaultAssetsProvider);
+    final l10n = AppLocalizations.of(context)!;
 
     return assetsAsync.when(
-      loading: () => const Center(
-        child: CupertinoActivityIndicator(color: Colors.white),
+      loading: () => Center(
+        child: CupertinoActivityIndicator(color: RRColors.accentCyan),
       ),
-      error: (_, __) => const Center(
-        child: Text('Failed to load vault',
-            style: TextStyle(color: Colors.white60)),
+      error: (_, __) => Center(
+        child: Padding(
+          padding: const EdgeInsets.all(RRSpace.sp24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(CupertinoIcons.exclamationmark_triangle,
+                  size: 60, color: RRColors.textDisabled),
+              const SizedBox(height: RRSpace.sp16),
+              Text(l10n.vaultLoadFailed,
+                  style: RRTypography.title1, textAlign: TextAlign.center),
+              const SizedBox(height: RRSpace.sp20),
+              PrimaryButton(
+                label: l10n.retry,
+                onPressed: () => ref.invalidate(vaultAssetsProvider),
+              ),
+            ],
+          ),
+        ),
       ),
       data: (assets) {
         if (assets.isEmpty) {
-          return Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(CupertinoIcons.lock_open_fill,
-                    size: 64, color: Colors.white54),
-                const SizedBox(height: RRSpace.sp16),
-                const Text(
-                  'Vault is empty',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: RRSpace.sp8),
-                const Text(
-                  'Tap ••• on any video to add it here',
-                  style: TextStyle(color: Colors.white60, fontSize: 14),
-                ),
-              ],
-            ),
-          );
+          return _EmptyVault(onAddVideos: widget.onBack, onHowItWorks: _showHowItWorks);
         }
 
         return GridView.builder(
           padding: const EdgeInsets.all(RRSpace.sp4),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 3,
-            crossAxisSpacing: 2,
-            mainAxisSpacing: 2,
+            crossAxisSpacing: RRSpace.sp4,
+            mainAxisSpacing: RRSpace.sp4,
             childAspectRatio: 9 / 16,
           ),
           itemCount: assets.length,
@@ -260,6 +468,395 @@ class _VaultScreenState extends ConsumerState<VaultScreen> {
               _VaultThumb(asset: assets[index]),
         );
       },
+    );
+  }
+}
+
+// ─── Empty vault state ──────────────────────────────────────────────────────
+
+class _EmptyVault extends StatelessWidget {
+  const _EmptyVault({this.onAddVideos, this.onHowItWorks});
+
+  final VoidCallback? onAddVideos;
+  final VoidCallback? onHowItWorks;
+
+  List<TextSpan> _titleSpans(String title) {
+    final baseStyle = TextStyle(fontSize: 32, fontWeight: FontWeight.w800);
+    final lastSpace = title.lastIndexOf(' ');
+    if (lastSpace < 0) {
+      return [
+        TextSpan(
+            text: title,
+            style: baseStyle.copyWith(color: RRColors.textPrimary)),
+      ];
+    }
+    return [
+      TextSpan(
+        text: '${title.substring(0, lastSpace)} ',
+        style: baseStyle.copyWith(color: RRColors.textPrimary),
+      ),
+      TextSpan(
+        text: title.substring(lastSpace + 1),
+        style: baseStyle.copyWith(color: RRColors.accentViolet),
+      ),
+    ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: RRSpace.sp24),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const SizedBox(height: RRSpace.sp12),
+          const _EmptyVaultHero(),
+          const SizedBox(height: RRSpace.sp24),
+          RichText(
+            textAlign: TextAlign.center,
+            text: TextSpan(children: _titleSpans(l10n.vaultEmpty)),
+          ),
+          const SizedBox(height: RRSpace.sp12),
+          Text(
+            l10n.vaultEmptySubtitle,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+                color: RRColors.textSecond, fontSize: 15, height: 1.4),
+          ),
+          const SizedBox(height: RRSpace.sp24),
+          Container(
+            padding: const EdgeInsets.symmetric(
+                horizontal: RRSpace.sp12, vertical: RRSpace.sp16),
+            decoration: BoxDecoration(
+              color: RRColors.bgElevated,
+              borderRadius: BorderRadius.circular(RRSpace.radiusLg),
+              boxShadow: [
+                BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.06),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4)),
+              ],
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: _VaultBadge(
+                    icon: CupertinoIcons.lock_fill,
+                    title: l10n.vaultBadgeSecureTitle,
+                    subtitle: l10n.vaultBadgeSecureSub,
+                  ),
+                ),
+                Container(width: 1, height: 60, color: RRColors.divider),
+                Expanded(
+                  child: _VaultBadge(
+                    icon: CupertinoIcons.photo_on_rectangle,
+                    title: l10n.vaultBadgePhotosTitle,
+                    subtitle: l10n.vaultBadgePhotosSub,
+                  ),
+                ),
+                Container(width: 1, height: 60, color: RRColors.divider),
+                Expanded(
+                  child: _VaultBadge(
+                    icon: CupertinoIcons.eye_slash,
+                    title: l10n.vaultBadgeHiddenTitle,
+                    subtitle: l10n.vaultBadgeHiddenSub,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: RRSpace.sp24),
+          PrimaryButton(
+            label: l10n.addVideosToVault,
+            icon: CupertinoIcons.add_circled,
+            gradient: RRColors.gradPro,
+            onPressed: onAddVideos,
+          ),
+          const SizedBox(height: RRSpace.sp12),
+          GestureDetector(
+            onTap: onHowItWorks,
+            child: Container(
+              height: RRSpace.buttonHeight,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(RRSpace.radiusFull),
+                border: Border.all(
+                    color: RRColors.accentViolet.withValues(alpha: 0.4)),
+              ),
+              alignment: Alignment.center,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(CupertinoIcons.square_grid_3x2,
+                      color: RRColors.accentViolet, size: 18),
+                  const SizedBox(width: 8),
+                  Text(
+                    l10n.howItWorks,
+                    style: const TextStyle(
+                      color: RRColors.accentViolet,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: RRSpace.sp24),
+        ],
+      ),
+    );
+  }
+}
+
+class _EmptyVaultHero extends StatelessWidget {
+  const _EmptyVaultHero();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 280,
+      height: 240,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Container(
+            width: 230,
+            height: 230,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: [
+                  RRColors.accentViolet.withValues(alpha: 0.22),
+                  Colors.transparent,
+                ],
+              ),
+            ),
+          ),
+          const Positioned(
+            top: 30,
+            left: 40,
+            child:
+                Icon(CupertinoIcons.sparkles, color: RRColors.accentViolet, size: 16),
+          ),
+          const Positioned(
+            bottom: 60,
+            right: 30,
+            child:
+                Icon(CupertinoIcons.sparkles, color: RRColors.accentViolet, size: 13),
+          ),
+          // Safe body
+          Container(
+            width: 150,
+            height: 150,
+            decoration: BoxDecoration(
+              color: const Color(0xFF2A2A3A),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: RRColors.accentViolet.withValues(alpha: 0.3)),
+            ),
+            alignment: Alignment.center,
+            child: Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                gradient: RRColors.gradPro,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: RRColors.accentViolet.withValues(alpha: 0.5),
+                    blurRadius: 24,
+                  ),
+                ],
+              ),
+              alignment: Alignment.center,
+              child: const Icon(CupertinoIcons.play_fill,
+                  color: Colors.white, size: 30),
+            ),
+          ),
+          // Safe door (open, offset to the left)
+          Positioned(
+            left: 4,
+            child: Container(
+              width: 70,
+              height: 150,
+              decoration: BoxDecoration(
+                color: const Color(0xFF232330),
+                borderRadius: BorderRadius.circular(16),
+                border:
+                    Border.all(color: RRColors.accentViolet.withValues(alpha: 0.25)),
+              ),
+              alignment: Alignment.center,
+              child: Container(
+                width: 28,
+                height: 28,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF15151F),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                      color: RRColors.accentViolet.withValues(alpha: 0.4)),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Vault lock hero graphic ──────────────────────────────────────────────────
+
+class _VaultLockHero extends StatelessWidget {
+  const _VaultLockHero();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 280,
+      height: 240,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          // Ambient glow
+          Container(
+            width: 230,
+            height: 230,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: RadialGradient(
+                colors: [
+                  RRColors.accentViolet.withValues(alpha: 0.14),
+                  Colors.transparent,
+                ],
+              ),
+            ),
+          ),
+          // Floating photo/video/folder icon chips
+          const Positioned(
+            top: 20,
+            left: 30,
+            child: _FloatIcon(icon: CupertinoIcons.film),
+          ),
+          const Positioned(
+            top: 30,
+            right: 20,
+            child: _FloatIcon(icon: CupertinoIcons.photo_fill),
+          ),
+          const Positioned(
+            bottom: 40,
+            left: 10,
+            child: _FloatIcon(icon: CupertinoIcons.folder_fill),
+          ),
+          const Positioned(
+            top: 10,
+            right: 70,
+            child: Icon(CupertinoIcons.sparkles,
+                color: RRColors.accentViolet, size: 16),
+          ),
+          const Positioned(
+            bottom: 60,
+            right: 30,
+            child: Icon(CupertinoIcons.sparkles,
+                color: RRColors.accentViolet, size: 13),
+          ),
+          // Lock icon
+          Container(
+            width: 110,
+            height: 110,
+            decoration: BoxDecoration(
+              gradient: RRColors.gradPro,
+              borderRadius: BorderRadius.circular(30),
+              boxShadow: [
+                BoxShadow(
+                  color: RRColors.accentViolet.withValues(alpha: 0.35),
+                  blurRadius: 30,
+                  offset: const Offset(0, 12),
+                ),
+              ],
+            ),
+            alignment: Alignment.center,
+            child: const Icon(
+              CupertinoIcons.lock_fill,
+              color: Colors.white,
+              size: 48,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FloatIcon extends StatelessWidget {
+  const _FloatIcon({required this.icon});
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const [
+          BoxShadow(
+              color: Color(0x14000000), blurRadius: 10, offset: Offset(0, 4)),
+        ],
+      ),
+      alignment: Alignment.center,
+      child: Icon(icon, color: RRColors.accentViolet, size: 20),
+    );
+  }
+}
+
+// ─── Vault feature badge ──────────────────────────────────────────────────────
+
+class _VaultBadge extends StatelessWidget {
+  const _VaultBadge({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          width: 44,
+          height: 44,
+          decoration: BoxDecoration(
+            color: RRColors.accentViolet.withValues(alpha: 0.15),
+            shape: BoxShape.circle,
+          ),
+          alignment: Alignment.center,
+          child: Icon(icon, color: RRColors.accentViolet, size: 18),
+        ),
+        const SizedBox(height: RRSpace.sp8),
+        Text(
+          title,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: RRColors.textPrimary,
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          subtitle,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: RRColors.textSecond,
+            fontSize: 11,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -290,24 +887,32 @@ class _VaultThumbState extends ConsumerState<_VaultThumb> {
   }
 
   void _confirmRemove(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showCupertinoDialog<void>(
       context: context,
       builder: (_) => CupertinoAlertDialog(
-        title: const Text('Remove from Vault?'),
-        content: const Text('This video will return to your main library.'),
+        title: Text(l10n.removeFromVaultTitle),
+        content: Text(l10n.removeFromVaultBody),
         actions: [
           CupertinoDialogAction(
             isDestructiveAction: true,
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              ref.read(vaultIdsProvider.notifier).toggle(widget.asset.id);
+              try {
+                await ref.read(vaultIdsProvider.notifier).remove(widget.asset.id);
+              } catch (error) {
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(l10n.vaultUpdateFailed)),
+                );
+              }
             },
-            child: const Text('Remove'),
+            child: Text(l10n.remove),
           ),
           CupertinoDialogAction(
             isDefaultAction: true,
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
         ],
       ),
@@ -318,40 +923,22 @@ class _VaultThumbState extends ConsumerState<_VaultThumb> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onLongPress: () => _confirmRemove(context),
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          _thumb != null
-              ? Image.memory(_thumb!, fit: BoxFit.cover)
-              : const ColoredBox(color: Color(0xFF1A1535)),
-          // Duration badge
-          Positioned(
-            right: 4,
-            bottom: 4,
-            child: Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-              decoration: BoxDecoration(
-                color: Colors.black54,
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                _fmtDuration(widget.asset.duration),
-                style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600),
-              ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(RRSpace.radiusSm),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            _thumb != null
+                ? Image.memory(_thumb!, fit: BoxFit.cover)
+                : ColoredBox(color: RRColors.bgElevated),
+            Positioned(
+              right: 4,
+              bottom: 4,
+              child: DurationBadge(seconds: widget.asset.duration),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
-  }
-
-  String _fmtDuration(int seconds) {
-    final m = seconds ~/ 60;
-    final s = (seconds % 60).toString().padLeft(2, '0');
-    return '$m:$s';
   }
 }

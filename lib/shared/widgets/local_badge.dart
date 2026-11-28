@@ -2,14 +2,17 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/colors.dart';
 import '../../core/theme/spacing.dart';
+import '../../l10n/app_localizations.dart';
 
 class LocalBadge extends StatelessWidget {
-  const LocalBadge({super.key, this.label = 'Local'});
+  const LocalBadge({super.key, this.label});
 
-  final String label;
+  /// Badge text; defaults to the localized "Local" label when null.
+  final String? label;
 
   @override
   Widget build(BuildContext context) {
+    final effectiveLabel = label ?? AppLocalizations.of(context)!.localBadge;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: RRSpace.sp4),
       decoration: BoxDecoration(
@@ -30,7 +33,7 @@ class LocalBadge extends StatelessWidget {
           ),
           const SizedBox(width: RRSpace.sp4),
           Text(
-            label,
+            effectiveLabel,
             style: const TextStyle(
               fontFamily: '.SF Pro Text',
               fontSize: 11,

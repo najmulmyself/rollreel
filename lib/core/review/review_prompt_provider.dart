@@ -2,14 +2,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_review/in_app_review.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../ads/system_prompt_coordinator.dart';
+
 /// Tracks "completed swipe sessions" and install date so an App Store
 /// review prompt can be auto-triggered per PRD §13: after 3 completed
 /// swipe sessions AND at least 24h post-install.
 final reviewPromptProvider = Provider<ReviewPromptController>((ref) {
-  return ReviewPromptController();
+  return ReviewPromptController(ref);
 });
 
 class ReviewPromptController {
+  ReviewPromptController(this._ref);
+
+  final Ref _ref;
+
   static const _kInstallDate = 'review_install_date';
   static const _kSessionCount = 'review_swipe_sessions';
   static const _kRequested = 'review_requested';
@@ -17,6 +23,9 @@ class ReviewPromptController {
   static const _kMinInstallAge = Duration(hours: 24);
 
   bool _hasSwipedThisSession = false;
+
+  bool hasUsedPlayer(SharedPreferences prefs) =>
+      _hasSwipedThisSession || (prefs.getInt(_kSessionCount) ?? 0) > 0;
 
   Future<void> ensureInstallDateRecorded() async {
     final prefs = await SharedPreferences.getInstance();
@@ -43,6 +52,7 @@ class ReviewPromptController {
   /// Call when the app becomes active/foreground. Triggers the native
   /// review prompt at most once, when both conditions are satisfied.
   Future<void> maybeRequestReview() async {
+    if (_ref.read(isSystemPromptActiveProvider)) return;
     final prefs = await SharedPreferences.getInstance();
     if (prefs.getBool(_kRequested) ?? false) return;
 
@@ -56,8 +66,14 @@ class ReviewPromptController {
 
     final review = InAppReview.instance;
     if (await review.isAvailable()) {
-      await prefs.setBool(_kRequested, true);
-      review.requestReview();
+      if (_ref.read(isSystemPromptActiveProvider)) return;
+      _ref.read(isSystemPromptActiveProvider.notifier).state = true;
+      try {
+        await prefs.setBool(_kRequested, true);
+        await review.requestReview();
+      } finally {
+        _ref.read(isSystemPromptActiveProvider.notifier).state = false;
+      }
     }
   }
 }

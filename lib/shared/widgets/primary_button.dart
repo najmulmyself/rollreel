@@ -9,11 +9,13 @@ class PrimaryButton extends StatelessWidget {
     required this.label,
     required this.onPressed,
     this.icon,
+    this.gradient,
   });
 
   final String label;
   final VoidCallback? onPressed;
   final IconData? icon;
+  final Gradient? gradient;
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +24,7 @@ class PrimaryButton extends StatelessWidget {
       width: double.infinity,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          gradient: RRColors.gradBrand,
+          gradient: gradient ?? RRColors.gradBrand,
           borderRadius: BorderRadius.circular(RRSpace.radiusFull),
         ),
         child: ElevatedButton.icon(

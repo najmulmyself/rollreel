@@ -3,142 +3,196 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-const kProductLifetime = 'com.rollreel.pro.lifetime';
-const kProductMonthly = 'com.rollreel.plus.monthly';
+import 'pro_entitlement.dart';
 
-// ─── is-pro provider ──────────────────────────────────────────────────────────
+export 'pro_entitlement.dart'
+    show isProProvider, kProductLifetime, kProductMonthly;
 
-class _IsProNotifier extends StateNotifier<bool> {
-  _IsProNotifier() : super(false) {
-    _load();
-  }
-
-  Future<void> _load() async {
-    final prefs = await SharedPreferences.getInstance();
-    state = prefs.getBool('is_pro') ?? false;
-  }
-
-  Future<void> setPro(bool value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('is_pro', value);
-    state = value;
-  }
-}
-
-final isProProvider =
-    StateNotifierProvider<_IsProNotifier, bool>((ref) => _IsProNotifier());
-
-// ─── IAP state ────────────────────────────────────────────────────────────────
+const _productIds = {kProductLifetime, kProductMonthly};
 
 class IAPState {
   const IAPState({
     this.available = false,
+    this.catalogLoading = false,
     this.loading = false,
     this.products = const {},
     this.error,
   });
 
   final bool available;
+  final bool catalogLoading;
   final bool loading;
   final Map<String, ProductDetails> products;
   final String? error;
 
   IAPState copyWith({
     bool? available,
+    bool? catalogLoading,
     bool? loading,
     Map<String, ProductDetails>? products,
     String? error,
     bool clearError = false,
-  }) =>
-      IAPState(
-        available: available ?? this.available,
-        loading: loading ?? this.loading,
-        products: products ?? this.products,
-        error: clearError ? null : (error ?? this.error),
-      );
+  }) => IAPState(
+    available: available ?? this.available,
+    catalogLoading: catalogLoading ?? this.catalogLoading,
+    loading: loading ?? this.loading,
+    products: products ?? this.products,
+    error: clearError ? null : (error ?? this.error),
+  );
 }
 
 // ─── IAP notifier ─────────────────────────────────────────────────────────────
 
 class IAPNotifier extends StateNotifier<IAPState> {
-  IAPNotifier(this._ref) : super(const IAPState()) {
-    _init();
+  IAPNotifier(this._ref) : super(const IAPState(catalogLoading: true)) {
+    unawaited(refreshCatalog());
+    unawaited(refreshEntitlements());
   }
 
   final Ref _ref;
+  Future<void>? _catalogRequest;
   StreamSubscription<List<PurchaseDetails>>? _sub;
+  Future<void> _purchaseUpdates = Future.value();
+  bool _restoring = false;
 
-  Future<void> _init() async {
-    final available = await InAppPurchase.instance.isAvailable();
-    if (!available) {
-      state = const IAPState(available: false);
-      return;
-    }
+  Future<void> refreshCatalog() => _catalogRequest ??= _loadCatalog()
+      .whenComplete(() => _catalogRequest = null);
 
-    _sub = InAppPurchase.instance.purchaseStream.listen(
-      _onPurchaseUpdate,
-      onError: (Object e) =>
-          state = state.copyWith(loading: false, error: e.toString()),
-    );
+  Future<void> refreshEntitlements() =>
+      _ref.read(isProProvider.notifier).refresh();
 
-    final response = await InAppPurchase.instance
-        .queryProductDetails({kProductLifetime, kProductMonthly});
-
-    debugPrint(
+  Future<void> _loadCatalog() async {
+    state = state.copyWith(catalogLoading: true);
+    try {
+      final store = InAppPurchase.instance;
+      final available = await store.isAvailable();
+      if (!mounted) return;
+      if (!available) {
+        state = state.copyWith(available: false, products: const {});
+        return;
+      }
+      _sub ??= store.purchaseStream.listen(
+        (purchases) {
+          _purchaseUpdates = _purchaseUpdates.then(
+            (_) => _onPurchaseUpdate(purchases),
+          );
+        },
+        onError: (Object error) {
+          state = state.copyWith(loading: _restoring, error: error.toString());
+        },
+      );
+      state = state.copyWith(available: true);
+      final response = await store.queryProductDetails(_productIds);
+      debugPrint(
         '[RollReel] IAP products found: ${response.productDetails.map((p) => p.id).toList()}, '
-        'not found: ${response.notFoundIDs}, error: ${response.error}');
-
-    state = IAPState(
-      available: true,
-      products: {for (final p in response.productDetails) p.id: p},
-    );
+        'not found: ${response.notFoundIDs}, error: ${response.error}',
+      );
+      if (!mounted) return;
+      final products = {for (final p in response.productDetails) p.id: p};
+      if (products.containsKey(kProductMonthly) &&
+          !await _ref.read(isProProvider.notifier).canSellMonthly) {
+        debugPrint(
+          '[RollReel] StoreKit returned Monthly, but entitlement verification is unavailable.',
+        );
+        products.remove(kProductMonthly);
+      }
+      if (mounted) state = state.copyWith(products: products);
+    } catch (error) {
+      debugPrint('[RollReel] Store initialization failed: $error');
+      if (mounted) state = state.copyWith(products: const {});
+    } finally {
+      if (mounted) state = state.copyWith(catalogLoading: false);
+    }
   }
 
   Future<void> purchase(String productId) async {
+    if (state.loading || state.catalogLoading) return;
     final product = state.products[productId];
     if (product == null) {
-      debugPrint('[RollReel] purchase() called for $productId but product not found');
+      debugPrint(
+        '[RollReel] purchase() called for $productId but product not found',
+      );
       state = state.copyWith(
         error: 'This plan isn\'t available right now. Please try again later.',
       );
       return;
     }
     state = state.copyWith(loading: true, clearError: true);
-    final param = PurchaseParam(productDetails: product);
-    await InAppPurchase.instance.buyNonConsumable(purchaseParam: param);
+    try {
+      final started = await InAppPurchase.instance.buyNonConsumable(
+        purchaseParam: PurchaseParam(productDetails: product),
+      );
+      if (!started && mounted) {
+        state = state.copyWith(loading: false, error: 'Purchase failed');
+      }
+    } catch (error) {
+      debugPrint('[RollReel] Purchase could not start: $error');
+      if (mounted) {
+        state = state.copyWith(loading: false, error: 'Purchase failed');
+      }
+    }
   }
 
-  Future<void> restore() async {
+  Future<bool> restore() async {
+    if (state.loading) return false;
+    _restoring = true;
     state = state.copyWith(loading: true, clearError: true);
-    await InAppPurchase.instance.restorePurchases();
+    try {
+      if (await _ref.read(isProProvider.notifier).restoreFromStoreKit()) {
+        return mounted && state.error == null;
+      }
+      if (!mounted) return false;
+      final catalog = _catalogRequest;
+      if (catalog != null) await catalog;
+      if (!mounted) return false;
+      if (!state.available && catalog == null) await refreshCatalog();
+      if (!mounted || !state.available) return false;
+      await InAppPurchase.instance.restorePurchases();
+      await _purchaseUpdates;
+      return mounted && state.error == null;
+    } catch (error) {
+      if (mounted) state = state.copyWith(error: error.toString());
+      return false;
+    } finally {
+      _restoring = false;
+      if (mounted) state = state.copyWith(loading: false);
+    }
   }
 
   Future<void> _onPurchaseUpdate(List<PurchaseDetails> purchases) async {
-    for (final purchase in purchases) {
-      switch (purchase.status) {
-        case PurchaseStatus.purchased:
-        case PurchaseStatus.restored:
-          await _ref.read(isProProvider.notifier).setPro(true);
-          await InAppPurchase.instance.completePurchase(purchase);
-        case PurchaseStatus.error:
+    if (!mounted) return;
+    final matching = purchases.where(
+      (purchase) => _productIds.contains(purchase.productID),
+    );
+    try {
+      for (final purchase in matching) {
+        if (purchase.status == PurchaseStatus.purchased ||
+            purchase.status == PurchaseStatus.restored) {
+          await _ref
+              .read(isProProvider.notifier)
+              .applyPurchase(purchase.productID);
+        } else if (purchase.status == PurchaseStatus.error && mounted) {
           state = state.copyWith(
-            loading: false,
             error: purchase.error?.message ?? 'Purchase failed',
           );
-        case PurchaseStatus.canceled:
-          state = state.copyWith(loading: false, clearError: true);
-        case PurchaseStatus.pending:
-          break;
+        }
+        if (purchase.pendingCompletePurchase) {
+          await InAppPurchase.instance.completePurchase(purchase);
+        }
       }
-    }
-    if (purchases.every((p) =>
-        p.status == PurchaseStatus.purchased ||
-        p.status == PurchaseStatus.restored ||
-        p.status == PurchaseStatus.canceled ||
-        p.status == PurchaseStatus.error)) {
-      state = state.copyWith(loading: false);
+    } catch (error) {
+      debugPrint('[RollReel] Purchase update could not finish: $error');
+      if (mounted) state = state.copyWith(error: 'Purchase failed');
+    } finally {
+      if (mounted &&
+          !_restoring &&
+          matching.isNotEmpty &&
+          matching.every(
+            (purchase) => purchase.status != PurchaseStatus.pending,
+          )) {
+        state = state.copyWith(loading: false);
+      }
     }
   }
 
@@ -149,5 +203,6 @@ class IAPNotifier extends StateNotifier<IAPState> {
   }
 }
 
-final iapProvider =
-    StateNotifierProvider<IAPNotifier, IAPState>((ref) => IAPNotifier(ref));
+final iapProvider = StateNotifierProvider<IAPNotifier, IAPState>(
+  (ref) => IAPNotifier(ref),
+);
